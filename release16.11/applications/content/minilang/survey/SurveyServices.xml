@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+  -->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <!-- Methods for SurveyQuestion -->
+    <simple-method method-name="createSurveyQuestion" short-description="Create Survey Question">
+        <if>
+            <condition>
+                <and>
+                    <if-compare field="surveyQuestionTypeId" value="ENUMERATION" operator="equals"/>
+                    <if-empty field="enumTypeId"/>
+                </and>
+            </condition>
+            <then>
+                <set field="questionType" value="ENUMERATION"/>
+                <set field="requiredField" value="enumTypeId"/>
+                <add-error>
+                    <fail-property resource="ContentUiLabels" property="ContentQuestionTypeRequiredField"/>
+                </add-error>
+            </then>
+        </if>
+        <if>
+            <condition>
+                <and>
+                    <if-compare field="surveyQuestionTypeId" value="GEO" operator="equals"/>
+                    <if-empty field="geoId"/>
+                </and>
+            </condition>
+            <then>
+                <set field="questionType" value="GEO"/>
+                <set field="requiredField" value="geoId"/>
+                <add-error>
+                    <fail-property resource="ContentUiLabels" property="ContentQuestionTypeRequiredField"/>
+                </add-error>
+            </then>
+        </if>
+        <check-errors/>
+
+        <make-value entity-name="SurveyQuestion" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <sequenced-id sequence-name="SurveyQuestion" field="newEntity.surveyQuestionId"/>
+        <create-value value-field="newEntity"/>
+        <field-to-result field="newEntity.surveyQuestionId" result-name="surveyQuestionId"/>
+    </simple-method>
+    <simple-method method-name="updateSurveyQuestion" short-description="Update Survey Question">
+        <if>
+            <condition>
+                <and>
+                    <if-compare field="parameters.surveyQuestionTypeId" value="ENUMERATION" operator="equals"/>
+                    <if-empty field="parameters.enumTypeId"/>
+                </and>
+            </condition>
+            <then>
+                <set field="questionType" value="ENUMERATION"/>
+                <set field="requiredField" value="enumTypeId"/>
+                <add-error>
+                    <fail-property resource="ContentUiLabels" property="ContentQuestionTypeRequiredField"/>
+                </add-error>
+            </then>
+        </if>
+        <if>
+            <condition>
+                <and>
+                    <if-compare field="parameters.surveyQuestionTypeId" value="GEO" operator="equals"/>
+                    <if-empty field="parameters.geoId"/>
+                </and>
+            </condition>
+            <then>
+                <set field="questionType" value="GEO"/>
+                <set field="requiredField" value="geoId"/>
+                <add-error>
+                    <fail-property resource="ContentUiLabels" property="ContentQuestionTypeRequiredField"/>
+                </add-error>
+            </then>
+        </if>
+        <check-errors/>
+        <entity-one entity-name="SurveyQuestion" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Survey Response Methods -->
+    <simple-method method-name="createSurveyResponse" short-description="Create Survey Response" login-required="false">
+        <!-- lookup the survey -->
+        <entity-one entity-name="Survey" value-field="survey" use-cache="true"/>
+        <if-empty field="survey">
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentNoSurveyFound"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <!-- look up the applied questions -->
+        <entity-and entity-name="SurveyQuestionAndAppl" list="surveyQuestionAndApplList" use-cache="true">
+            <field-map field-name="surveyId" from-field="survey.surveyId"/>
+        </entity-and>
+        <if-empty field="surveyQuestionAndApplList">
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentNoQuestionsSurveyFound"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <!-- check if anonymous is allowed and if not that we have a partyId -->
+        <if-compare field="survey.isAnonymous" operator="not-equals" value="Y">
+            <if-empty field="parameters.partyId">
+                <add-error>
+                    <fail-property resource="ContentUiLabels" property="ContentSurveyAnonymousResponse"/>
+                </add-error>
+                <check-errors/>
+            </if-empty>
+        </if-compare>
+
+        <!-- if this is a single use and we have a partyId check for existing responses -->
+        <if-compare field="survey.allowMultiple" operator="not-equals" value="Y">
+            <if-not-empty field="parameters.partyId">
+                <entity-and entity-name="SurveyResponse" list="existingResponses">
+                    <field-map field-name="partyId" from-field="parameters.partyId"/>
+                    <field-map field-name="surveyId" from-field="survey.surveyId"/>
+                </entity-and>
+                <if-not-empty field="existingResponses">
+                    <if-compare field="survey.allowUpdate" operator="not-equals" value="Y">
+                        <add-error>
+                            <fail-property resource="ContentUiLabels" property="ContentSurveyAlreadyResponded"/>
+                        </add-error>
+                        <check-errors/>
+                    </if-compare>
+                </if-not-empty>
+            </if-not-empty>
+        </if-compare>
+        <!-- make sure we have answers to check -->
+        <if-empty field="parameters.answers">
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentSurveyAnswersNotFound"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+        <set field="answers" from-field="parameters.answers"/>
+
+        <!-- make sure all required fields were responded to -->
+        <iterate list="surveyQuestionAndApplList" entry="surveyQuestionAndAppl">
+            <!-- for validation get SurveyMultiResp and SurveyMultiRespColumn entries and if exist process for each surveyMultiRespColId -->
+            <get-related-one value-field="surveyQuestionAndAppl" relation-name="SurveyMultiResp" to-value-field="surveyMultiResp" use-cache="true"/>
+            <if-not-empty field="surveyMultiResp">
+                <!-- if the surveyQuestionAndAppl has a surveyMultiRespColId, then just look for one answer with that ID -->
+                <if-empty field="surveyQuestionAndAppl.surveyMultiRespColId">
+                    <get-related value-field="surveyMultiResp" relation-name="SurveyMultiRespColumn" list="surveyMultiRespColumnList" use-cache="true"/>
+                    <iterate list="surveyMultiRespColumnList" entry="surveyMultiRespColumn">
+                        <set field="answerFieldName" value="answers[&quot;${surveyQuestionAndAppl.surveyQuestionId}_${surveyMultiRespColumn.surveyMultiRespColId}&quot;]"/>
+                        <call-simple-method method-name="validateSurveyResponseInline"/>
+                    </iterate>
+                <else>
+                    <set field="answerFieldName" value="answers[&quot;${surveyQuestionAndAppl.surveyQuestionId}_${surveyQuestionAndAppl.surveyMultiRespColId}&quot;]"/>
+                    <call-simple-method method-name="validateSurveyResponseInline"/>
+                </else>
+                </if-empty>
+            <else>
+                <set field="answerFieldName" value="answers[&quot;${surveyQuestionAndAppl.surveyQuestionId}&quot;]"/>
+                <call-simple-method method-name="validateSurveyResponseInline"/>
+            </else>
+            </if-not-empty>
+        </iterate>
+        <check-errors/>
+
+        <now-timestamp field="nowTimestamp"/>
+
+        <!-- create/update the response -->
+        <if-compare field="survey.allowUpdate" operator="equals" value="Y">
+            <if-not-empty field="parameters.surveyResponseId">
+                <entity-one entity-name="SurveyResponse" value-field="surveyResponse"/>
+            </if-not-empty>
+        </if-compare>
+
+        <if-empty field="surveyResponse">
+            <make-value value-field="surveyResponse" entity-name="SurveyResponse"/>
+            <sequenced-id sequence-name="SurveyResponse" field="surveyResponse.surveyResponseId"/>
+            <set-nonpk-fields map="parameters" value-field="surveyResponse"/>
+            <create-value value-field="surveyResponse"/>
+        </if-empty>
+
+        <if-empty field="surveyResponse.responseDate">
+            <set from-field="nowTimestamp" field="surveyResponse.responseDate"/>
+        </if-empty>
+        <set from-field="nowTimestamp" field="surveyResponse.lastModifiedDate"/>
+
+        <store-value value-field="surveyResponse"/>
+        <field-to-result field="surveyResponse.surveyResponseId" result-name="surveyResponseId"/>
+
+        <!-- if a dataResourceId was passed in use it to set DataResource.relatedDetailId to the surveyResponse.surveyResponseId -->
+        <if-not-empty field="parameters.dataResourceId">
+            <entity-one entity-name="DataResource" value-field="dataResource"/>
+            <set field="dataResource.relatedDetailId" from-field="surveyResponse.surveyResponseId"/>
+            <store-value value-field="dataResource"/>
+        </if-not-empty>
+
+        <!-- lookup any existing response answers -->
+        <get-related value-field="surveyResponse" relation-name="SurveyResponseAnswer" list="existingAnswers"/>
+        <iterate list="existingAnswers" entry="existingAnswer">
+            <set field="currentAnswersFieldName" from-field="existingAnswer.surveyQuestionId"/>
+            <if>
+                <condition>
+                    <and>
+                        <not>
+                            <if-empty field="existingAnswer.surveyMultiRespColId"/>
+                        </not>
+                        <if-compare field="existingAnswer.surveyMultiRespColId" operator="not-equals" value="_NA_"/>
+                    </and>
+                </condition>
+                <then>
+                    <set field="currentAnswersFieldName" value="${currentAnswersFieldName}_${existingAnswer.surveyMultiRespColId}"/>
+                </then>
+            </if>
+            <set field="currentAnswers.${currentAnswersFieldName}" from-field="existingAnswer"/>
+        </iterate>
+
+        <!-- create the response answers -->
+        <iterate list="surveyQuestionAndApplList" entry="surveyQuestionAndAppl">
+            <!-- for process inputs get SurveyMultiResp and SurveyMultiRespColumn entries and if exist process for each surveyMultiRespColId -->
+            <get-related-one value-field="surveyQuestionAndAppl" relation-name="SurveyMultiResp" to-value-field="surveyMultiResp" use-cache="true"/>
+            <if-not-empty field="surveyMultiResp">
+                <!-- if the surveyQuestionAndAppl has a surveyMultiRespColId, then just look for one answer with that ID -->
+                <if-empty field="surveyQuestionAndAppl.surveyMultiRespColId">
+                    <get-related value-field="surveyMultiResp" relation-name="SurveyMultiRespColumn" list="surveyMultiRespColumnList" use-cache="true"/>
+                    <iterate list="surveyMultiRespColumnList" entry="surveyMultiRespColumn">
+                        <set field="currentFieldName" value="${surveyQuestionAndAppl.surveyQuestionId}_${surveyMultiRespColumn.surveyMultiRespColId}"/>
+                        <call-simple-method method-name="processSurveyResponseInline"/>
+                    </iterate>
+                <else>
+                    <set field="currentFieldName" value="${surveyQuestionAndAppl.surveyQuestionId}_${surveyQuestionAndAppl.surveyMultiRespColId}"/>
+                    <call-simple-method method-name="processSurveyResponseInline"/>
+                </else>
+                </if-empty>
+            <else>
+                <set field="currentFieldName" value="${surveyQuestionAndAppl.surveyQuestionId}"/>
+                <call-simple-method method-name="processSurveyResponseInline"/>
+            </else>
+            </if-not-empty>
+        </iterate>
+
+        <!-- run the survey response service (async) -->
+        <set from-field="surveyResponse.surveyResponseId" field="respServiceCtx.surveyResponseId"/>
+        <if-not-empty field="survey.responseService">
+            <call-service-asynch service-name="${survey.responseService}" in-map-name="respServiceCtx" include-user-login="true"/>
+        </if-not-empty>
+
+        <field-to-result field="surveyResponse.surveyResponseId" result-name="surveyResponseId"/>
+        <field-to-result field="parameters.productStoreSurveyId" result-name="productStoreSurveyId"/>
+        <field-to-result field="parameters.surveyId" result-name="surveyId"/>
+    </simple-method>
+
+    <!-- =============== Inline method used by createSurveyResponse ============== -->
+    <simple-method method-name="validateSurveyResponseInline" short-description="validateSurveyResponseInline" login-required="false">
+        <!-- see if response is required -->
+        <if-compare field="surveyQuestionAndAppl.requiredField" operator="equals" value="Y">
+            <if-empty field="${answerFieldName}">
+                <add-error>
+                    <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAResponse"/>
+                </add-error>
+            </if-empty>
+        </if-compare>
+
+        <!-- validate the field -->
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="CREDIT_CARD">
+            <if-validate-method field="${answerFieldName}" method="isCreditCard">
+                <else>
+                    <add-error>
+                        <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidCreditCardNumber"/>
+                    </add-error>
+                </else>
+            </if-validate-method>
+        </if-compare>
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="GIFT_CARD">
+            <set field="finAccountMap.finAccountTypeId" value="GIFTCERT_ACCOUNT"/>
+            <set field="finAccountMap.statusId" value="FNACT_ACTIVE"/>
+            <set field="codeOk" value="false"/>
+            <find-by-and entity-name="FinAccount" map="finAccountMap" list="finAccountList"/>
+            <iterate list="finAccountList" entry="finAccount">
+                <if-compare field="finAccount.finAccountCode" operator="equals" value="${${answerFieldName}}">
+                    <set field="codeOk" value="true"/>
+                </if-compare>
+            </iterate>
+            <if-compare field="codeOk" value="true" operator="not-equals">
+                <if-validate-method field="${answerFieldName}" method="isGiftCard">
+                    <else>
+                        <add-error>
+                               <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidGiftCardNumber"/>
+                        </add-error>
+                    </else>
+                </if-validate-method>
+            </if-compare>
+        </if-compare>
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="DATE">
+            <if-validate-method field="${answerFieldName}" method="isDate">
+                <else>
+                    <add-error>
+                           <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidDate"/>
+                    </add-error>
+                </else>
+            </if-validate-method>
+        </if-compare>
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="EMAIL">
+            <if-validate-method field="${answerFieldName}" method="isEmail">
+                <else>
+                    <add-error>
+                        <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidEmailAddress"/>
+                    </add-error>
+                </else>
+            </if-validate-method>
+        </if-compare>
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="NUMBER_CURRENCY">
+            <if-validate-method field="${answerFieldName}" method="isSignedDouble">
+                <else>
+                    <add-error>
+                           <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidCurrencyAmount"/>
+                    </add-error>
+                </else>
+            </if-validate-method>
+        </if-compare>
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="NUMBER_FLOAT">
+            <if-validate-method field="${answerFieldName}" method="isSignedDouble">
+                <else>
+                    <add-error>
+                        <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidDecimalNumber"/>
+                    </add-error>
+                </else>
+            </if-validate-method>
+        </if-compare>
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="NUMBER_LONG">
+            <if-validate-method field="${answerFieldName}" method="isSignedLong">
+                <else>
+                    <add-error>
+                        <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidWholeNumber"/>
+                    </add-error>
+                </else>
+            </if-validate-method>
+        </if-compare>
+        <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="URL">
+            <if-validate-method field="${answerFieldName}" method="isUrl">
+                <else>
+                    <add-error>
+                        <fail-property resource="ContentUiLabels" property="ContentSurveyQuestionRequiresAValidURL"/>
+                    </add-error>
+                </else>
+            </if-validate-method>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="processSurveyResponseInline" short-description="processSurveyResponseInline" login-required="false">
+        <if-not-empty field="currentAnswers">
+            <set field="responseAnswer" from-field="currentAnswers[&quot;${currentFieldName}&quot;]"/>
+        </if-not-empty>
+
+       <if>
+            <condition>
+                <or>
+                    <if-empty field="responseAnswer"/>
+                    <if-compare-field field="responseAnswer.surveyQuestionId" to-field="surveyQuestionAndAppl.surveyQuestionId" operator="not-equals"/>
+                    <and>
+                        <not>
+                            <if-empty field="surveyMultiRespColumn"/>
+                        </not>
+                        <if-compare-field field="responseAnswer.surveyMultiRespColId" to-field="surveyMultiRespColumn.surveyMultiRespColId" operator="not-equals"/>
+                    </and>
+                </or>
+            </condition>
+            <then>
+                <make-value entity-name="SurveyResponseAnswer" value-field="responseAnswer"/>
+                <set from-field="surveyResponse.surveyResponseId" field="responseAnswer.surveyResponseId"/>
+                <set from-field="surveyQuestionAndAppl.surveyQuestionId" field="responseAnswer.surveyQuestionId"/>
+
+                <!-- If this has a surveyMultiRespColumn then set surveyMultiRespId and surveyMultiRespColId otherwise set surveyMultiRespColId to _NA_ -->
+                <if-not-empty field="surveyMultiRespColumn">
+                    <set field="responseAnswer.surveyMultiRespId" from-field="surveyMultiRespColumn.surveyMultiRespId"/>
+                    <set field="responseAnswer.surveyMultiRespColId" from-field="surveyMultiRespColumn.surveyMultiRespColId"/>
+                    <else>
+                        <set field="responseAnswer.surveyMultiRespColId" value="_NA_"/>
+                    </else>
+                </if-not-empty>
+
+                <create-value value-field="responseAnswer"/>
+            </then>
+        </if>
+        <if-not-empty field="answers[&quot;${currentFieldName}&quot;]">
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="BOOLEAN">
+                <set field="responseAnswer.booleanResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="EMAIL">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="DATE">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="URL">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="CREDIT_CARD">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="GIFT_CARD">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="PASSWORD">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="TEXT_SHORT">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="TEXT_LONG">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="TEXTAREA">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="NUMBER_CURRENCY">
+                <set field="responseAnswer.currencyResponse" from-field="answers[&quot;${currentFieldName}&quot;]" type="BigDecimal"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="NUMBER_FLOAT">
+                <set field="responseAnswer.floatResponse" from-field="answers[&quot;${currentFieldName}&quot;]" type="Double"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="NUMBER_LONG">
+                <set field="responseAnswer.numericResponse" from-field="answers[&quot;${currentFieldName}&quot;]" type="Long"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="OPTION">
+                <set field="responseAnswer.surveyOptionSeqId" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="GEO">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="ENUMERATION">
+                <set field="responseAnswer.textResponse" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+            </if-compare>
+            <if-compare field="surveyQuestionAndAppl.surveyQuestionTypeId" operator="equals" value="CONTENT">
+                <if-instance-of field="answers[&quot;${currentFieldName}&quot;]" class="java.nio.ByteBuffer">
+                    <!--set from-field="answers._${surveyQuestionAndAppl.surveyQuestionId}_contentType" field="partyContent._uploadedFile_contentType"/>
+                    <set from-field="answers._${surveyQuestionAndAppl.surveyQuestionId}_fileName" field="partyContent._uploadedFile_fileName"/>
+                    <set from-field="answers[&quot;${currentFieldName}&quot;]" field="partyContent.uploadedFile"/>
+                    <set value="DOCUMENT" field="partyContent.contentTypeId"/>
+                    <set value="PERSONAL" field="partyContent.dataCategoryId"/>
+                    <set value="CTNT_PUBLISHED" field="partyContent.statusId"/-->
+
+                    <!--  First create the Content record -->
+                    <make-value entity-name="Content" value-field="content"/>
+                    <sequenced-id field="content.contentId" sequence-name="Content"/>
+                    <set field="content.contentTypeId" value="DOCUMENT"/>
+                    <set field="content.statusId" value="CTNT_PUBLISHED" />
+                    <create-value value-field="content"/>
+
+                    <!-- Create the DataResource record -->
+                    <set field="dataResource.dataResourceTypeId" value="IMAGE_OBJECT"/>
+                    <set field="dataResource.mimeTypeId" from-field="answers._${surveyQuestionAndAppl.surveyQuestionId}_contentType"/>
+                    <set field="dataResource.objectInfo" from-field="answers._${surveyQuestionAndAppl.surveyQuestionId}_fileName"/>
+
+                    <call-service service-name="createDataResource" in-map-name="dataResource">
+                        <result-to-field result-name="dataResourceId"/>
+                    </call-service>
+
+                    <!-- Create the ImageDataResource record -->
+                    <set field="imageDataResource.dataResourceId" from-field="dataResourceId"/>
+                    <set field="imageDataResource.imageData" from-field="answers[&quot;${currentFieldName}&quot;]"/>
+                    <call-service service-name="createImageDataResource" in-map-name="imageDataResource"/>                    
+
+                    <!-- Associate the DataResource with the Content record -->
+                    <set field="content.dataResourceId" from-field="dataResourceId"/>
+                    <store-value value-field="content"/>
+
+                    <set field="partyContent.partyId" from-field="parameters.partyId"/>
+                    <set field="partyContent.contentId" from-field="content.contentId"/>
+                    <set field="partyContent.partyContentTypeId" value="INTERNAL"/>
+                    <set field="partyContent.fromDate" from-field="nowTimestamp"/>
+                    <call-service service-name="createPartyContent" in-map-name="partyContent">
+                        <result-to-field result-name="contentId" field="responseAnswer.contentId"/>
+                    </call-service>
+                <else>
+                    <set from-field="answers[&quot;${currentFieldName}&quot;]" field="responseAnswer.contentId"/>
+                </else>
+                </if-instance-of>
+            </if-compare>
+
+            <if-empty field="responseAnswer.sequenceNum">
+                <set from-field="surveyQuestionAndAppl.sequenceNum" field="responseAnswer.sequenceNum"/>
+            </if-empty>
+            <set from-field="nowTimestamp" field="responseAnswer.answeredDate"/>
+            <store-value value-field="responseAnswer"/>
+        </if-not-empty>
+    </simple-method>
+</simple-methods>

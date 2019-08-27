@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Order Opportunity Services</description>
+    <vendor>OFBiz</vendor>
+
+    <service name="createSalesForecast" engine="simple" auth="true" default-entity-name="SalesForecast"
+            location="component://order/minilang/opportunity/OpportunityServices.xml" invoke="createSalesForecast">
+       <description>Creates a Sales Forecast for the userLogin. Requires ORDERMGR_4C_CREATE permission.
+            This will save the forecast into the history as well. Note that this service does not compute
+            the forecast. That must be done in a higher level service.</description>
+        <required-permissions join-type="AND">
+            <check-permission permission="ORDERMGR" action="_4C_CREATE"/>
+        </required-permissions>
+        <auto-attributes mode="OUT" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="updateSalesForecast" engine="simple" auth="true" default-entity-name="SalesForecast"
+            location="component://order/minilang/opportunity/OpportunityServices.xml" invoke="updateSalesForecast">
+       <description>Updates a Sales Forecast and marks it as modified by the userLogin. Requires ORDERMGR_4C_UPDATE
+            permission. This will save the current forecast into the history before overwritting it.
+            Note that this service does not compute the forecast. That must be done in a higher level service.</description>
+        <required-permissions join-type="AND">
+            <check-permission permission="ORDERMGR" action="_4C_UPDATE"/>
+        </required-permissions>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute name="changeNote" type="String" mode="IN" optional="true"/>
+    </service>
+
+     <!-- Sales Forecast Detail -->
+    <service name="createSalesForecastDetail" default-entity-name="SalesForecastDetail" engine="entity-auto" invoke="create" auth="true">
+        <description>Creates a Sales Forecast Detail</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="salesForecastDetailId" mode="OUT"/>
+    </service>
+    <service name="updateSalesForecastDetail" default-entity-name="SalesForecastDetail" engine="entity-auto" invoke="update" auth="true">
+        <description>Updates a Sales Forecast Detail</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteSalesForecastDetail" default-entity-name="SalesForecastDetail" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Sales Forecast Detail</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+
+    <!-- opportunity service -->
+    <service name="createSalesOpportunity" default-entity-name="SalesOpportunity" engine="entity-auto" invoke="create">
+        <description>Create an sales opportunity</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute name="accountPartyId" mode="IN" type="String" optional="true"/>
+        <attribute name="leadPartyId" mode="IN" type="String" optional="true"/>
+        <override name="opportunityName" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
+        <override name="nextStep" allow-html="safe"/>
+    </service>
+    <service name="updateSalesOpportunity" default-entity-name="SalesOpportunity" engine="entity-auto" invoke="update">
+        <description>Update an sales opportunity</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute name="accountPartyId" mode="IN" type="String" optional="true"/>
+        <attribute name="leadPartyId" mode="IN" type="String" optional="true"/>
+        <override name="opportunityName" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
+        <override name="nextStep" allow-html="safe"/>
+    </service>
+    <service name="createSalesOpportunityRole" default-entity-name="SalesOpportunityRole" engine="entity-auto" invoke="create">
+        <description>Create sales opportunity role</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    <service name="createSalesOpportunityAccountRole" engine="simple" default-entity-name="SalesOpportunityRole" 
+        location="component://order/minilang/opportunity/OpportunityServices.xml" invoke="createSalesOpportunityAccountRole">
+        <description>Create sales opportunity account role</description>
+        <attribute name="accountPartyId" mode="IN" type="String"/>
+        <attribute name="salesOpportunityId" mode="IN" type="String"/>
+    </service>
+    <service name="createSalesOpportunityLeadRole" engine="simple" default-entity-name="SalesOpportunityRole" 
+        location="component://order/minilang/opportunity/OpportunityServices.xml" invoke="createSalesOpportunityLeadRole">
+        <description>Create sales opportunity lead role</description>
+        <attribute name="leadPartyId" mode="IN" type="String"/>
+        <attribute name="salesOpportunityId" mode="IN" type="String"/>
+    </service>
+    <service name="findPartyInSalesOpportunityRole" engine="simple" default-entity-name="SalesOpportunityRole" 
+        location="component://order/minilang/opportunity/OpportunityServices.xml" invoke="findPartyInSalesOpportunityRole">
+        <description>find sales opportunity role party</description>
+        <attribute name="roleTypeId" mode="IN" type="String"/>
+        <attribute name="salesOpportunityId" mode="IN" type="String" optional="true"/>
+        <attribute name="partyId" mode="OUT" type="String" optional="true"/>
+    </service>
+
+    <!-- SalesOpportunityCompetitor services -->
+    <service name="createSalesOpportunityCompetitor" default-entity-name="SalesOpportunityCompetitor" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SalesOpportunityCompetitor</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateSalesOpportunityCompetitor" default-entity-name="SalesOpportunityCompetitor" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a SalesOpportunityCompetitor</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSalesOpportunityCompetitor" default-entity-name="SalesOpportunityCompetitor" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SalesOpportunityCompetitor</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="deleteSalesOpportunityRole" default-entity-name="SalesOpportunityRole" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SalesOpportunityRole</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SalesOpportunityStage services -->
+    <service name="createSalesOpportunityStage" default-entity-name="SalesOpportunityStage" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SalesOpportunityStage</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateSalesOpportunityStage" default-entity-name="SalesOpportunityStage" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a SalesOpportunityStage</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSalesOpportunityStage" default-entity-name="SalesOpportunityStage" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SalesOpportunityStage</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SalesOpportunityTrckCode services -->
+    <service name="createSalesOpportunityTrckCode" default-entity-name="SalesOpportunityTrckCode" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SalesOpportunityTrckCode</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateSalesOpportunityTrckCode" default-entity-name="SalesOpportunityTrckCode" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a SalesOpportunityTrckCode</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSalesOpportunityTrckCode" default-entity-name="SalesOpportunityTrckCode" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SalesOpportunityTrckCode</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SalesOpportunityWorkEffort services -->
+    <service name="createSalesOpportunityWorkEffort" default-entity-name="SalesOpportunityWorkEffort" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SalesOpportunityWorkEffort</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="deleteSalesOpportunityWorkEffort" default-entity-name="SalesOpportunityWorkEffort" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SalesOpportunityWorkEffort</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SalesOpportunityQuote services -->
+    <service name="createSalesOpportunityQuote" default-entity-name="SalesOpportunityQuote" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SalesOpportunityQuote</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="deleteSalesOpportunityQuote" default-entity-name="SalesOpportunityQuote" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SalesOpportunityQuote</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

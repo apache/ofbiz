@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <!-- SegmentGroup Related Find Service -->
+    <simple-method method-name="arePartiesRelatedThroughSegmentGroup" short-description="Determine: are Parties Related Through SegmentGroup?">
+        <!-- NOTE NOTE NOTE: this service is not current and needs to be updated for the new SegmentGroupViewRelatedParties view-entity def -->
+
+
+        <!--
+            The parties can be related through:
+            Party -> SegmentGroupRole -> SegmentGroup -> SegmentGroupRole -> Party
+            OR
+            Party -> SegmentGroupRole -> SegmentGroup -> SegmentGroupClassification -> PartyClassificationGroup -> PartyClassification -> Party
+        -->
+        <now-timestamp field="nowTimestamp"/>
+        <entity-condition entity-name="SegmentGroupViewRelatedParties" list="segmentGroupViewRelatedPartiesList">
+            <condition-list combine="and">
+                <condition-expr field-name="partyId" from-field="parameters.partyId"/>
+                <condition-expr field-name="roleTypeId" from-field="parameters.roleTypeId" ignore-if-empty="true"/>
+                <condition-expr field-name="toPartyId" from-field="parameters.toPartyId"/>
+                <condition-expr field-name="toRoleTypeId" from-field="parameters.toRoleTypeId" ignore-if-empty="true"/>
+            </condition-list>
+        </entity-condition>
+        <!--
+        <entity-condition entity-name="SegmentGroupViewRelatedPartiesClass" list="segmentGroupViewRelatedPartiesClassList">
+            <condition-list combine="and">
+                <condition-expr field-name="partyId" from-field="parameters.partyId"/>
+                <condition-expr field-name="roleTypeId" from-field="parameters.roleTypeId" ignore-if-empty="true"/>
+                <condition-expr field-name="toPartyId" from-field="parameters.toPartyId"/>
+                <condition-expr field-name="toFromDate" operator="less-equals" from-field="nowTimestamp"/>
+                <condition-list combine="or">
+                    <condition-expr field-name="toThruDate" operator="equals" from-field="nullField"/>
+                    <condition-expr field-name="toThruDate" operator="greater-equals" from-field="nowTimestamp"/>
+                </condition-list>
+            </condition-list>
+        </entity-condition>
+        -->
+        <if>
+            <condition>
+                <and>
+                    <if-empty field="segmentGroupViewRelatedPartiesList"/>
+                    <!-- <if-empty field="segmentGroupViewRelatedPartiesClassList"/> -->
+                </and>
+            </condition>
+            <then>
+                <set field="areRelated" value="N"/>
+                <field-to-result field="areRelated"/>
+            </then>
+            <else>
+                <set field="areRelated" value="Y"/>
+                <field-to-result field="areRelated"/>
+            </else>
+        </if>
+    </simple-method>
+</simple-methods>

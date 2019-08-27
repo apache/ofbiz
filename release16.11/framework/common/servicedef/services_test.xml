@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>OFBIZ Test Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <service name="testScv" engine="java" export="true" validate="false" require-new-transaction="true"
+            location="org.apache.ofbiz.common.CommonServices" invoke="testService">
+        <description>Test service</description>
+        <attribute name="defaultValue" type="Double" mode="IN" default-value="999.9999"/>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="resp" type="String" mode="OUT"/>
+    </service>
+    <service name="testSOAPScv" engine="java" export="true" validate="false" require-new-transaction="true"
+            location="org.apache.ofbiz.common.CommonServices" invoke="testSOAPService">
+        <description>Test SOAP service</description>
+        <attribute name="testing" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+        <attribute name="testingNodes" type="List" mode="OUT" optional="true"/>
+    </service>
+    <service name="blockingTestScv" engine="java" validate="false" require-new-transaction="true" transaction-timeout="20"
+            location="org.apache.ofbiz.common.CommonServices" invoke="blockingTestService">
+        <description>Blocking Test service</description>
+        <attribute name="duration" mode="IN" type="Long" optional="true"/>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="resp" type="String" mode="OUT"/>
+    </service>
+    <service name="testError" engine="java" export="true" validate="false" require-new-transaction="true" max-retry="1"
+            location="org.apache.ofbiz.common.CommonServices" invoke="returnErrorService">
+    </service>
+    <!-- Because of the danger of Java deserialization when using RMI, the RMI component has been disabled in the default configuration of OFBiz.
+         If you need RMI you just need to uncomment those places - See OFBIZ-6942 for details -->
+    <!-- see serviceengine.xml to configure the rmi location alias -->
+    <!-- <service name="testRmi" engine="rmi" validate="false"
+            location="main-rmi" invoke="testScv">
+        <implements service="testScv"/>
+    </service>
+    -->
+
+    <service name="testRollback" engine="java" export="true" validate="false"
+            location="org.apache.ofbiz.common.CommonServices" invoke="testRollbackListener">
+        <description>Test service</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="resp" type="String" mode="OUT"/>
+    </service>
+    <service name="testCommit" engine="java" export="true" validate="false"
+            location="org.apache.ofbiz.common.CommonServices" invoke="testCommitListener">
+        <description>Test service</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="resp" type="String" mode="OUT"/>
+    </service>
+
+    <service name="groupTest" engine="group" location="testGroup" invoke=""/>
+
+    <service name="testHttp" engine="http" location="main-http" invoke="testScv">
+        <description>HTTP service wrapper around the test service</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="resp" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testSoap" engine="soap" export="true" location="main-soap" invoke="testSOAPScv">
+        <description>SOAP service; calls the OFBiz test SOAP service</description>
+        <implements service="testSOAPScv"/>
+    </service>
+    
+    <service name="testSoapSimple" engine="soap" export="true" location="main-soap" invoke="testScv">
+        <description>simple SOAP service; calls the OFBiz test service</description>
+        <implements service="testScv"/>
+    </service>
+
+    <!--  test service for local loopback testing (OFBiz Client SOAP -> OFBiz Server SOAP)  
+        https://ofbiz-vm2.apache.org:8443/webtools/control/SOAPService is the ultimate location for the testRemoteSoap 
+        It's redirected from https://demo-trunk.ofbiz.apache.org/webtools/control/SOAPService by the HTTPD frontend installed by Puppet in the demo server, ie ofbiz-vm2.apache.org
+        We could use also http://demo-trunk.ofbiz.apache.org/webtools/control/SOAPService but HSTS would sent it to https anyway
+        So this can be used only against trunk demo and is not in the tests set to avoid a dependency on Internet -->
+    <service name="testRemoteSoap" engine="soap" export="true" 
+        location="https://demo-trunk.ofbiz.apache.org/webtools/control/SOAPService"
+        invoke="testSoapSimple">
+        <attribute name="defaultValue" type="Double" mode="IN" default-value="999.9999"/>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="resp" type="String" mode="OUT"/>
+    </service>
+
+    <!-- FIXME For now, not sure why, the 4 remote SOAP services below don't work -->
+    
+    <!-- the location = endpoint = SOAP action -->
+    <!-- invoke parameter is the name of the operation to invoke, for example LatLonListZipCode -->
+    <!-- invoke parameter is needed when there are several possible operations for the SOAP action  -->
+    <!-- FIXME For now, not sure why, this remote SOAP service does not work -->
+    <service name="testRemoteSoap1" engine="soap" export="true"
+        location="http://www.weather.gov/forecasts/xml/SOAP_server/ndfdXMLserver.php"
+        invoke="LatLonListZipCode">
+        <description>A service to invoke the NWS web service</description>
+        <namespace>
+            http://www.weather.gov/forecasts/xml/DWMLgen/wsdl/ndfdXML.wsdl#LatLonListZipCode
+        </namespace>
+        <attribute name="ZipCode" type="String" mode="IN"/>
+        <attribute name="invoke" type="String" mode="IN" />
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+    
+    <!-- the location = endpoint = SOAP action -->
+    <!-- invoke parameter is the name of the operation to invoke, for example LatLonListCityNames -->
+    <!-- invoke parameter is needed when there are several possible operations for the SOAP action  -->
+    <!-- FIXME For now, not sure why, this remote SOAP service does not work -->
+    <service name="testRemoteSoap2" engine="soap" export="true"
+        location="http://www.weather.gov/forecasts/xml/SOAP_server/ndfdXMLserver.php"
+        invoke="LatLonListCityNames">
+        <description>A service to invoke the NWS web service</description>
+        <namespace>
+            http://www.weather.gov/forecasts/xml/DWMLgen/wsdl/ndfdXML.wsdl#LatLonListCityNames
+        </namespace>
+        <attribute name="CityName" type="String" mode="IN"/>
+        <attribute name="invoke" type="String" mode="IN" />
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <!-- FIXME For now, not sure why, this remote SOAP service does not work -->
+    <service name="testRemoteSoap3" engine="soap" export="true"
+        location="http://www.restfulwebservices.net/wcf/EmailValidationService.svc"
+        invoke="EmailValidationService">
+        <attribute name="ZipCode" type="String" mode="IN"/>
+        <attribute name="invoke" type="String" mode="IN" />
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+    
+    <!-- FIXME For now, not sure why, this remote SOAP service does not work -->
+    <service name="testRemoteSoap4" engine="soap" export="true"
+        location="http://www.webservicex.net/geoipservice.asmx"
+        invoke="GetGeoIPContext">
+        <attribute name="invoke" type="String" mode="IN" />
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testGroovy" engine="groovy" location="component://common/minilang/GroovyServiceTest.groovy" invoke="">
+        <description>Test Groovy Script Service</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testGroovyMethod" engine="groovy" location="component://common/minilang/GroovyServiceTest.groovy" invoke="testMethod">
+        <description>Test Groovy Script Service Method Invocation</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineGroovy" engine="script" location="component://common/minilang/GroovyServiceTest.groovy" invoke="">
+        <description>Test Script Engine With Groovy Script</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineGroovyMethod" engine="script" location="component://common/minilang/GroovyServiceTest.groovy" invoke="testMethod">
+        <description>Test Script Engine With Groovy Script Method Invocation</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineJavaScript" engine="script" location="component://common/minilang/JavaScriptTest.js" invoke="">
+        <description>Test Script Engine With JavaScript</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="exampleId" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineJavaScriptFunction" engine="script" location="component://common/minilang/JavaScriptTest.js" invoke="testFunction">
+        <description>Test Script Engine With JavaScript Function Invocation</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testJMSQueue" engine="jms" location="serviceMessenger" invoke="testScv">
+        <description>Test JMS Queue service</description>
+        <attribute name="message" type="String" mode="IN"/>
+    </service>
+
+    <service name="testJMSTopic" engine="jms" location="serviceMessenger" invoke="testScv">
+        <description>Test JMS Topic service</description>
+        <attribute name="message" type="String" mode="IN"/>
+    </service>
+
+    <service name="testMca" engine="java"
+            location="org.apache.ofbiz.common.CommonServices" invoke="mcaTest">
+        <description>Test Service MCA</description>
+        <implements service="mailProcessInterface"/>
+    </service>
+
+    <service name="testRoute" engine="route" location="" invoke="" auth="true">
+        <description>Test the Route engine</description>
+    </service>
+
+    <service name="simpleMapListTest" engine="java" auth="false" export="true"
+            location="org.apache.ofbiz.common.CommonServices" invoke="simpleMapListTest">
+        <description>To test XML-RPC handling of Maps and Lists</description>
+        <attribute name="listOfStrings" type="List" mode="IN"/>
+        <attribute name="mapOfStrings" type="Map" mode="IN"/>
+    </service>
+
+    <service name="testJavaScript" engine="javascript" auth="false"
+        location="component://common/minilang/JavaScriptTest.js" invoke="">
+        <description>Test JavaScript Service</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="testEntityFailure" engine="java" auth="false" validate="false"
+            location="org.apache.ofbiz.common.CommonServices" invoke="entityFailTest">
+        <description>Cause a Referential Integrity Error</description>
+    </service>
+
+    <service name="entitySortTest" engine="java" auth="false" validate="false"
+            location="org.apache.ofbiz.common.CommonServices" invoke="entitySortTest">
+        <description>Test Entity Comparable</description>
+    </service>
+
+     <service name="makeALotOfVisits" engine="java" auth="true"
+            location="org.apache.ofbiz.common.CommonServices" invoke="makeALotOfVisits">
+        <description>Test JavaScript Service</description>
+        <attribute name="count" type="Integer" mode="IN" optional="false"/>
+        <attribute name="rollback" type="Boolean" mode="IN" optional="true"/>
+    </service>
+
+    <service name="byteBufferTest" engine="java" auth="true"
+            location="org.apache.ofbiz.common.CommonServices" invoke="byteBufferTest">
+        <description>Test Passing ByteBuffer To Service</description>
+        <attribute name="byteBuffer1" type="java.nio.ByteBuffer" mode="IN" optional="false"/>
+        <attribute name="saveAsFileName1" type="String" mode="IN" optional="false"/>
+        <attribute name="byteBuffer2" type="java.nio.ByteBuffer" mode="IN" optional="false"/>
+        <attribute name="saveAsFileName2" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="uploadContentTest" engine="java" auth="true"
+            location="org.apache.ofbiz.common.CommonServices" invoke="uploadTest">
+        <description>Upload Content Test Service</description>
+        <attribute name="uploadFile" type="java.nio.ByteBuffer" mode="IN" optional="false"/>
+        <attribute name="_uploadFile_contentType" type="String" mode="IN" optional="false"/>
+        <attribute name="_uploadFile_fileName" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="conditionReturnTrue" engine="java"
+            location="org.apache.ofbiz.common.CommonServices" invoke="conditionTrueService">
+        <description>ECA Condition Service - Return TRUE</description>
+        <implements service="serviceEcaConditionInterface"/>
+    </service>
+    <service name="conditionReturnFalse" engine="java"
+            location="org.apache.ofbiz.common.CommonServices" invoke="conditionFalseService">
+        <description>ECA Condition Service - Return FALSE</description>
+        <implements service="serviceEcaConditionInterface"/>
+    </service>
+
+    <service name="serviceStreamTest" engine="java" auth="false"
+            location="org.apache.ofbiz.common.CommonServices" invoke="streamTest">
+        <implements service="serviceStreamInterface"/>
+    </service>
+
+    <service name="ping" engine="java" export="true" require-new-transaction="true"
+            location="org.apache.ofbiz.common.CommonServices" invoke="ping">
+        <description>Test Ping Service</description>
+        <attribute name="message" type="String" mode="INOUT" optional="true"/>
+    </service>
+</services>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>OFBiz Service Engine Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Service Engine Services -->
+    <service name="purgeOldJobs" engine="java"
+            location="org.apache.ofbiz.service.ServiceUtil" invoke="purgeOldJobs" auth="true" use-transaction="false" semaphore="wait">
+        <description>Cleans out old jobs which have been around longer then what is defined in serviceengine.xml</description>
+        <required-permissions join-type="AND">
+            <check-permission permission="SERVICE_INVOKE_ANY"/>
+        </required-permissions>
+        <!-- this service has no attributes -->
+    </service>
+
+    <service name="cancelScheduledJob" engine="java"
+            location="org.apache.ofbiz.service.ServiceUtil" invoke="cancelJob" auth="true">
+        <description>Cancels a schedule job</description>
+        <required-permissions join-type="AND">
+            <check-permission permission="SERVICE_INVOKE_ANY"/>
+        </required-permissions>
+        <auto-attributes entity-name="JobSandbox" include="pk" mode="IN" optional="false"/>
+        <attribute name="cancelDateTime" type="Timestamp" mode="OUT" optional="false"/>
+        <attribute name="statusId" type="String" mode="OUT" optional="false"/> <!-- To more easily see current pending jobs and possibly cancel some others -->
+    </service>
+
+    <service name="cancelJobRetries" engine="java"
+            location="org.apache.ofbiz.service.ServiceUtil" invoke="cancelJobRetries" auth="true">
+        <description>Cancels a job retry flag</description>
+        <required-permissions join-type="AND">
+            <check-permission permission="SERVICE_INVOKE_ANY"/>
+        </required-permissions>
+        <auto-attributes entity-name="JobSandbox" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="resetScheduledJob" engine="java"
+            location="org.apache.ofbiz.service.ServiceUtil" invoke="resetJob" auth="true">
+        <description>Resets a stale job so it can be re-run</description>
+        <required-permissions join-type="AND">
+            <check-permission permission="SERVICE_INVOKE_ANY"/>
+        </required-permissions>
+        <auto-attributes entity-name="JobSandbox" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Service Engine Interfaces -->
+    <service name="permissionInterface" engine="interface">
+        <description>Interface to describe base parameters for Permission Services</description>
+        <attribute name="mainAction" type="String" mode="IN" optional="true">
+            <description>The action requiring permission. Must be one of ADMIN, CREATE, UPDATE, DELETE, VIEW.</description>
+        </attribute>
+        <attribute name="primaryPermission" type="String" mode="IN" optional="true">
+            <description>The permission to check - typically the name of an application or entity.</description>
+        </attribute>
+        <attribute name="altPermission" type="String" mode="IN" optional="true">
+            <description>Optional alternate permission to check. If the primary permission check fails,
+            the alternate permission will be checked.</description>
+        </attribute>
+        <attribute name="resourceDescription" type="String" mode="IN" optional="true">
+            <description>The name of the resource being accessed - defaults to service name.</description>
+        </attribute>
+        <attribute name="hasPermission" type="Boolean" mode="OUT" optional="false">
+            <description>Contains true if the requested permission has been granted.</description>
+        </attribute>
+        <attribute name="failMessage" type="String" mode="OUT" optional="true">
+            <description>Contains an explanation if the permission was denied.</description>
+        </attribute>
+    </service>
+
+    <service name="authenticationInterface" engine="interface">
+        <description>Interface to describe authentication services</description>
+        <attribute name="login.username" type="String" mode="IN"/>
+        <attribute name="login.password" type="String" mode="IN"/>
+        <attribute name="visitId" type="String" mode="IN" optional="true"/>
+        <attribute name="isServiceAuth" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="userLogin" type="org.apache.ofbiz.entity.GenericValue" mode="OUT"/>
+        <attribute name="userLoginSession" type="java.util.Map" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="serviceStreamInterface" engine="interface">
+        <description>Interface to describe services call with streams</description>
+        <attribute name="inputStream" type="java.io.InputStream" mode="IN"/>
+        <attribute name="outputStream" type="java.io.OutputStream" mode="IN"/>
+        <attribute name="contentType" type="String" mode="OUT"/>
+    </service>
+
+    <service name="serviceEcaConditionInterface" engine="interface">
+        <description>Interface to describe services which are used as SECA conditions</description>
+        <attribute name="serviceContext" type="Map" mode="IN"/>
+        <attribute name="serviceName" type="String" mode="IN"/>
+        <attribute name="conditionReply" type="Boolean" mode="OUT"/>
+    </service>
+    <service name="serviceMcaConditionInterface" engine="interface">
+        <description>Interface to describe services which are used as SMCA conditions</description>
+        <attribute name="messageWrapper" type="org.apache.ofbiz.service.mail.MimeMessageWrapper" mode="IN"/>
+        <attribute name="conditionReply" type="Boolean" mode="OUT"/>
+    </service>
+
+    <service name="mailProcessInterface" engine="interface">
+        <description>Interface to describe services used to process incoming email</description>
+        <attribute name="messageWrapper" type="org.apache.ofbiz.service.mail.MimeMessageWrapper" mode="IN"/>
+    </service>
+
+    <!-- simple condition implementation -->
+    <service name="effectiveDateEcaCondition" engine="java" auth="false" use-transaction="false"
+            location="org.apache.ofbiz.service.ServiceUtil" invoke="genericDateCondition">
+        <implements service="serviceEcaConditionInterface"/>
+        <attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"/>
+        <attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"/>
+    </service>
+
+    <!-- JobManagerLock Services -->
+    <service name="createJobManagerLock" default-entity-name="JobManagerLock" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Job Manager Lock</description>
+        <permission-service service-name="commonGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateJobManagerLock" default-entity-name="JobManagerLock" engine="entity-auto" invoke="update" auth="true">
+        <description>Cancel a Job Sandbox Lock</description>
+        <permission-service service-name="commonGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="createCatalinaSession" default-entity-name="CatalinaSession" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Catalina Session Record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updateCatalinaSession" default-entity-name="CatalinaSession" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Catalina Session Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCatalinaSession" default-entity-name="CatalinaSession" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Catalina Session Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <!-- StandardLanguage services -->
+    <service name="createStandardLanguage" default-entity-name="StandardLanguage" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a StandardLanguage Record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateStandardLanguage" default-entity-name="StandardLanguage" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a StandardLanguage Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteStandardLanguage" default-entity-name="StandardLanguage" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a StandardLanguage Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- StatusItem services -->
+    <service name="createStatusItem" default-entity-name="StatusItem" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a StatusItem Record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateStatusItem" default-entity-name="StatusItem" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a StatusItem Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteStatusItem" default-entity-name="StatusItem" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a StatusItem Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createStatusType" default-entity-name="StatusType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a StatusType</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateStatusType" default-entity-name="StatusType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a StatusType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteStatusType" default-entity-name="StatusType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a StatusType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createSequenceValueItem" default-entity-name="SequenceValueItem" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SequenceValueItem</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSequenceValueItem" default-entity-name="SequenceValueItem" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a SequenceValueItem</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSequenceValueItem" default-entity-name="SequenceValueItem" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SequenceValueItem</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="MemoryInfo" type="single" default-map-name="memoryInfo">
+        <field name="memory" title="${uiLabelMap.WebtoolsTotalMemory}"><display/></field>
+        <field name="maxMemory" title="${uiLabelMap.WebtoolsMaxMemory}"><display/></field>
+        <field name="freeMemory" title="${uiLabelMap.WebtoolsFreeMemory}"><display/></field>
+        <field name="usedMemory" title="${uiLabelMap.WebtoolsUsedMemory}"><display/></field>
+        <field name="totalCacheMemory" title="${uiLabelMap.WebtoolsCacheMemory}"><display/></field>
+    </form>
+    <grid name="ListCache" list-name="cacheList" paginate-target="FindUtilCache" separate-columns="true" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <field name="cacheName" title="${uiLabelMap.WebtoolsCacheName}" sort-field="true"><display/></field>
+        <field name="cacheSize" title="${uiLabelMap.WebtoolsSize}" sort-field="true"><display/></field>
+        <field name="hitCount" title="${uiLabelMap.WebtoolsHits}" sort-field="true"><display/></field>
+        <field name="misses" title="${uiLabelMap.WebtoolsMisses}" sort-field="true"><display description="${missCountTot}/${missCountNotFound}/${missCountExpired}/${missCountSoftRef}"/></field>
+        <field name="removes" title="${uiLabelMap.WebtoolsRemoves}" sort-field="true"><display description="${removeHitCount}/${removeMissCount}"/></field>
+        <field name="maxInMemory" title="${uiLabelMap.WebtoolsMaxInMemory}" sort-field="true"><display/></field>
+        <field name="expireTime" title="${uiLabelMap.WebtoolsExpireTime}" sort-field="true"><display/></field>
+        <field name="useSoftReference" title="${uiLabelMap.WebtoolsUseSoftRef}" sort-field="true"><display/></field>
+        <field name="cacheMemory" title="${uiLabelMap.WebtoolsCacheMemory}" sort-field="true"><display/></field>
+        <field name="cacheMenu" title=" " use-when="hasUtilCacheEdit"><include-menu name="ListCacheForm" location="component://webtools/widget/Menus.xml"/></field>
+    </grid>
+
+    <grid name="ListCacheElements" list-name="cacheElementsList" paginate-target="FindUtilCacheElements" separate-columns="true" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <field name="elementKey" title="${uiLabelMap.WebtoolsCacheElementKey}" sort-field="true"><display/></field>
+        <field name="expireTimeMillis" title="${uiLabelMap.WebtoolsExpireTime}" sort-field="true"><display/></field>
+        <field name="lineSize" title="${uiLabelMap.WebtoolsBytes}" sort-field="true"><display/></field>
+
+        <field name="administration" title=" " widget-style="buttontext" use-when="hasUtilCacheEdit">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="FindUtilCacheElementsRemoveElement">
+                <parameter param-name="UTIL_CACHE_NAME" from-field="cacheName"/>
+                <parameter param-name="UTIL_CACHE_ELEMENT_NUMBER" from-field="keyNum"/>
+            </hyperlink>
+        </field>
+    </grid>
+
+    <form name="EditCache" type="single" target="EditUtilCacheUpdate" default-map-name="cache">
+        <field name="UTIL_CACHE_NAME" entry-name="cacheName" title="${uiLabelMap.WebtoolsCacheName}"><display/></field>
+        <field name="cacheSize" title="${uiLabelMap.WebtoolsSize}"><display/></field>
+        <field name="hitCount" title="${uiLabelMap.WebtoolsHits}"><display/></field>
+        <field name="missCountTot" title="${uiLabelMap.WebtoolsMissesTotal}"><display/></field>
+        <field name="missCountNotFound" title="${uiLabelMap.WebtoolsMissesNotFound}"><display/></field>
+        <field name="missCountExpired" title="${uiLabelMap.WebtoolsMissesExpire}"><display/></field>
+        <field name="missCountSoftRef" title="${uiLabelMap.WebtoolsMissesSoftReference}"><display/></field>
+        <field name="removeHitCount" title="${uiLabelMap.WebtoolsRemovesHit}"><display/></field>
+        <field name="removeMissCount" title="${uiLabelMap.WebtoolsRemovesMisses}"><display/></field>
+        <field name="UTIL_CACHE_MAX_IN_MEMORY" entry-name="maxInMemory" title="${uiLabelMap.WebtoolsMaxInMemory}"><text/></field>
+        <field name="UTIL_CACHE_EXPIRE_TIME" entry-name="expireTime" title="${uiLabelMap.WebtoolsExpireTime}"><text/></field>
+        <field name="UTIL_CACHE_USE_SOFT_REFERENCE" entry-name="useSoftReference" title="${uiLabelMap.WebtoolsUseSoftRef}">
+            <drop-down allow-empty="false">
+                <option key="false" description="${uiLabelMap.CommonFalse}"/>
+                <option key="true" description="${uiLabelMap.CommonTrue}"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonApply}"><submit button-type="button"/></field>
+    </form>    
+</forms>

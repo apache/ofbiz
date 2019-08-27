@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Order (ShoppingCart) Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <service name="interfaceProductPromoCond" engine="interface" location="" invoke="">
+        <attribute name="productPromoCond" type="org.apache.ofbiz.entity.GenericValue" mode="IN"/>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN"/>
+        <attribute name="nowTimestamp" type="Timestamp" mode="IN"/>
+        <attribute name="directResult" type="Boolean" mode="OUT" optional="true"/>
+        <attribute name="compareBase" type="Integer" mode="OUT" optional="true"/>
+        <attribute name="operatorEnumId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="interfaceProductPromoAction" engine="interface" location="" invoke="">
+        <attribute name="productPromoAction" type="org.apache.ofbiz.entity.GenericValue" mode="IN"/>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN"/>
+        <attribute name="nowTimestamp" type="Timestamp" mode="IN"/>
+        <attribute name="actionResultInfo" type="org.apache.ofbiz.order.shoppingcart.product.ProductPromoWorker$ActionResultInfo" mode="IN"/>
+        <attribute name="cartItemModifyException" type="org.apache.ofbiz.order.shoppingcart.CartItemModifyException" mode="OUT" optional="true"/>
+    </service>
+    <service name="assignItemShipGroup" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="assignItemShipGroup">
+        <description>Assign a ShoppingCartItem -> Quantity to a ship group</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="fromGroupIndex" type="Integer" mode="IN" optional="false"/>
+        <attribute name="toGroupIndex" type="Integer" mode="IN" optional="false"/>
+        <attribute name="itemIndex" type="Integer" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="clearEmptyGroups" type="Boolean" mode="IN" optional="true"/>
+    </service>
+
+    <service name="setCartShippingOptions" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="setShippingOptions">
+        <description>Sets The ShoppingCart Shipping Options</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="groupIndex" type="Integer" mode="IN" optional="false"/>
+        <attribute name="shippingContactMechId" type="String" mode="IN" optional="false">
+            <type-validate>
+                <fail-property resource="OrderUiLabels" property="checkhelper.select_shipping_destination"/>
+            </type-validate>
+        </attribute>
+        <attribute name="shipmentMethodString" type="String" mode="IN" optional="false">
+            <type-validate>
+                <fail-property resource="OrderUiLabels" property="checkhelper.select_shipping_method"/>
+            </type-validate>
+        </attribute>
+        <attribute name="shippingInstructions" type="String" mode="IN" optional="true"/>
+        <attribute name="maySplit" type="Boolean" mode="IN" optional="false">
+            <type-validate>
+                <fail-property resource="OrderUiLabels" property="checkhelper.select_splitting_preference"/>
+            </type-validate>
+        </attribute>
+        <attribute name="isGift" type="Boolean" mode="IN" optional="false">
+            <type-validate>
+                <fail-property resource="OrderUiLabels" property="checkhelper.specify_if_order_is_gift"/>
+            </type-validate>
+        </attribute>
+        <attribute name="giftMessage" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="setCartShippingAddress" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="setShippingOptions">
+        <description>Sets The ShoppingCart Shipping Options</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="groupIndex" type="Integer" mode="IN" optional="false"/>
+        <attribute name="shippingContactMechId" type="String" mode="IN" optional="false">
+            <type-validate>
+                <fail-property resource="OrderUiLabels" property="checkhelper.select_shipping_destination"/>
+            </type-validate>
+        </attribute>
+    </service>
+
+    <service name="setCartPaymentOptions" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="setPaymentOptions">
+        <description>Sets the ShoppingCart Payment Options</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="paymentInfoId" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="refNum" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="setCartOtherOptions" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="setOtherOptions">
+        <description>Sets the ShoppingCart Other Options (besided payment and shipping)</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="orderAdditionalEmails" type="String" mode="IN" optional="true"/>
+        <attribute name="correspondingPoId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="loadCartFromOrder" engine="java" auth="true"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="loadCartFromOrder">
+        <description>Create a ShoppingCart Object based on an existing order</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="createAsNewOrder" type="String" mode="IN" default-value="N"/>
+        <attribute name="skipInventoryChecks" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="skipProductChecks" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="includePromoItems" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="loadCartFromQuote" engine="java" auth="true"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="loadCartFromQuote">
+        <description>Create a ShoppingCart Object based on an existing quote. If applyQuoteAdjustments is set to false then standard cart adjustments are generated.</description>
+        <attribute name="quoteId" type="String" mode="IN" optional="false"/>
+        <attribute name="applyQuoteAdjustments" type="String" mode="IN" optional="true"/>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="OUT" optional="false"/>
+    </service>
+    <service name="loadCartFromShoppingList" engine="java" auth="true"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="loadCartFromShoppingList">
+        <description>Create a ShoppingCart Object based on an existing shopping list.</description>
+        <attribute name="shoppingListId" type="String" mode="IN" optional="false"/>
+        <attribute name="applyStorePromotions" type="String" mode="IN" optional="true"/>
+        <attribute name="orderPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="getShoppingCartData" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="getShoppingCartData">
+        <description>Get the ShoppingCart data</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="totalQuantity" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="currencyIsoCode" type="String" mode="OUT" optional="true"/>
+        <attribute name="subTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="subTotalCurrencyFormatted" type="String" mode="OUT" optional="true"/>
+        <attribute name="totalShipping" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="totalShippingCurrencyFormatted" type="String" mode="OUT" optional="true"/>
+        <attribute name="totalSalesTax" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="totalSalesTaxCurrencyFormatted" type="String" mode="OUT" optional="true"/>
+        <attribute name="displayGrandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="displayGrandTotalCurrencyFormatted" type="String" mode="OUT" optional="true"/>
+        <attribute name="cartItemData" type="Map" mode="OUT"/>
+        <attribute name="displayOrderAdjustmentsTotalCurrencyFormatted" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="getShoppingCartItemIndex" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="getShoppingCartItemIndex">
+        <description>Get the ShoppingCart info from the productId</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="itemIndex" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="resetShipGroupItems" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="resetShipGroupItems">
+        <description>Reset the ship Groups in the cart and put the items in default group</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+    </service>
+
+    <service name="prepareVendorShipGroups" engine="java" auth="false"
+            location="org.apache.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="prepareVendorShipGroups">
+        <description>Split the default shipgroup to individual shipgroups that are unique to a vendor</description>
+        <attribute name="shoppingCart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createCartAbandonedLine" default-entity-name="CartAbandonedLine" engine="entity-auto" invoke="create" auth="true">
+        <description>Create CartAbandonedLine record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateCartAbandonedLine" default-entity-name="CartAbandonedLine" engine="entity-auto" invoke="update" auth="true">
+        <description>Update CartAbandonedLine record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCartAbandonedLine" default-entity-name="CartAbandonedLine" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete CartAbandonedLine record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+</services>

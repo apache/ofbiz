@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    
+    <view-entity entity-name="ContentApprovalProductContentAndInfo"
+            package-name="org.apache.ofbiz.content.content"
+            title="ContentApproval, ProductContent, Content and DataResource View Entity">
+      <member-entity entity-alias="CA" entity-name="ContentApproval"/>
+      <member-entity entity-alias="PRC" entity-name="ProductContent"/>
+      <member-entity entity-alias="CO" entity-name="Content"/>
+      <member-entity entity-alias="DR" entity-name="DataResource"/>
+      <alias-all entity-alias="CA"/>
+      <alias-all entity-alias="PRC">
+        <exclude field="contentId"/>
+        <exclude field="sequenceNum"/>
+      </alias-all>
+      <alias-all entity-alias="CO">
+        <exclude field="contentId"/>
+      </alias-all>
+      <alias-all entity-alias="DR" prefix="dr"/>
+      <view-link entity-alias="CA" rel-entity-alias="PRC">
+        <key-map field-name="contentId"/>
+      </view-link>
+      <view-link entity-alias="PRC" rel-entity-alias="CO">
+        <key-map field-name="contentId"/>
+      </view-link>
+      <view-link entity-alias="CO" rel-entity-alias="DR">
+        <key-map field-name="dataResourceId"/>
+      </view-link>
+      <relation type="one-nofk" rel-entity-name="ElectronicText">
+        <key-map field-name="dataResourceId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="ImageDataResource">
+        <key-map field-name="dataResourceId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="OtherDataResource">
+        <key-map field-name="dataResourceId"/>
+      </relation>
+      <relation type="many" rel-entity-name="ContentAssocDataResourceViewFrom">
+        <key-map field-name="contentId" rel-field-name="contentIdStart"/>
+      </relation>
+      <relation type="many" rel-entity-name="ContentAssocDataResourceViewTo">
+        <key-map field-name="contentId" rel-field-name="contentIdStart"/>
+      </relation>
+    </view-entity>
+    
+    <view-entity entity-name="ProductCategoryMemberAndPrice" package-name="org.apache.ofbiz.product.category" title="ProductCategoryMember And ProductPrice View Entiry">
+        <member-entity entity-alias="PCM" entity-name="ProductCategoryMember"/>
+        <member-entity entity-alias="PD" entity-name="Product"/>
+        <member-entity entity-alias="PP" entity-name="ProductPrice"/>
+        <alias-all entity-alias="PCM"/>
+        <alias-all entity-alias="PD" prefix="product">
+            <exclude field="productId"/>
+        </alias-all>
+        <alias-all entity-alias="PP" prefix="price">
+            <exclude field="productId"/>
+        </alias-all>
+        <view-link entity-alias="PCM" rel-entity-alias="PD">
+            <key-map field-name="productId"/>
+        </view-link>
+        <view-link entity-alias="PD" rel-entity-alias="PP">
+            <key-map field-name="productId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="ProductStoreGroupAndMember" package-name="org.apache.ofbiz.product.store" title="ProductStoreGroup And ProductStore View Entiry">
+        <member-entity entity-alias="PSG" entity-name="ProductStoreGroup"/>
+        <member-entity entity-alias="PSGM" entity-name="ProductStoreGroupMember"/>
+        <member-entity entity-alias="PS" entity-name="ProductStore"/>
+        <alias-all entity-alias="PSG"/>
+        <alias-all entity-alias="PSGM"/>
+        <alias-all entity-alias="PS"/>
+        <view-link entity-alias="PSG" rel-entity-alias="PSGM">
+            <key-map field-name="productStoreGroupId"/>
+        </view-link>
+        <view-link entity-alias="PSGM" rel-entity-alias="PS">
+            <key-map field-name="productStoreId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="ProductStoreGroupRollupAndChild" package-name="org.apache.ofbiz.product.store" title="ProductStoreGroupRollup And ProductStoreGroup View Entiry">
+        <member-entity entity-alias="PSGR" entity-name="ProductStoreGroupRollup"/>
+        <member-entity entity-alias="PSG" entity-name="ProductStoreGroup"/>
+        <alias-all entity-alias="PSG"/>
+        <alias-all entity-alias="PSGR"/>
+        <view-link entity-alias="PSG" rel-entity-alias="PSGR">
+            <key-map field-name="productStoreGroupId"/>
+        </view-link>
+    </view-entity>
+</entitymodel>

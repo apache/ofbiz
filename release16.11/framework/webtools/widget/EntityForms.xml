@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="EntityEoModelBundle" type="single" target="exportEntityEoModelBundle" title="">
+        <auto-fields-service service-name="exportEntityEoModelBundle"/>
+        <field name="eomodeldFullPath"><text size="100"/></field>
+        <field name="entityGroupId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="EntityGroup" description="${entityGroupName}">
+                    <entity-order-by field-name="entityGroupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListPerformanceResults" type="list" list-name="performanceList" paginate-target="EntityPerformanceTest" separate-columns="true" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="operation" title="${uiLabelMap.WebtoolsPerformanceOperation}"><display/></field>
+        <field name="entity" title="${uiLabelMap.WebtoolsEntity}"><display/></field>
+        <field name="calls" title="${uiLabelMap.WebtoolsPerformanceCalls}"><display/></field>
+        <field name="seconds" title="${uiLabelMap.WebtoolsPerformanceSeconds}"><display/></field>
+        <field name="secsPerCall" title="${uiLabelMap.WebtoolsPerformanceSecondsCall}"><display/></field>
+        <field name="callsPerSecond" title="${uiLabelMap.WebtoolsPerformanceCallsSecond}"><display/></field>
+    </form>
+    
+    <form name="FilterEntities" default-table-style="condensed-table">
+        <field name="filterByGroupName">
+            <drop-down>
+                <list-options key-name="value" list-name="entityGroups" description="${name}"/>
+            </drop-down>
+        </field>
+        <field name="filterByEntityName" position="2"><text/></field>
+        <field name="submitButton" position="3" title="${uiLabelMap.CommonApply}"><submit/></field>
+    </form>
+    
+    <grid name="ListEntities" list-name="entitiesList" paginate="false"
+          odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <set field="firstChar" value="${groovy: entityName.substring(0, 1)}"/>
+        </row-actions>
+        <field name="entityName">
+            <hyperlink id="${firstChar}" description="${entityName} ${groovy: if (viewEntity == 'Y') return '(' + uiLabelMap.WebtoolsEntityView + ')'}" target="FindGeneric">
+               <parameter param-name="entityName"/>
+            </hyperlink>
+        </field>
+        <field name="actions" title=" ">
+            <include-menu name="ListEntitiesAction" location="component://webtools/widget/Menus.xml"/>
+        </field>
+    </grid>
+
+    <form name="EntitySQLCommand" target="EntitySQLProcessor">
+        <field name="group" title="${uiLabelMap.CommonGroup}">
+            <drop-down allow-empty="false">
+                <list-options list-name="groups" key-name="group" description="${group}"/>
+            </drop-down>
+        </field>
+        <field name="sqlCommand" title="${uiLabelMap.WebtoolsSqlCommand}">
+            <textarea cols="60" rows="6"/>
+        </field>
+        <field name="rowLimit" title="${uiLabelMap.WebtoolsLimitRowsTo}"><text default-value="200" size="5"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSend}"><submit/></field>
+    </form>
+</forms>

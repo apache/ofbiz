@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="CommonOrderViewDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="Main">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-portal-page id="OrderPortalPage"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderHeaderView">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderViewOrder"/>
+                <set field="headerItem" value="findorders"/>
+                <set field="layoutSettings.javaScripts[]" value="/ordermgr-js/order.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/ordermgr-js/OrderShippingInfo.js" global="true"/>
+                <set field="layoutSettings.javaScripts[]" value="/ordermgr-js/geoAutoCompleter.js" global="true"/>
+                <script location="component://order/groovyScripts/order/OrderView.groovy"/>
+                <script location="component://order/groovyScripts/order/OrderViewWebSecure.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <include-screen name="orderHeader"/>
+                        <container style="clear"/>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/OrderItems.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/OrderNotes.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/Transitions.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="orderHeader">
+        <section>
+            <condition>
+                <not><if-empty field="orderHeader"/></not>
+            </condition>
+            <widgets>
+                <container id="split50">
+                    <container style="lefthalf">
+                        <include-screen name="orderinfo"/>
+                        <include-screen name="orderterms"/>
+                        <include-screen name="orderpaymentinfo"/>
+                        <include-screen name="projectAssoOrder"/>
+                    </container>
+                    <container style="righthalf">
+                        <include-screen name="ordercontactinfo"/>
+                        <include-screen name="OrderRoleInfo"/>
+                        <include-screen name="ordershippinginfo"/>
+                        <include-screen name="OrderSalesReps"/>
+                    </container>
+                </container>
+            </widgets>
+            <fail-widgets>
+                <label style="h2" text="${uiLabelMap.OrderNoOrderFound}: [${orderId}]"></label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="orderinfo">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://order/template/order/OrderInfo.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="orderterms">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://order/template/order/OrderTerms.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="orderpaymentinfo">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://order/template/order/OrderPaymentInfo.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="projectAssoOrder">
+        <section>
+            <condition>
+                <if-has-permission permission="PROJECTMGR" action="_VIEW"/>
+            </condition>
+            <actions>
+            <set field="orderId" from-field="parameters.orderId"/>
+            <entity-and entity-name="OrderHeaderAndWorkEffort" list="listProjectAssoOrder">
+                <field-map field-name="orderId" from-field="orderId"/>
+                <field-map field-name="workEffortTypeId" value="PROJECT"/>
+            </entity-and>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <not>
+                            <if-empty field="listProjectAssoOrder"/>
+                        </not>
+                    </condition>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.PageTitleProjectInformation}">
+                            <include-form name="projectAssoOrder" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
+                        </screenlet>
+                    </widgets>
+                    <fail-widgets></fail-widgets>
+                </section>
+            </widgets>
+            <fail-widgets></fail-widgets>
+        </section>
+    </screen>
+    <screen name="ordercontactinfo">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://order/template/order/OrderContactInfo.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderRoleInfo">
+        <section>
+            <widgets>
+                <screenlet name="OrderRoles" title="${uiLabelMap.CommonRoles}" initially-collapsed="true">
+                    <include-grid name="ListOrderRoles" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ordershippinginfo">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://order/template/order/OrderShippingInfo.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderSalesReps">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://order/template/order/OrderSalesReps.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderHeaderListView">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderLookupOrder"/>
+                <set field="headerItem" value="orderlist"/>
+                <set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+                <script location="component://order/groovyScripts/order/OrderList.groovy"/>
+                <script location="component://order/groovyScripts/order/FilterOrderList.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/OrderList.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderItemEdit">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderEditItems"/>
+                <set field="headerItem" value="orderlist"/>
+                <script location="component://order/groovyScripts/order/OrderView.groovy"/>
+                <script location="component://order/groovyScripts/order/OrderViewWebSecure.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <include-screen name="orderHeader"/>
+                        <container style="clear"/>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/EditOrderItems.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/AppendOrderItem.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderFindOrder">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderFindOrder"/>
+                <set field="headerItem" value="findorders"/>
+                <script location="component://order/groovyScripts/order/FindOrders.groovy"/>
+                <script location="component://content/groovyScripts/print/FindPrinters.groovy"/>
+
+                <!-- asmselect parameters, must be prefixed by asm_ for SetMultipleSelectJs.ftl -->
+                <set field="asm_multipleSelectForm"  value="lookuporder"/>
+                <set field="asm_multipleSelect"  value="roleTypeId"/>
+                <set field="asm_formSize" value="1000"/>
+                <set field="asm_asmListItemPercentOfForm" value="95"/>
+                <set field="asm_sortable" value="false"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="asm_title" value="${uiLabelMap.OrderPartySelectRoleForParty}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://common/template/includes/SetMultipleSelectJs.ftl"/></html></platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/FindOrders.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderNewNote">
+        <section>
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+            </condition>
+            <actions>
+                <set field="titleProperty" value="OrderAddNote"/>
+                <set field="headerItem" value="findorders"/>
+                <script location="component://order/groovyScripts/order/NewNote.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.OrderAddNote}">
+                            <container>
+                                <link target="orderview?orderId=${orderId}" text="${uiLabelMap.OrderBackToOrder}" style="buttontext"/>
+                            </container>
+                            <include-form name="OrderNewNote" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.OrderViewPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="OrderDeliveryScheduleInfo">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderViewEditDeliveryScheduleInfo"/>
+                <set field="headerItem" value="findorders"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://order/groovyScripts/order/OrderDeliveryScheduleInfo.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-compare operator="equals" value="true" field="hasPermission"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.OrderScheduleDelivery}">
+                                    <container style="button-bar">
+                                        <link target="orderview" text="${uiLabelMap.OrderViewOrder}" style="buttontext">
+                                            <parameter param-name="orderId" from-field="orderId"/>
+                                        </link>
+                                    </container>
+                                    <section>
+                                        <condition>
+                                            <not><if-empty field="orderId"/></not>
+                                        </condition>
+                                        <widgets>
+                                            <include-form name="UpdateDeliveryScheduleInformation" location="component://order/widget/ordermgr/OrderDeliveryScheduleForms.xml"/>
+                                        </widgets>
+                                        <fail-widgets>
+                                            <label text="${uiLabelMap.OrderNoPurchaseSpecified}"></label>
+                                        </fail-widgets>
+                                    </section>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3" text="${uiLabelMap.OrderViewPermissionError}"></label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderStats">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderOrderStatisticsPage"/>
+                <set field="headerItem" value="stats"/>
+                <script location="component://order/groovyScripts/order/OrderStats.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/OrderStats.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderReceivePayment">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderReceiveOfflinePayments"/>
+                <set field="headerItem" value="findorders"/>
+                <script location="component://order/groovyScripts/order/ReceivePayment.groovy"/>
+                <entity-and entity-name="OrderRole" list="orderRoles">
+                  <field-map field-name="orderId" value="${parameters.orderId}"/>
+                  <field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
+                </entity-and>
+                <entity-and entity-name="PaymentMethod" list="paymentMethods">
+                  <field-map field-name="partyId" from-field="orderRoles[0].partyId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/ReceivePayment.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewImage">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderViewImage"/>
+                <script location="component://order/groovyScripts/order/ViewImage.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/order/ViewImage.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="SendOrderConfirmation">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderSendConfirmationEmail"/>
+                <set field="headerItem" value="findorders"/>
+                <set field="emailType" value="PRDS_ODR_CONFIRM"/>
+                <script location="component://order/groovyScripts/order/SendConfirmationEmail.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/SendConfirmationEmail.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="SendOrderCompletion">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderSendConfirmationEmail"/>
+                <set field="headerItem" value="findorders"/>
+                <set field="emailType" value="PRDS_ODR_COMPLETE"/>
+                <script location="component://order/groovyScripts/order/SendConfirmationEmail.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/SendConfirmationEmail.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListOrderTerms">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderOrderTerms"/>
+                <set field="headerItem" value="findorders"/>
+                <entity-and entity-name="OrderTerm" list="orderTerms">
+                    <field-map field-name="orderId" from-field="parameters.orderId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <screenlet id="AddOrderTermPanel" title="${uiLabelMap.CommonAdd} ${uiLabelMap.OrderOrderTerms}" collapsible="true">
+                            <include-form name="AddOrderTerm" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListOrderTerms" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderHistory">
+        <section>
+            <actions>
+                <set field="headerItem" value="findorders"/>
+                <script location="component://order/groovyScripts/order/OrderHistory.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderViewDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.OrderOrderHistory} #${orderId}">
+                            <container>
+                                <link target="orderview?orderId=${orderId}" text="${uiLabelMap.OrderBackToOrder}" style="buttontext"/>
+                            </container>
+                            <include-screen name="OrderShipmentMethodHistory"/>
+                            <include-screen name="OrderUnitPriceHistory"/>
+                            <include-screen name="OrderQuantityHistory"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderShipmentMethodHistory">
+        <section>
+            <condition>
+                <not>
+                    <if-empty field="orderShipmentHistories"/>
+                </not>
+            </condition>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderShipmentMethodHistory}">
+                    <include-form name="OrderShipmentMethodHistory" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                </screenlet>
+            </widgets>
+            <fail-widgets>
+                <screenlet title="${uiLabelMap.OrderShipmentMethodHistory}">
+                    <label text="${uiLabelMap.OrderHistoryNotAvailable}"/>
+                </screenlet>
+            </fail-widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderUnitPriceHistory">
+        <section>
+            <condition>
+                <not>
+                    <if-empty field="orderUnitPriceHistories"/>
+                </not>
+            </condition>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderUnitPriceHistory}">
+                    <include-form name="OrderUnitPriceHistory" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                </screenlet>
+            </widgets>
+            <fail-widgets>
+                <screenlet title="${uiLabelMap.OrderUnitPriceHistory}">
+                    <label text="${uiLabelMap.OrderHistoryNotAvailable}"/>
+                </screenlet>
+            </fail-widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderQuantityHistory">
+        <section>
+            <condition>
+                <not>
+                    <if-empty field="orderQuantityHistories"/>
+                </not>
+            </condition>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderQuantityHistory}">
+                    <include-form name="OrderQuantityHistory" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                </screenlet>
+            </widgets>
+            <fail-widgets>
+                <screenlet title="${uiLabelMap.OrderQuantityHistory}">
+                    <label text="${uiLabelMap.OrderHistoryNotAvailable}"/>
+                </screenlet>
+            </fail-widgets>
+        </section>
+    </screen>
+
+    <!-- Screens Specific to portlet -->
+    <screen name="ListCustomerOrders">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="MyPortalUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="partyId" from-field="userLogin.partyId"/>
+                <set field="statusId" from-field="statusId"/>
+                <set field="roleTypeId" from-field="roleTypeId"/>
+                <set field="screenletTitle" from-field="uiLabelMap.MyPortalMyOrders"/>
+            </actions>
+            <widgets>
+                <screenlet title="${screenletTitle} ${partyId} ${statusId}" navigation-form-name="ListCustomerOrders" >
+                   <include-form name="ListCustomerOrders" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListSalesOrders">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="filterDate" type="Timestamp" value="${nowTimestamp}"/>
+                <script location="component://order/groovyScripts/order/OrderList.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+                    </condition>
+                    <widgets>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/order/OrderListByDate.ftl"/></html>
+                        </platform-specific>
+                    </widgets>
+                    <fail-widgets>
+                        <label style="h3" text="${uiLabelMap.OrderViewPermissionError}"/>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListPurchaseOrders">
+        <section>
+            <actions>
+                <set field="partyId" from-field="userLogin.partyId"/>
+                <set field="roleTypeId" value="SUPPLIER_AGENT"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+                    </condition>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.OrderPurchaseOrder}" navigation-form-name="ListPurchaseOrders" >
+                            <include-form name="ListPurchaseOrders" location="component://order/widget/ordermgr/OrderForms.xml"/>
+                        </screenlet>
+                    </widgets>
+                    <fail-widgets>
+                        <label style="h3" text="${uiLabelMap.OrderViewPermissionError}"/>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+</screens>

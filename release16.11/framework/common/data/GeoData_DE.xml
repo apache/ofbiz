@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+    <Geo abbreviation="BW" geoCode="BW" geoId="DE-BW" geoName="Baden-Württemberg" geoTypeId="STATE"/>
+    <Geo abbreviation="BY" geoCode="BY" geoId="DE-BY" geoName="Bayern" geoTypeId="STATE"/>
+    <Geo abbreviation="BE" geoCode="BE" geoId="DE-BE" geoName="Berlin" geoTypeId="STATE"/>
+    <Geo abbreviation="BR" geoCode="BR" geoId="DE-BR" geoName="Brandenburg" geoTypeId="STATE"/>
+    <Geo abbreviation="HB" geoCode="HB" geoId="DE-HB" geoName="Bremen" geoTypeId="STATE"/>
+    <Geo abbreviation="HH" geoCode="HH" geoId="DE-HH" geoName="Hamburg" geoTypeId="STATE"/>
+    <Geo abbreviation="HE" geoCode="HE" geoId="DE-HE" geoName="Hessen" geoTypeId="STATE"/>
+    <Geo abbreviation="MV" geoCode="MV" geoId="DE-MV" geoName="Mecklenburg-Vorpommern" geoTypeId="STATE"/>
+    <Geo abbreviation="NI" geoCode="NI" geoId="DE-NI" geoName="Niedersachsen" geoTypeId="STATE"/>
+    <Geo abbreviation="NW" geoCode="NW" geoId="DE-NW" geoName="Nordrhein-Westfalen" geoTypeId="STATE"/>
+    <Geo abbreviation="RP" geoCode="RP" geoId="DE-RP" geoName="Rheinland-Pfalz" geoTypeId="STATE"/>
+    <Geo abbreviation="SL" geoCode="SL" geoId="DE-SL" geoName="Saarland" geoTypeId="STATE"/>
+    <Geo abbreviation="SH" geoCode="SH" geoId="DE-SH" geoName="Schleswig-Holstein" geoTypeId="STATE"/>
+    <Geo abbreviation="SN" geoCode="SN" geoId="DE-SN" geoName="Sachsen" geoTypeId="STATE"/>
+    <Geo abbreviation="SA" geoCode="SA" geoId="DE-SA" geoName="Sachsen-Anhalt" geoTypeId="STATE"/>
+    <Geo abbreviation="TH" geoCode="TH" geoId="DE-TH" geoName="Thüringen" geoTypeId="STATE"/>
+
+    <GeoAssoc geoId="DEU" geoIdTo="DE-BW" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-BY" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-BE" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-BR" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-HB" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-HH" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-HE" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-MV" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-NI" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-NW" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-RP" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-SL" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-SH" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-SN" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-SA" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="DEU" geoIdTo="DE-TH" geoAssocTypeId="REGIONS"/> 
+</entity-engine-xml>

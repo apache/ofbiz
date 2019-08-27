@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="ServiceList">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleServiceList"/>
+                <set field="tabButtonItem" value="serviceList"/>
+                <script location="component://webtools/groovyScripts/service/AvailableServices.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/template/service/AvailableServices.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindJob">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleJobList"/>
+                <set field="tabButtonItem" value="findJob"/>
+                <set field="jobCtx" from-field="parameters"/>
+                <set field="dummy" value="${groovy: if ('SERVICE_PENDING'.equals(jobCtx.statusId)) jobCtx.jobId = ''}"/> <!--  To more easily see current pending jobs and possibly cancel some others -->
+                <!-- fields for ServerHour24HourFormatJs.ftl -->
+                <set field="clockField" value="FindJobs_clock_title"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-screen name="JobManagerLockEnable"/>
+                        <section>
+                            <widgets>
+                                <platform-specific><html><html-template location="component://common/template/includes/ServerHour24HourFormatJs.ftl"/></html></platform-specific>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindJobs" location="component://webtools/widget/ServiceForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListJobs" location="component://webtools/widget/ServiceForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="JobDetails">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleJobDetails"/>
+                <set field="tabButtonItem" value="findJob"/>
+                <script location="component://webtools/groovyScripts/service/JobDetails.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleJobDetails}">
+                            <include-form name="JobDetails" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.WebtoolsRunTimeDataInfo}">
+                            <include-form name="JobRuntimeDataInfo" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ThreadList">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleThreadList"/>
+                <set field="tabButtonItem" value="threadList"/>
+                <script location="component://webtools/groovyScripts/service/Threads.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.WebtoolsServiceEngineThreads}">
+                            <include-form name="PoolState" location="component://webtools/widget/ServiceForms.xml"/>
+                            <include-form name="ListJavaThread" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.WebtoolsGeneralJavaThreads}">
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/service/Threads.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ScheduleJob">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleScheduleJob"/>
+                <set field="tabButtonItem" value="scheduleJob"/>
+                <script location="component://webtools/groovyScripts/service/ScheduleJob.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-screen name="JobManagerLockEnable"/>
+                        <screenlet title="${uiLabelMap.WebtoolsStep1ServiceAndRecurrenceInfo}">
+                            <include-form name="ScheduleJob" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="RunService">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleRunService"/>
+                <set field="tabButtonItem" value="runService"/>
+                <script location="component://webtools/groovyScripts/service/ScheduleJob.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <label style="h3">${uiLabelMap.WebtoolsServiceLimitedTime}</label>
+                            <include-form name="RunService" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="setServiceParameters">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleScheduleJob"/>
+                <set field="tabButtonItem" value="scheduleJob"/>
+                <script location="component://webtools/groovyScripts/service/ScheduleJob.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.WebtoolsStep2ServiceParameters}">
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/service/SetServiceParameter.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="setSyncServiceParameters">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleScheduleJob"/>
+                <set field="headerItem" value="services"/>
+                <set field="tabButtonItem" value="runService"/>
+                <script location="component://webtools/groovyScripts/service/ScheduleJob.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleScheduleJob}">
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/service/SetServiceParameterSync.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ServiceResult">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleScheduleJob"/>
+                <set field="headerItem" value="services"/>
+                <set field="tabButtonItem" value="runService"/>
+                <script location="component://webtools/groovyScripts/service/ServiceResult.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/template/service/ServiceResult.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindJobManagerLock">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleJobManagerLockList"/>
+                <set field="tabButtonItem" value="FindJobManagerLock"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="page-title"><label text="${uiLabelMap[titleProperty]}"></label></container>
+                        <section>
+                            <condition><if-has-permission permission="SERVICE_JM_LOCK"/></condition>
+                            <widgets>
+                                <container style="button-bar">
+                                     <link target="AddJobManagerLock" text="${uiLabelMap.CommonAdd}" style="buttontext create" link-type="layered-modal"/>
+                                </container>
+                            </widgets>
+                        </section>
+                        <screenlet id="searchOptions" name="findScreenlet" collapsible="true" title="${uiLabelMap.CommonSearchOptions}">
+                            <container id="search-options">
+                                <include-form name="FindJobManagerLock" location="component://webtools/widget/ServiceForms.xml"/>
+                            </container>
+                        </screenlet>
+                        <screenlet padded="false">
+                            <label style="h3" text="${uiLabelMap.CommonSearchResults}"/>
+                            <container id="search-results">
+                                <include-form name="ListJobManagerLock" location="component://webtools/widget/ServiceForms.xml"/>
+                            </container>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddJobManagerLock">
+        <section>
+            <widgets>
+                <decorator-screen name="PopUpDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="AddJobManagerLock" location="component://webtools/widget/ServiceForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="JobManagerLockEnable">
+        <section>
+            <actions>
+                <entity-condition entity-name="JobManagerLock" list="currentJobManagerLocks" filter-by-date="true">
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
+                <entity-condition entity-name="JobManagerLock" list="nextJobManagerLocks" filter-by-date="false">
+                    <condition-list>
+                        <condition-expr field-name="fromDate" operator="greater" from-field="nowTimestamp"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="thruDate" operator="greater" from-field="nowTimestamp"/>
+                            <condition-expr field-name="thruDate" operator="equals" from-field="nullField"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <or>
+                            <not><if-empty field="currentJobManagerLocks"/></not>
+                            <not><if-empty field="nextJobManagerLocks"/></not>
+                        </or>
+                    </condition>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.WebtoolsJobManagerLockEnable}">
+                            <section>
+                                 <condition>
+                                     <not><if-empty field="currentJobManagerLocks"/></not>
+                                 </condition>
+                                 <actions>
+                                     <set field="jobManagerLocks" from-field="currentJobManagerLocks"/>
+                                 </actions>
+                                 <widgets>
+                                     <label style="h3">${uiLabelMap.WebtoolsCurrentJobManagerLock}</label>
+                                     <include-grid location="component://webtools/widget/ServiceForms.xml" name="JobManagerLockEnable"/>
+                                 </widgets>
+                             </section>
+                             <section>
+                                 <condition>
+                                     <not><if-empty field="nextJobManagerLocks"/></not>
+                                 </condition>
+                                 <actions>
+                                     <set field="jobManagerLocks" from-field="nextJobManagerLocks"/>
+                                 </actions>
+                                 <widgets>
+                                     <label style="h3">${uiLabelMap.WebtoolsNextJobManagerLock}</label>
+                                     <include-grid location="component://webtools/widget/ServiceForms.xml" name="JobManagerLockEnable"/>
+                                 </widgets>
+                             </section>
+                         </screenlet>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+</screens>

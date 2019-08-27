@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <!-- Payment Group -->
+    <form name="FindPaymentGroup" type="single" target="FindPaymentGroup"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="PaymentGroup" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListPaymentGroup" type="list" separate-columns="true" default-entity-name="PaymentGroup" list-name="paymentGroupList" 
+        paginate-target="FindPaymentGroup" paginate="true" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <row-actions>
+            <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers" filter-by-date="true">
+                <field-map field-name="paymentGroupId"/>
+            </entity-and>
+            <entity-and entity-name="PmtGrpMembrPaymentAndFinAcctTrans" list="paymentGroupMemberAndTransList" filter-by-date="true">
+                <field-map field-name="paymentGroupId"/>
+            </entity-and>
+        </row-actions>
+        <field name="paymentGroupId" widget-style="buttontext">
+            <hyperlink description="${paymentGroupId}" target="PaymentGroupOverview">
+                <parameter param-name="paymentGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="paymentGroupTypeId" title="${uiLabelMap.FormFieldTitle_paymentGroupType}"><display-entity entity-name="PaymentGroupType"/></field>
+        <field name="paymentGroupName"><display description="${paymentGroupName}"/></field>
+        <field name="depositSlip" title=" " widget-style="buttontext" use-when="${paymentGroupTypeId == 'BATCH_PAYMENT'} @and ${groovy:org.apache.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+            <hyperlink description="${uiLabelMap.AccountingInvoicePDF}" target="DepositSlip.pdf" target-window="_BLANK" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="printCheck" title=" " widget-style="buttontext" use-when="${paymentGroupTypeId == 'CHECK_RUN'} @and ${groovy:org.apache.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+            <hyperlink description="${uiLabelMap.AccountingInvoicePDF}" target="printChecks.pdf" target-window="_BLANK" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext" use-when="${paymentGroupTypeId == 'BATCH_PAYMENT'} @and ${paymentGroupMemberAndTransList[0].finAccountTransStatusId != 'FINACT_TRNS_APPROVED'} @and ${groovy:org.apache.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+            <hyperlink description="${uiLabelMap.CommonCancel}" target="cancelPaymentGroup" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext" use-when="${paymentGroupTypeId == 'CHECK_RUN'} @and ${paymentGroupMemberAndTransList[0].finAccountTransStatusId != 'FINACT_TRNS_APPROVED'} @and ${groovy:org.apache.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+            <hyperlink description="${uiLabelMap.CommonCancel}" target="cancelCheckRunPayments" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+            </hyperlink>
+        </field>
+    </form>
+    
+    <form name="EditPaymentGroup" type="single" target="updatePaymentGroup" title="" default-map-name="paymentGroup">
+        <actions>
+            <entity-and entity-name="PmtGrpMembrPaymentAndFinAcctTrans" list="pmtGrpMembrPaymentAndFinAcctTransList">
+                <field-map field-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </entity-and>
+            <entity-one entity-name="FinAccount" value-field="finAccount">
+                <field-map field-name="finAccountId" from-field="pmtGrpMembrPaymentAndFinAcctTransList[0].finAccountId"/>
+            </entity-one>            
+        </actions>
+        <alt-target use-when="paymentGroup==null" target="createPaymentGroup"/>
+        <auto-fields-service service-name="updatePaymentGroup"/>
+        <field use-when="paymentGroup!=null" name="paymentGroupId"><display/></field>
+        <field use-when="paymentGroup==null @and paymentGroupId==null" name="paymentGroupId"><ignored/></field>
+        <field use-when="paymentGroup==null @and paymentGroupId!=null" name="paymentGroupId"><display description="${uiLabelMap.CommonCannotBeFound}: [${paymentGroupId}]" also-hidden="false"/></field>
+        <field name="paymentGroupId" use-when="display==true"><display/></field>
+        <field name="paymentGroupTypeId" use-when="display==true" title="${uiLabelMap.CommonType}">
+            <display-entity entity-name="PaymentGroupType"/>
+        </field>
+        <field name="paymentGroupTypeId" use-when="paymentGroup==null" title="${uiLabelMap.CommonType}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PaymentGroupType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field use-when="finAccount!=null" name="finAccountName" title="${uiLabelMap.FormFieldTitle_finAccountName}"><display description="${finAccount.finAccountName}" type="text"></display></field>
+        <field use-when="finAccount!=null" name="ownerPartyId" title="${uiLabelMap.FormFieldTitle_ownerPartyId}"><display description="${finAccount.ownerPartyId}" type="text"></display></field>
+        <field name="paymentGroupName" use-when="display==true"><display/></field>
+        <field name="submitButton" use-when="paymentGroup==null" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+        <field name="submitButton" use-when="paymentGroup!=null" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="submitButton" use-when="display==true"><hidden/></field>
+    </form>
+    
+    <!-- Payment Group Member -->
+    <form name="ListPaymentGroupMember" type="list" list-name="paymentGroupMembers" target="updatePaymentGroupMember"
+            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row" separate-columns="true" paginate-target="EditPaymentGroupMember">
+        <row-actions>
+            <entity-one entity-name="Payment" value-field="payment"/>
+            <set field="paymentTypeId" from-field="payment.paymentTypeId"/>
+            <set field="partyIdFrom" from-field="payment.partyIdFrom"/>
+            <set field="partyIdTo" from-field="payment.partyIdTo"/>
+            <set field="paymentMethodTypeId" from-field="payment.paymentMethodTypeId"/>
+            <entity-one entity-name="CreditCard" value-field="creditCard">
+                <field-map field-name="paymentMethodId" from-field="payment.paymentMethodId"/>
+            </entity-one>
+            <set field="cardType" from-field="creditCard.cardType"/>
+            <set field="amount" from-field="payment.amount" type="BigDecimal"/>
+            <set field="paymentRefNum" from-field="payment.paymentRefNum"/>
+        </row-actions>
+        <field name="paymentGroupId"><hidden/></field>
+        <field name="paymentId">
+            <hyperlink description="${paymentId}" target="paymentOverview">
+                <parameter param-name="paymentId"/>
+            </hyperlink>
+        </field>
+        <field name="paymentRefNum" title="${uiLabelMap.AccountingReferenceNumber}"><display/></field>
+        <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${lastName} ${firstName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyIdFrom}]" >
+                    <parameter param-name="partyId" from-field="partyIdFrom"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.AccountingToParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${lastName} ${firstName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyIdTo}]" >
+                    <parameter param-name="partyId" from-field="partyIdTo"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="paymentTypeId" title="${uiLabelMap.OrderPaymentType}"><display-entity entity-name="PaymentType"/></field>
+        <field name="paymentMethodTypeId" use-when="cardType!=null">
+            <display-entity entity-name="PaymentMethodType" description="${description} (${cardType})"/>
+        </field>
+        <field name="paymentMethodTypeId" use-when="cardType==null">
+            <display-entity entity-name="PaymentMethodType"/>
+        </field>
+        <field name="amount"><display currency="${payment.currencyUomId}" type="currency"/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="deleteLink" title="" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonCancel}" target="expirePaymentGroupMember" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+                <parameter param-name="paymentId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddPaymentGroupMember" type="single" target="createPaymentGroupMember">
+        <auto-fields-service service-name="createPaymentGroupMember"/>
+        <field name="paymentGroupId"><hidden/></field>
+        <field name="paymentId"><lookup target-form-name="LookupPayment"/></field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+    <form name="PaymentGroupMembers" type="list" list-name="paymentGroupMembers"
+            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="PaymentGroupOverview">
+        <row-actions>
+            <entity-one entity-name="Payment" value-field="payment"/>
+            <set field="statusId" from-field="payment.statusId"/>
+            <set field="amount" from-field="payment.amount"/>
+            <set field="paymentTypeId" from-field="payment.paymentTypeId"/>
+            <set field="partyIdFrom" from-field="payment.partyIdFrom"/>
+            <set field="partyIdTo" from-field="payment.partyIdTo"/>
+        </row-actions>
+        <field name="paymentId">
+            <hyperlink description="${paymentId}" target="paymentOverview">
+                <parameter param-name="paymentId"/>
+            </hyperlink>
+        </field>
+        <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${lastName} ${firstName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyIdFrom}]" >
+                    <parameter param-name="partyId" from-field="partyIdFrom"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.AccountingToParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${lastName} ${firstName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyIdTo}]" >
+                    <parameter param-name="partyId" from-field="partyIdTo"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="paymentTypeId" title="${uiLabelMap.OrderPaymentType}"><display-entity entity-name="PaymentType"/></field>
+        <field name="statusId" title="${uiLabelMap.AccountingPaymentStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="amount"><display also-hidden="false" type="currency" currency="${payment.currencyUomId}"/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><display/></field>
+    </form>
+</forms>

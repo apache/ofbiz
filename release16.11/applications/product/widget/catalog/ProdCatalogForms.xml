@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindCatalog" type="single" target="FindCatalog" title="" default-map-name="catalog"
+        header-row-style="header-row" default-table-style="basic-table" >
+        <field name="prodCatalogId" title="${uiLabelMap.ProdCatalogId}"><text-find/></field>
+        <field name="catalogName"><text-find/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="ListCatalog" list-name="listIt" target="" title="" type="list" paginate-target="FindCatalog"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <actions>
+            <set field="entityName" value="ProdCatalog"/>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="+catalogName"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="prodCatalogId" sort-field="true">
+            <hyperlink description="${prodCatalogId}" target="EditCatalog" also-hidden="false">
+                <parameter param-name="prodCatalogId"/>
+            </hyperlink>
+        </field>
+        
+        <field name="prodCatalogId" sort-field="true">
+            <hyperlink description="${prodCatalogId}" target="EditProdCatalog?prodCatalogId=${prodCatalogId}"></hyperlink>
+        </field>
+        <field name="catalogName" sort-field="true"><display/></field>
+        <field name="useQuickAdd" title="${uiLabelMap.ProductUseQuickAdd}" sort-field="true"><display/></field>
+    </form>
+    <form name="EditProdCatalog" type="single" target="updateProdCatalog" title="" default-map-name="prodCatalog"
+        header-row-style="header-row" default-table-style="basic-table" default-entity-name="ProdCatalog">
+
+        <alt-target use-when="prodCatalog==null" target="createProdCatalog"/>
+
+        <auto-fields-service service-name="updateProdCatalog" map-name=""/>
+
+        <field use-when="prodCatalog!=null" name="prodCatalogId" title="${uiLabelMap.ProductCatalogId}" tooltip="${uiLabelMap.ProductNotModificationRecreatingProductCatalog}."><display/></field>
+        <field use-when="prodCatalog==null&amp;&amp;prodCatalogId!=null" name="prodCatalogId" title="${uiLabelMap.ProductCatalogId}" tooltip="${uiLabelMap.ProductCouldNotFindProductCatalogWithId} [${prodCatalogId}]"><text size="20" maxlength="20"/></field>
+        <!-- this to be taken care of with auto-fields-service as soon as it uses entity field info too -->
+        <field use-when="prodCatalog==null&amp;&amp;prodCatalogId==null" name="prodCatalogId" title="${uiLabelMap.ProductCatalogId}"><text size="20" maxlength="20"/></field>
+
+        <field name="catalogName"><text size="30" maxlength="60"/></field>
+
+        <field name="useQuickAdd" title="${uiLabelMap.ProductUseQuickAdd}">
+            <drop-down allow-empty="false" no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+
+        <field name="styleSheet" title="${uiLabelMap.ProductStyleSheet}"><text size="60" maxlength="250"/></field>
+        <field name="headerLogo" title="${uiLabelMap.ProductHeaderLogo}"><text size="60" maxlength="250"/></field>
+        <field name="contentPathPrefix" title="${uiLabelMap.ProductContentPathPrefix}" tooltip="${uiLabelMap.ProductPrependedImageContentPaths}"><text size="60" maxlength="250"/></field>
+        <field name="templatePathPrefix" title="${uiLabelMap.ProductTemplatePathPrefix}"  tooltip="${uiLabelMap.ProductPrependedTemplatePaths}"><text size="60" maxlength="250"/></field>
+
+        <field name="viewAllowPermReqd" title="${uiLabelMap.ProductCategoryViewAllowPermReqd}">
+            <drop-down allow-empty="false" no-current-selected-key="N"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="purchaseAllowPermReqd" title="${uiLabelMap.ProductCategoryPurchaseAllowPermReqd}">
+            <drop-down allow-empty="false" no-current-selected-key="N"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="AddProdCatalogToParty" type="single" target="addProdCatalogToParty" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addProdCatalogToParty"/>
+        <field name="prodCatalogId" map-name="prodCatalog"><hidden/></field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><lookup target-form-name="LookupPartyName"></lookup></field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRole}">
+            <drop-down no-current-selected-key="_NA_">
+                <entity-options entity-name="RoleType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="UpdateProdCatalogToParty" type="list" target="updateProdCatalogToParty" title="" list-name="prodCatalogRoleList"
+        odd-row-style="alternate-row" default-table-style="basic-table" separate-columns="true">
+        <auto-fields-service service-name="updateProdCatalogToParty"/>
+        <field name="prodCatalogId"><hidden/></field>
+        <!-- three possibilities for the Party: person, partyGroup, neither... just print everything and if it's empty, no biggie -->
+        <field name="partyId" title="${uiLabelMap.PartyParty}">
+            <display-entity entity-name="PartyNameView" description="${personalTitle} ${firstName} ${middleName} ${lastName} ${suffix} ${groupName}" also-hidden="true" cache="false">
+                <sub-hyperlink target-type="inter-app" link-style="buttontext" target="/partymgr/control/viewprofile" description="${partyId}">
+                    <parameter param-name="party_id" from-field="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRole}"><display-entity entity-name="RoleType"/></field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDateTime}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDateTime}"></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="removeProdCatalogFromParty" also-hidden="false">
+              <parameter param-name="prodCatalogId"/>
+              <parameter param-name="partyId"/>
+              <parameter param-name="roleTypeId"/>
+              <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="CreateProductStoreCatalog" type="single" target="createProdCatalogStore" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createProductStoreCatalog"/>
+        <field name="prodCatalogId" map-name="prodCatalog"><hidden/></field>
+        <field name="productStoreId" title="${uiLabelMap.ProductStore}">
+            <drop-down>
+                <entity-options entity-name="ProductStore" description="${storeName}">
+                    <entity-order-by field-name="storeName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="UpdateProductStoreCatalog" type="list" target="updateProdCatalogStore" title="" list-name="productStoreCatalogList"
+        odd-row-style="alternate-row" default-table-style="basic-table" separate-columns="true">
+        <auto-fields-service service-name="updateProductStoreCatalog"/>
+        <field name="prodCatalogId"><hidden/></field>
+        <field name="productStoreId" title="${uiLabelMap.ProductStoreId}">
+            <display-entity entity-name="ProductStore" description="${storeName}" also-hidden="true" cache="true">
+                <sub-hyperlink link-style="buttontext" target="EditProductStore" description="${productStoreId}">
+                    <parameter param-name="productStoreId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDateTime}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDateTime}"></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteProdCatalogStore" also-hidden="false">
+              <parameter param-name="prodCatalogId"/>
+              <parameter param-name="productStoreId"/>
+              <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditProdCatalogCategories" type="list" target="updateProductCategoryToProdCatalog" title="" list-name="prodCatalogCategories"
+        odd-row-style="alternate-row" default-table-style="basic-table" paginate-target="EditProdCatalogCategories" separate-columns="true">
+        <auto-fields-service service-name="updateProductCategoryToProdCatalog"/>
+        <field name="prodCatalogId"><hidden/></field>
+        <field name="productCategoryId" title="${uiLabelMap.ProductCategoryId}">
+            <display-entity entity-name="ProductCategory" also-hidden="true" cache="true">
+                <sub-hyperlink link-style="buttontext" target="EditCategory" description="${productCategoryId}">
+                    <parameter param-name="productCategoryId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="prodCatalogCategoryTypeId" title="${uiLabelMap.ProductCatalogCategoryType}"><display-entity entity-name="ProdCatalogCategoryType" also-hidden="true" cache="true"/></field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDateTime}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDateTime}"></field>
+        <field name="sequenceNum" title="${uiLabelMap.CommonSequenceNum}"></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="removeProductCategoryFromProdCatalog" also-hidden="false">
+              <parameter param-name="prodCatalogId"/>
+              <parameter param-name="productCategoryId"/>
+              <parameter param-name="partyId"/>
+              <parameter param-name="fromDate"/>
+              <parameter param-name="prodCatalogCategoryTypeId"/>
+            </hyperlink>
+        </field>
+        <field name="makeTopLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.ProductMakeTop}" target="EditCategory" also-hidden="false">
+                <parameter param-name="CATALOG_TOP_CATEGORY" from-field="productCategoryId"/>
+                <parameter param-name="productCategoryId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="AddProductCategoryToProdCatalog" type="single" target="addProductCategoryToProdCatalog" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addProductCategoryToProdCatalog"/>
+        <field name="prodCatalogId"><hidden/></field>
+        <field name="productCategoryId" title="${uiLabelMap.ProductCategoryId}"><lookup target-form-name="LookupProductCategory"></lookup></field>
+        <field name="prodCatalogCategoryTypeId" title="${uiLabelMap.ProductCatalogCategoryType}">
+            <drop-down>
+                <entity-options entity-name="ProdCatalogCategoryType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDateTime}"/>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDateTime}"/>
+        <field name="sequenceNum" title="${uiLabelMap.CommonSequenceNum}"/>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+</forms>

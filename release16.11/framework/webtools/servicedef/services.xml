@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>OFBiz WebTools Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Entity Import Services
+         Transacitons are turned off for these services because they set transactions and timeouts inside the services with txTimeout parameter -->
+    <service name="parseEntityXmlFile" engine="java"
+            location="org.apache.ofbiz.webtools.WebToolsServices" invoke="parseEntityXmlFile" auth="true" use-transaction="false">
+        <description>Parses an entity xml file or an entity xml text</description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="url" type="java.net.URL" mode="IN" optional="true"/>
+        <attribute name="xmltext" type="String" mode="IN" optional="true" allow-html="any"/>
+        <attribute name="onlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="checkDataOnly" type="String" mode="IN" optional="true"/>
+        <attribute name="placeholderValues" type="java.util.Map" mode="IN" optional="true"/>
+        <attribute name="rowProcessed" type="Long" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityImport" engine="java"
+            location="org.apache.ofbiz.webtools.WebToolsServices" invoke="entityImport" auth="true" use-transaction="false">
+        <description>Imports an entity xml file or text string</description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="filename" type="String" mode="IN" optional="true" allow-html="any"/>
+        <attribute name="fmfilename" type="String" mode="IN" optional="true" allow-html="any"/>
+        <attribute name="fulltext" type="String" mode="IN" optional="true" allow-html="any"/>
+        <attribute name="isUrl" type="String" mode="IN" optional="true"/>
+        <attribute name="onlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="checkDataOnly" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="placeholderValues" type="java.util.Map" mode="IN" optional="true"/>
+        <attribute name="messages" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityImportDir" engine="java"
+            location="org.apache.ofbiz.webtools.WebToolsServices" invoke="entityImportDir" auth="true" use-transaction="false">
+        <description>Imports all entity xml files contained in a directory</description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="path" type="String" mode="IN" optional="true"/>
+        <attribute name="onlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="checkDataOnly" type="String" mode="IN" optional="true"/>
+        <attribute name="deleteFiles" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="filePause" type="Long" mode="IN" optional="true"/>
+        <attribute name="placeholderValues" type="java.util.Map" mode="IN" optional="true"/>
+        <attribute name="messages" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityImportReaders" engine="java"
+        location="org.apache.ofbiz.webtools.WebToolsServices" invoke="entityImportReaders" auth="true" use-transaction="false">
+        <description>Imports an entity xml file or text string</description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="readers" type="String" mode="IN" optional="true"/>
+        <attribute name="overrideDelegator" type="String" mode="IN" optional="true"/>
+        <attribute name="overrideGroup" type="String" mode="IN" optional="true"/>
+        <attribute name="onlyInserts" type="String" mode="IN" optional="true"/>
+        <attribute name="maintainTimeStamps" type="String" mode="IN" optional="true"/>
+        <attribute name="createDummyFks" type="String" mode="IN" optional="true"/>
+        <attribute name="checkDataOnly" type="String" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="messages" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="entityExportAll" engine="java"
+            location="org.apache.ofbiz.webtools.WebToolsServices" invoke="entityExportAll" auth="true" use-transaction="false">
+        <description>Exports all entities into xml files</description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="outpath" type="String" mode="IN" optional="true"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
+        <attribute name="results" type="List" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="getEntityRefData" engine="java" location="org.apache.ofbiz.webtools.WebToolsServices" invoke="getEntityRefData" auth="true" use-transaction="false">
+        <description>Gets the entity reference data - for the entity reference screen. See org.apache.ofbiz.webtools.WebToolsServices.getEntityRefData().</description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="numberOfEntities" type="java.lang.Integer" mode="OUT" optional="true"/>
+        <attribute name="packagesList" type="java.util.List" mode="OUT" optional="true"/>
+    </service>
+    <service name="exportEntityEoModelBundle" engine="java" location="org.apache.ofbiz.webtools.WebToolsServices" invoke="exportEntityEoModelBundle" auth="true" use-transaction="false">
+        <description>Saves specified set of entities to an Apple EOModelBundle file.
+            See org.apache.ofbiz.webtools.WebToolsServices.exportEoModelBundle().
+            Specify either entityPackageName or entityGroupId, or leave both empty for ALL entities in the data model.
+        </description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="eomodeldFullPath" type="java.lang.String" mode="IN" optional="false"/>
+        <attribute name="entityPackageName" type="java.lang.String" mode="IN" optional="true"/>
+        <attribute name="entityGroupId" type="java.lang.String" mode="IN" optional="true"/>
+        <attribute name="datasourceName" type="java.lang.String" mode="IN" optional="true"/>
+        <attribute name="entityNamePrefix" type="java.lang.String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="entityMaintPermCheck" engine="java" location="org.apache.ofbiz.webtools.WebToolsServices" invoke="entityMaintPermCheck">
+        <description>Performs an entity maintenance security check. Returns hasPermission=true
+          if the user has the ENTITY_MAINT permission.</description>
+        <implements service="permissionInterface"/>
+    </service>
+
+    <service name="exportServiceEoModelBundle" engine="java" location="org.apache.ofbiz.webtools.WebToolsServices" invoke="exportServiceEoModelBundle" auth="true" use-transaction="false">
+        <description>Saves service and related artifacts diagram to an Apple EOModelBundle file.
+        </description>
+        <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
+        <attribute name="eomodeldFullPath" type="java.lang.String" mode="IN" optional="false"/>
+        <attribute name="serviceName" type="java.lang.String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="saveLabelsToXmlFile" engine="java" location="org.apache.ofbiz.webtools.labelmanager.SaveLabelsToXmlFile"
+             invoke="saveLabelsToXmlFile" auth="true" use-transaction="false">
+        <description>Save labels to xml file</description>
+        <attribute name="key" type="String" mode="IN" optional="true"/>
+        <attribute name="keyComment" type="String" mode="IN" optional="true"/>
+        <attribute name="update_label" type="String" mode="IN" optional="false"/>
+        <attribute name="fileName" type="String" mode="IN" optional="false"/>
+        <attribute name="confirm" type="String" mode="IN" optional="true"/>
+        <attribute name="removeLabel" type="String" mode="IN" optional="true"/>
+        <attribute name="localeNames" type="List" mode="IN" optional="true"/>
+        <attribute name="localeValues" type="List" mode="IN" optional="true"/>
+        <attribute name="localeComments" type="List" mode="IN" optional="true"/>
+    </service>
+</services>

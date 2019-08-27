@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="OrderPurchaseReportOptions" type="single" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="productStoreId">
+            <drop-down allow-empty="false" allow-multiple="true" size="4">
+                <option key="" description="- ${uiLabelMap.CommonAny} -"/>
+                <entity-options entity-name="ProductStore" description="${storeName} [${productStoreId}]">
+                    <entity-order-by field-name="storeName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="originFacilityId">
+            <drop-down allow-empty="false" allow-multiple="true" size="4">
+                <option key="" description="- ${uiLabelMap.CommonAny} -"/>
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName} [${facilityId}]">
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="terminalId"><text size="10" maxlength="20"/></field>
+        <field name="statusId">
+            <check all-checked="false">
+                <option key="" description="- ${uiLabelMap.CommonAny} -"/>
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint value="ORDER_STATUS" name="statusTypeId"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </check>
+        </field>
+    </form>
+    <form name="OrderPurchaseProductOptions" type="single" target="OrderPurchaseReportProduct.pdf" title="" extends="OrderPurchaseReportOptions" target-window="_BLANK">
+        <field name="fromOrderDate" title="${uiLabelMap.OrderReportFromDate}"><date-time type="timestamp"/></field>
+        <field name="thruOrderDate" title="${uiLabelMap.OrderReportThruDate}"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonRun}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="OrderPurchasePaymentOptions" type="single" target="OrderPurchaseReportPayment.pdf" title="" extends="OrderPurchaseReportOptions" target-window="_BLANK">
+        <field name="orderTypeId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="OrderType">
+                    <entity-order-by field-name="orderTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromOrderDate" title="${uiLabelMap.OrderReportFromDate}"><date-time type="timestamp"/></field>
+        <field name="thruOrderDate" title="${uiLabelMap.OrderReportThruDate}"><date-time type="timestamp"/></field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonRun}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <!-- form for generating a report of total product sales (quantity and value) -->
+    <form name="SalesByStoreReport" type="single" target="SalesByStoreReport.pdf" title=""
+        header-row-style="header-row" default-table-style="basic-table" target-window="_BLANK">
+        <field name="productStoreId">
+            <drop-down allow-empty="false" allow-multiple="true" size="4">
+                <option key="" description="- ${uiLabelMap.CommonSelectAny} -"/>
+                <entity-options entity-name="ProductStore" description="${storeName} [${productStoreId}]">
+                    <entity-order-by field-name="storeName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="toPartyId" title="${uiLabelMap.AccountingToPartyId}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="orderStatusId">
+            <check all-checked="false">
+                <option key="" description="- ${uiLabelMap.CommonSelectAny} -"/>
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_STATUS"/>
+                </entity-options>
+            </check>
+        </field>
+        <field name="fromOrderDate" title="${uiLabelMap.CommonFromDate}"><date-time type="timestamp"/></field>
+        <field name="thruOrderDate" title="${uiLabelMap.CommonThruDate}"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonRun}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <!-- form for generating a report of open order items -->
+    <form name="OpenOrderItemsReport" type="single" target="OpenOrderItemsReport" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="productStoreId">
+            <drop-down allow-empty="false" allow-multiple="true" size="4">
+                <option key="" description="- ${uiLabelMap.CommonSelectAny} -"/>
+                <entity-options entity-name="ProductStore" description="${storeName} [${productStoreId}]">
+                    <entity-order-by field-name="storeName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="orderTypeId">
+            <drop-down allow-empty="false">
+                <option key="SALES_ORDER" description="${uiLabelMap.OrderSalesOrder}"/>
+                <option key="PURCHASE_ORDER" description="${uiLabelMap.OrderPurchaseOrder}"/>
+            </drop-down>
+        </field>
+        <field name="orderStatusId">
+            <check all-checked="false">
+                <option key="" description="- ${uiLabelMap.CommonSelectAny} -"/>
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusId" operator="in" value="ORDER_APPROVED,ORDER_CREATED,ORDER_HOLD"/>
+                </entity-options>
+            </check>
+        </field>
+        <field name="fromOrderDate" title="${uiLabelMap.OrderReportFromDate}"><date-time type="timestamp"/></field>
+        <field name="thruOrderDate" title="${uiLabelMap.OrderReportThruDate}"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonRun}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <!-- list open order items -->
+    <form name="OpenOrderItemsList" type="list" list-name="orderItemList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="OpenOrderItemsReport">
+        <field name="orderDate" title="${uiLabelMap.OrderDate}"><display/></field>
+        <field name="orderId" title="${uiLabelMap.OrderOrderId}" widget-style="buttontext">
+            <hyperlink description="${orderId}" target="orderview">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" title="${uiLabelMap.ProductProduct}"><display/></field>
+        <field name="itemDescription" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="quantityOrdered" title="${uiLabelMap.ProductQuantity}"><display/></field>
+        <field name="quantityIssued" title="${uiLabelMap.OrderQtyShipped}"><display/></field>
+        <field name="quantityOpen" title="${uiLabelMap.ProductOpenQuantity}"><display/></field>
+        <field name="shipAfterDate" title="${uiLabelMap.OrderShipAfterDate}"><display/></field>
+        <field name="shipBeforeDate" title="${uiLabelMap.OrderShipBeforeDate}"><display/></field>
+        <field name="comments" title="${uiLabelMap.CommonComments}"><display/></field>
+        <field name="costPrice" title="${uiLabelMap.ProductCostPrice}"><display/></field>
+        <field name="listPrice" title="${uiLabelMap.ProductListPrice}"><display/></field>
+        <field name="retailPrice" title="${uiLabelMap.ProductRetailPrice}"><display/></field>
+        <field name="discount" title="${uiLabelMap.ProductDiscount}"><display/></field>
+        <field name="calculatedMarkup" title="${uiLabelMap.OrderCalculatedMarkup}"><display/></field>
+        <field name="percentMarkup" title="${uiLabelMap.OrderPercentageMarkup}"><display/></field>
+    </form>
+
+    <form name="OpenOrderItemsTotal" type="list" list-name="totalAmountList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="total" title="${uiLabelMap.CommonTotal}"><display/></field>
+        <field name="totalQuantityOrdered"><display/></field>
+        <field name="totalQuantityOpen"><display/></field>
+        <field name="totalCostPrice"><display/></field>
+        <field name="totalListPrice"><display/></field>
+        <field name="totalRetailPrice"><display/></field>
+        <field name="totalDiscount"><display/></field>
+        <field name="totalMarkup"><display/></field>
+        <field name="totalPercentMarkup"><display/></field>
+    </form>
+
+    <!-- form for generating a report of total product purchases (quantity and value) -->
+    <form name="PurchasesByOrganizationReport" type="single" target="PurchasesByOrganizationReport.pdf" title=""
+        header-row-style="header-row" default-table-style="basic-table" target-window="_BLANK">
+        <field name="fromPartyId" title="${uiLabelMap.AccountingFromParty}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PartyRoleAndPartyDetail" key-field-name="partyId" description="${groupName} ${firstName} ${lastName} [${partyId}]">
+                    <entity-constraint name="roleTypeId" operator="equals" value="SUPPLIER"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="toPartyId" title="${uiLabelMap.AccountingToPartyId}">
+            <check all-checked="false">
+                <entity-options entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId" description="${groupName} ${firstName} ${lastName} [${partyId}]"/>
+            </check>
+        </field>
+        <field name="orderStatusId">
+            <check all-checked="false">
+                <option key="" description="- ${uiLabelMap.CommonSelectAny} -"/>
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_STATUS"/>
+                </entity-options>
+            </check>
+        </field>
+        <field name="fromOrderDate" title="${uiLabelMap.CommonFromDate}"><date-time type="timestamp"/></field>
+        <field name="thruOrderDate" title="${uiLabelMap.CommonThruDate}"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonRun}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+</forms>

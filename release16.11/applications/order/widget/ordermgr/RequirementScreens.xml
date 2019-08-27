@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="CommonRequirementDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ORDERMGR, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition><not><if-empty field="requirement"/></not></condition>
+                                    <widgets>
+                                        <include-menu name="RequirementTabBar" location="component://order/widget/ordermgr/OrderMenus.xml"/>
+                                    </widgets>
+                                </section>
+                                <container>
+                                    <label style="h1">${uiLabelMap.OrderRequirement} [${requirementId}]</label>
+                                </container>
+
+                                <decorator-section-include name="body"/>
+
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.OrderViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonRequirementsDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ORDERMGR, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="RequirementsTabBar" location="component://order/widget/ordermgr/OrderMenus.xml"/>
+                                <container>
+                                    <link target="EditRequirement" text="${uiLabelMap.OrderNewRequirement}" style="buttontext"/>
+                                </container>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.OrderViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindRequirements">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindRequirements"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="FindRequirements"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementsDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindRequirements" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListRequirements" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ApproveRequirements">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindNotApprovedRequirements"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="ApproveRequirements"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+                <script location="component://order/groovyScripts/requirement/SelectCreatedProposed.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementsDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindNotApprovedRequirements" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ApproveRequirements" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ApprovedProductRequirements">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindApprovedProductRequirements"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="ApprovedProductRequirements"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+                <set field="_rowSubmit" value="Y"/>
+                <script location="component://order/groovyScripts/requirement/ApprovedProductRequirements.groovy"/>
+        </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementsDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleFindApprovedProductRequirements}">
+                            <include-form name="FindApprovedProductRequirements" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <actions>
+                                <set field="genericLinkName" value="print"/>
+                                <set field="genericLinkText" value="${uiLabelMap.CommonPrint}"/>
+                                <set field="genericLinkTarget" value="ApprovedProductRequirementsReport"/>
+                                <set field="genericLinkStyle" value="buttontext"/>
+                                <set field="genericLinkWindow" value="reportWindow"/>
+                            </actions>
+                            <widgets>
+                                <include-screen name="genericLink" location="component://common/widget/CommonScreens.xml"/>
+                            </widgets>
+                        </section>
+                        <section>
+                            <condition>
+                                <not><if-empty field="parameters.partyId"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.OrderRequirementsList}">
+                                    <include-form name="ApprovedProductRequirements" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                                    <screenlet>
+                                        <include-form name="ApprovedProductRequirementsSummary" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                                    </screenlet>
+                                    <include-form name="ApprovedProductRequirementsSubmit" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet title="${uiLabelMap.PageTitleFindApprovedProductRequirements}">
+                                    <include-form name="ApprovedProductRequirementsList" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ApprovedProductRequirementsReport">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="pageLayoutName" value="simple-landscape"/>
+                <set field="titleProperty" value="PageTitleApprovedProductRequirements"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="ApprovedProductRequirementsList" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ApprovedProductRequirementsByVendor">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindApprovedRequirementsBySupplier"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="ApprovedProductRequirementsByVendor"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+                <script location="component://order/groovyScripts/requirement/ApprovedProductRequirementsByVendor.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementsDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleFindApprovedRequirementsBySupplier}">
+                            <include-form name="ApprovedProductRequirementsByVendor" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ApprovedProductRequirementsByVendorReport">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="pageLayoutName" value="simple-landscape"/>
+                <set field="titleProperty" value="PageTitleApprovedProductRequirementsByVendor"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="ApprovedProductRequirementsByVendor" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRequirement">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRequirement"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="EditRequirement"/>
+
+                <set field="requirementId" from-field="parameters.requirementId"/>
+                <entity-one entity-name="Requirement" value-field="requirement" auto-field-map="true"/>
+
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditRequirement}">
+                            <include-form name="EditRequirement" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListRequirementCustRequests">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListRequirementCustRequests"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="ListRequirementCustRequests"/>
+
+                <set field="requirementId" from-field="parameters.requirementId"/>
+                <entity-one entity-name="Requirement" value-field="requirement" auto-field-map="true"/>
+
+                <entity-and entity-name="RequirementCustRequest" list="requirementCustRequests">
+                    <field-map field-name="requirementId" from-field="requirementId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListRequirementCustRequests}">
+                            <include-form name="ListRequirementCustRequests" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- screen listing orders related to a given requirement -->
+    <screen name="ListRequirementOrders">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListRequirementOrders"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="ListRequirementOrdersTab"/>
+
+                <set field="requirementId" from-field="parameters.requirementId"/>
+                <entity-one entity-name="Requirement" value-field="requirement" auto-field-map="true"/>
+                <entity-and entity-name="OrderRequirementCommitment" list="orderRequirements">
+                    <field-map field-name="requirementId" from-field="requirementId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListRequirementOrders}">
+                            <include-form name="ListRequirementOrders" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- screen listing orders related to a given requirement -->
+    <screen name="ListRequirementRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListRequirementRoles"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="ListRequirementRolesTab"/>
+
+                <set field="requirementId" from-field="parameters.requirementId"/>
+                <entity-one entity-name="Requirement" value-field="requirement" auto-field-map="true"/>
+                <entity-and entity-name="RequirementRole" list="requirementRoles">
+                    <field-map field-name="requirementId" from-field="requirementId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListRequirementRoles}">
+                            <container>
+                                <link target="EditRequirementRole" text="${uiLabelMap.CommonNew}" style="buttontext">
+                                    <parameter param-name="requirementId"/>
+                                </link>
+                                <link target="autoAssignRequirementToSupplier" text="${uiLabelMap.OrderAutoAssign}" style="buttontext">
+                                    <parameter param-name="requirementId"/>
+                                </link>
+                            </container>
+                            <include-form name="ListRequirementRoles" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                        </screenlet>
+                   </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRequirementRole">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRequirementRole"/>
+                <set field="headerItem" value="requirement"/>
+                <set field="tabButtonItem" value="ListRequirementRolesTab"/>
+                <set field="requirementId" from-field="parameters.requirementId"/>
+                <entity-one entity-name="Requirement" value-field="requirement" auto-field-map="true"/>
+                <entity-one entity-name="RequirementRole" value-field="requirementRole" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequirementDecorator" location="${parameters.commonRequirementsDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditRequirementRole}">
+                            <include-form name="EditRequirementRole" location="component://order/widget/ordermgr/RequirementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

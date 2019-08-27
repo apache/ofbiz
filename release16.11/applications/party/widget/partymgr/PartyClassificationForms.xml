@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="ListPartyClassifications" type="list" target="updatePartyClassification"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+        <entity-and entity-name="PartyClassification">
+            <field-map field-name="partyId"/>
+        </entity-and>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><display/></field>
+        <field name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}">
+            <display-entity entity-name="PartyClassificationGroup" key-field-name="partyClassificationGroupId" description="${description} [${partyClassificationGroupId}]"/>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
+        <field name="deleteLink" title=" " widget-style="smallSubmit">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePartyClassification" also-hidden="false">
+                <parameter param-name="partyClassificationGroupId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="ListPartyClassificationGroups" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="PartyClassificationGroup"/>
+        </actions>
+        <field name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}" widget-style="buttontext">
+            <hyperlink description="${partyClassificationGroupId}" target="EditPartyClassificationGroup" also-hidden="false">
+                <parameter param-name="partyClassificationGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="partyClassificationTypeId">
+            <display-entity entity-name="PartyClassificationType" key-field-name="partyClassificationTypeId"/>
+        </field>
+        <field name="parentGroupId"><display/></field>
+        <field name="description" title=" "><display/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePartyClassificationGroup" also-hidden="false">
+                <parameter param-name="partyClassificationGroupId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditPartyClassificationGroup" type="single" target="updatePartyClassificationGroup" default-map-name="partyClassificationGroup"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="partyClassificationGroup==null" target="createPartyClassificationGroup"/>
+        <field use-when="partyClassificationGroup!=null" name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}"><display/></field>
+        <field use-when="partyClassificationGroup==null&amp;&amp;partyClassificationGroupId==null" name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}"><ignored/></field>
+        <field use-when="partyClassificationGroup==null&amp;&amp;partyClassificationGroupId!=null" name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${partyClassificationGroupId}]"><display/></field>
+        <field name="partyClassificationTypeId">
+            <drop-down>
+                <entity-options entity-name="PartyClassificationType" key-field-name="partyClassificationTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="parentGroupId"><lookup target-form-name="LookupPartyClassificationGroup"/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><text size="55"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext"><submit button-type="text-link"/></field>
+    </form>
+
+    <form name="AddPartyClassification" type="single" target="createPartyClassification" default-map-name="partyClassification"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><display/></field>
+        <field name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}">
+            <drop-down>
+                <entity-options entity-name="PartyClassificationGroup" key-field-name="partyClassificationGroupId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}" required-field="true"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
+        <!-- <field name="cancelLink" title=" " widget-style="smallSubmit">
+            <hyperlink description="${uiLabelMap.CommonCancelDone}" target="${donePage}" also-hidden="false">
+                <parameter param-name="segmentGroupId"/>
+            </hyperlink>
+        </field> -->
+    </form>
+
+    <form name="AddPartyClassificationParty" type="single" target="createPartyClassificationParty" default-map-name="partyClassification"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}">
+            <display-entity entity-name="PartyClassificationGroup" key-field-name="partyClassificationGroupId"/>
+        </field>
+        <field name="partyId"  title="${uiLabelMap.PartyPartyId}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><date-time/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
+        <!-- <field name="cancelLink" title=" " widget-style="smallSubmit">
+            <hyperlink description="${uiLabelMap.CommonCancelDone}" target="${donePage}" also-hidden="false">
+                <parameter param-name="segmentGroupId"/>
+            </hyperlink>
+        </field> -->
+    </form>
+
+    <form name="ListPartyClassificationGroupParties" type="list" target="updatePartyClassificationParty"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="PartyClassification">
+                <field-map field-name="partyClassificationGroupId"/>
+            </entity-and>
+        </actions>
+        <field name="partyClassificationGroupId" title="${uiLabelMap.PartyClassificationGroupId}">
+            <display-entity entity-name="PartyClassificationGroup" key-field-name="partyClassificationGroupId" description="${description} [${partyClassificationGroupId}]"/>
+        </field>
+        <field name="partyId" title="${uiLabelMap.Party}">
+           <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${lastName} ${groupName}">
+                   <sub-hyperlink target="viewprofile" description="${partyId}" link-style="smallSubmit">
+                <parameter param-name="partyId"/>
+            </sub-hyperlink>
+           </display-entity>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="smallSubmit"><submit button-type="text-link"/></field>
+        <field name="deleteLink" title=" " widget-style="smallSubmit">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePartyClassification" also-hidden="false">
+                <parameter param-name="partyClassificationGroupId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+</forms>

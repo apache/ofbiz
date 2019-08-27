@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindPayGrades" type="single" target="FindPayGrades" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createPayGrade" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="payGradeId"><lookup target-form-name="LookupPayGrade"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListPayGrades" type="list" list-name="listIt" title="" target="updatePayGrade" paginate-target="FindPayGrade"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="payGradeCtx"/>
+                <field-map field-name="entityName" value="PayGrade"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-service default-field-type="display" service-name="updatePayGrade"/>
+        <field name="payGradeId" title="${uiLabelMap.HumanResPayGradeID}" widget-style="linktext">
+            <hyperlink also-hidden="true" target="EditPayGrade" target-type="plain" description="${payGradeId}">
+                <parameter param-name="payGradeId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePayGrade" also-hidden="false">
+                <parameter param-name="payGradeId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditPayGrade" type="single" target="updatePayGrade" title=""
+        header-row-style="header-row" default-table-style="basic-table" default-map-name="payGrade">
+        <alt-target use-when="payGradeId==null" target="createPayGrade"/>
+        <auto-fields-service service-name="updatePayGrade"/>
+        <field use-when="payGrade!=null" name="payGradeId"><display/></field>
+        <field use-when="payGrade==null" name="payGradeId"><text/></field>
+        <field name="payGradeName" required-field="true"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" use-when="payGrade!=null" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListSalarySteps" type="multi" target="updateSalaryStep?salaryStepSeqId=${salaryStepSeqId}&amp;payGradeId=${payGradeId}" paginate-target="findSalarySteps"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <actions>
+            <entity-one entity-name="SalaryStep" auto-field-map="true"/>
+            <entity-condition entity-name="SalaryStep"> <condition-expr field-name="payGradeId" operator="equals" from-field="payGradeId"/><order-by field-name="salaryStepSeqId"/></entity-condition>
+        </actions>
+        <auto-fields-service service-name="updateSalaryStep"/>
+        <field name="salaryStepSeqId" title="${uiLabelMap.HumanResSalaryStepSeqId}"><display also-hidden="true"/></field>
+        <field name="payGradeId"><hidden/></field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><hidden value="Y"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteSalaryStep">
+                <parameter param-name="salaryStepSeqId"/>
+                <parameter param-name="payGradeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddSalaryStep" type="single" target="createSalaryStep"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createSalaryStep"/>
+        <field name="salaryStepSeqId"><ignored/></field>
+        <field name="payGradeId"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+</forms>

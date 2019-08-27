@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<!--
+This file contains basic services for SalesOpportunity and SalesForecast.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <simple-method method-name="createSalesForecast" short-description="Creates a sales forecast and stores a copy in sales forecast history.">
+
+        <!-- make the value and set the fields from the parameters -->
+        <make-value value-field="salesForecast" entity-name="SalesForecast"/>
+        <sequenced-id sequence-name="SalesForecast" field="salesForecastId"/>
+        <set field="salesForecast.salesForecastId" from-field="salesForecastId"/>
+        <set-nonpk-fields map="parameters" value-field="salesForecast"/>
+
+        <!-- set the creation info -->
+        <set field="salesForecast.createdByUserLoginId" from-field="userLogin.userLoginId"/>
+        <set field="salesForecast.modifiedByUserLoginId" from-field="userLogin.userLoginId"/>
+
+        <!-- create the value -->
+        <create-value value-field="salesForecast"/>
+
+        <!-- save a copy to history -->
+        <call-simple-method method-name="saveSalesForecastHistory"/>
+
+        <!-- return the ID -->
+        <field-to-result field="salesForecastId" result-name="salesForecastId"/>
+    </simple-method>
+
+    <simple-method method-name="updateSalesForecast" short-description="Updates a sales forecast and stores a copy in sales forecast history.">
+
+        <!-- get the forecast -->
+        <entity-one entity-name="SalesForecast" auto-field-map="true" value-field="salesForecast"/>
+
+        <!-- set the fields from the parameters -->
+        <set-nonpk-fields map="parameters" value-field="salesForecast"/>
+
+        <!-- store the value -->
+        <store-value value-field="salesForecast"/>
+
+        <!-- save a copy to history -->
+        <call-simple-method method-name="saveSalesForecastHistory"/>
+    </simple-method>
+
+    <simple-method method-name="saveSalesForecastHistory" short-description="Given a salesForecast map, saves the data in the history.">
+
+        <!-- make the value and set the fields from the salesForecast map -->
+        <make-value value-field="salesForecastHistory" entity-name="SalesForecastHistory"/>
+        <sequenced-id sequence-name="SalesForecastHistory" field="salesForecastHistoryId"/>
+        <set field="salesForecastHistory.salesForecastHistoryId" from-field="salesForecastHistoryId"/>
+        <set-nonpk-fields map="salesForecast" value-field="salesForecastHistory"/>
+
+        <!-- get the change note from the parameters -->
+        <set field="salesForecastHistory.changeNote" from-field="parameters.changeNote"/>
+
+        <!-- set the modified info -->
+        <now-timestamp field="nowTimestamp"/>
+        <set field="salesForecastHistory.modifiedTimestamp" from-field="nowTimestamp"/>
+        <set field="salesForecast.modifiedByUserLoginId" from-field="userLogin.userLoginId"/>
+
+        <!-- create the value -->
+        <create-value value-field="salesForecastHistory"/>
+    </simple-method>
+
+    <simple-method method-name="updateSalesOpportunity" short-description="Update an Sales opportunity">
+        <entity-one entity-name="SalesOpportunity" value-field="lookedUpValue"/>
+        <if-compare field="parameters.opportunityStageId" operator="equals" value="SOSTG_CLOSED">
+            <if-empty field="parameters.estimatedCloseDate">
+                <now-timestamp field="nowTimestamp"/>
+                <call-class-method class-name="org.apache.ofbiz.base.util.UtilDateTime" method-name="getDayStart" ret-field="parameters.estimatedCloseDate">
+                    <field field="nowTimestamp" type="java.sql.Timestamp"/>
+                </call-class-method>
+            </if-empty>
+        </if-compare>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="createSalesOpportunityAccountRole" short-description="Create Sales Opportunity Account Role">
+        <entity-and entity-name="SalesOpportunityRole" list="salesOpportunityRoles">
+            <field-map field-name="salesOpportunityId" from-field="parameters.salesOpportunityId"/>
+            <field-map field-name="roleTypeId" value="ACCOUNT"/>
+        </entity-and>
+        <first-from-list entry="lookedUpValue" list="salesOpportunityRoles"/>
+        <if-compare-field field="lookedUpValue.partyId" operator="not-equals" to-field="parameters.accountPartyId">
+            <if-not-empty field="lookedUpValue">
+                <remove-value value-field="lookedUpValue"/>
+            </if-not-empty>
+            <!-- Check party role for create Account Role -->
+            <if-not-empty field="parameters.accountPartyId">
+            <set field="salesOpportunityRole.roleTypeId" value="ACCOUNT"/>
+            <set field="salesOpportunityRole.partyId" from-field="parameters.accountPartyId"/>
+                <call-service service-name="ensurePartyRole" in-map-name="salesOpportunityRole"/>
+            </if-not-empty>
+            <set field="salesOpportunityRole.salesOpportunityId" from-field="parameters.salesOpportunityId"/>
+            <call-service service-name="createSalesOpportunityRole" in-map-name="salesOpportunityRole"/>
+        </if-compare-field>
+    </simple-method>
+    <simple-method method-name="createSalesOpportunityLeadRole" short-description="Create Sales Opportunity Lead Role">
+        <entity-and entity-name="SalesOpportunityRole" list="salesOpportunityRoles">
+            <field-map field-name="salesOpportunityId" from-field="parameters.salesOpportunityId"/>
+            <field-map field-name="roleTypeId" value="LEAD"/>
+        </entity-and>
+        <first-from-list entry="lookedUpValue" list="salesOpportunityRoles"/>
+        <if-compare-field field="lookedUpValue.partyId" operator="not-equals" to-field="parameters.leadPartyId">
+            <if-not-empty field="lookedUpValue">
+                <remove-value value-field="lookedUpValue"/>
+            </if-not-empty>
+            <!-- Check party role for create Lead Role -->
+            <set field="salesOpportunityRole.roleTypeId" value="LEAD"/>
+            <set field="salesOpportunityRole.partyId" from-field="parameters.leadPartyId"/>
+            <call-service service-name="ensurePartyRole" in-map-name="salesOpportunityRole"/>
+            <set field="salesOpportunityRole.salesOpportunityId" from-field="parameters.salesOpportunityId"/>
+            <call-service service-name="createSalesOpportunityRole" in-map-name="salesOpportunityRole"/>
+        </if-compare-field>
+    </simple-method>
+    <simple-method method-name="findPartyInSalesOpportunityRole" short-description="find party in role specified by in parameter">
+        <entity-and entity-name="SalesOpportunityRole" list="salesOpportunityRoles">
+            <field-map field-name="roleTypeId" from-field="parameters.roleTypeId"/>
+            <field-map field-name="salesOpportunityId" from-field="parameters.salesOpportunityId"/>
+        </entity-and>
+        <first-from-list list="salesOpportunityRoles" entry="lookedUpValue"/>
+        <field-to-result field="lookedUpValue.partyId" result-name="partyId"/>
+    </simple-method>
+</simple-methods>

@@ -1,0 +1,757 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="FindRequest">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderFindRequests"/>
+                <set field="headerItem" value="request"/>
+                <set field="entityName" value="CustRequest"/>
+                <set field="asm_multipleSelectForm" value="FindRequests"/>
+                <set field="asm_asmListItemPercentOfForm" value="110"/>
+                <set field="custRequestType.asm_multipleSelect"  value="FindRequests_custRequestTypeId"/>
+                <set field="custRequestType.asm_sortable" value="true"/>
+                <set field="custRequestType.asm_title" value=" "/>
+                <set field="statusId.asm_multipleSelect"  value="FindRequests_statusId"/>
+                <set field="statusId.asm_sortable" value="true"/>
+                <set field="statusId.asm_title" value=" "/>
+                <set field="productStoreId.asm_multipleSelect"  value="FindRequests_productStoreId"/>
+                <set field="productStoreId.asm_sortable" value="true"/>
+                <set field="productStoreId.asm_title" value=" "/>
+                <set field="salesChannelEnumId.asm_multipleSelect"  value="FindRequests_salesChannelEnumId"/>
+                <set field="salesChannelEnumId.asm_sortable" value="true"/>
+                <set field="salesChannelEnumId.asm_title" value=" "/>
+                <set field="asm_listField[]" from-field="custRequestType"/>
+                <set field="asm_listField[]" from-field="statusId"/>
+                <set field="asm_listField[]" from-field="productStoreId"/>
+                <set field="asm_listField[]" from-field="salesChannelEnumId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link target="request" text="${uiLabelMap.OrderNewRequest}" style="buttontext create"/>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <platform-specific><html><html-template location="component://common/template/includes/SetMultipleSelectJsList.ftl"/></html></platform-specific>
+                                <include-form name="FindRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+    
+    <screen name="ViewCustRequest">
+        <section>
+            <actions>
+                <set field="custRequestId" from-field="parameters.custRequestId" default-value="${parameters.id}"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <get-related-one value-field="custRequest" relation-name="CustRequestType" to-value-field="custRequestType"/>
+                <get-related-one value-field="custRequest" relation-name="StatusItem" to-value-field="statusItem"/>
+                <get-related-one value-field="custRequest" relation-name="CurrencyUom" to-value-field="currency"/>
+                <get-related-one value-field="custRequest" relation-name="ProductStore" to-value-field="store"/>
+                <get-related-one value-field="custRequest" relation-name="FulfillContactMech" to-value-field="fulfillContactMech"/>
+                <entity-and entity-name="CustRequestAndWorkEffort" list="requestWorkEfforts">
+                    <field-map field-name="custRequestId" from-field="parameters.custRequestId"/>
+                </entity-and>
+                <get-related value-field="custRequest" relation-name="CustRequestParty" list="requestParties"/>
+                <set field="orderBy[]" value="sequenceNum"/>
+                <get-related value-field="custRequest" relation-name="CustRequestItem" list="custRequestItems" order-by-list="orderBy"/>
+                <entity-and entity-name="CommunicationEventAndCustRequest" list="commEvents">
+                    <field-map field-name="custRequestId" from-field="parameters.custRequestId"/>
+                </entity-and>
+                <entity-and entity-name="CustRequestItemNoteView" list="notes">
+                    <field-map field-name="custRequestId" from-field="parameters.custRequestId"/>
+                    <order-by  field-name="custRequestItemSeqId"/>
+                </entity-and>
+                <entity-and entity-name="CustRequestContent" list="custRequestContents" filter-by-date="true">
+                    <field-map field-name="custRequestId" from-field="custRequestId"/>
+                </entity-and>
+                <entity-condition entity-name="CustRequestAndContent" list="custRequestAndContents">
+                    <condition-list combine="and">
+                        <condition-expr field-name="custRequestId" from-field="custRequestId"/>
+                        <condition-expr field-name="fromDate" operator="less-equals" from-field="nowTimestamp"/>                        
+                        <condition-list combine="or">
+                            <condition-expr field-name="thruDate" operator="greater-equals" from-field="nowTimestamp"/>
+                            <condition-expr field-name="thruDate" from-field="null"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
+                <entity-and entity-name="CustRequestItemNoteView" list="notes">
+                    <field-map field-name="custRequestId" from-field="custRequestId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <container style="lefthalf">
+                    <screenlet title="${uiLabelMap.OrderRequest} ${custRequest.custRequestId} ${uiLabelMap.CommonInformation}">
+                        <include-form name="RequestInfo" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </screenlet>
+                    <screenlet title="${uiLabelMap.OrderRequestRoles}">
+                        <include-form name="ViewRequestRoles" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </screenlet>
+                </container>
+                <container style="righthalf">
+                    <screenlet title="${uiLabelMap.OrderCustRequestStatusList}" navigation-form-name="ViewRequest">
+                        <include-form name="ViewRequestStatus" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </screenlet>
+                    <platform-specific>
+                        <html><html-template location="component://order/template/request/RequestContactMech.ftl"/></html>
+                    </platform-specific>
+                    <screenlet title="${uiLabelMap.PartyListCommunicationEvents}" navigation-form-name="ViewRequest">
+                        <include-form name="ViewRequestCommunicationEvents" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </screenlet>
+                    <screenlet title="${uiLabelMap.WorkEffortWorkEfforts}" navigation-form-name="ViewRequest">
+                        <include-form name="ViewRequestWorkEfforts" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </screenlet>
+                    <screenlet title="${uiLabelMap.CommonContent}" navigation-form-name="ViewRequest">
+                        <include-form name="ListCustRequestContent" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </screenlet>
+                </container>
+                <container style="clear"/>
+                <screenlet title="${uiLabelMap.PageTitleRequestItems}">
+                    <include-form name="OverviewRequestItems" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                </screenlet>
+                <screenlet title="${uiLabelMap.PageTitleRequestItemNotes}">
+                    <include-form name="ListRequestItemNotes" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewRequest">
+        <section>
+            <actions>
+                <set field="MainColumnStyle" value="rightonly"/>
+                <set field="tabButtonItem" value="ViewRequest"/>
+                <set field="headerItem" value="request"/>
+                <set field="titleProperty" value="PageTitleViewRequest"/>
+                <set field="showRequestManagementLinks" value="Y"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-screen name="ViewCustRequest"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRequest">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderRequest"/>
+                <set field="tabButtonItem" value="editRequest"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <set field="statusId" from-field="custRequest.statusId"/>
+                <entity-one entity-name="StatusItem" value-field="currentStatus"/>
+                <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.OrderRequest}">
+                            <section>
+                                <condition>
+                                    <if-compare field="parameters.small" operator="equals" value="Y"/>
+                                </condition>
+                                <widgets>
+                                    <include-form name="EditSmallCustRequest" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                                </widgets>
+                                <fail-widgets>
+                                    <include-form name="EditCustRequest" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                                </fail-widgets>
+                            </section>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRequestCustomer">
+        <section>
+            <actions>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <set field="statusId" from-field="custRequest.statusId"/>
+                <entity-one entity-name="StatusItem" value-field="currentStatus"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.OrderRequest}">
+                            <include-form name="EditRequestCustomer" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="RequestRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleRequestRoles"/>
+                <set field="tabButtonItem" value="requestroles"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-and entity-name="CustRequestParty" list="custRequestParties">
+                    <field-map field-name="custRequestId" from-field="custRequestId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="EditRequestRolePanel" title="${uiLabelMap.PageTitleEditRequestRoles}" collapsible="true">
+                            <include-form name="EditRequestRole" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListRequestRoles" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="RequestItems">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleRequestItems"/>
+                <set field="tabButtonItem" value="requestitems"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-and entity-name="CustRequestItem" list="custRequestItems">
+                    <field-map field-name="custRequestId" from-field="custRequestId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="custRequestItemSeqId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleRequestItems}">
+                            <link target="requestitem" text="${uiLabelMap.OrderNewRequestItem}" style="buttontext">
+                                <parameter param-name="custRequestId"/>
+                            </link>
+                            <include-form name="ListRequestItems" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRequestItem">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRequestItem"/>
+                <set field="tabButtonItem" value="requestitem"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <set field="custRequestItemSeqId" from-field="parameters.custRequestItemSeqId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+                <set field="statusId" from-field="custRequestItem.statusId"/>
+                <entity-one entity-name="StatusItem" value-field="currentStatus"/>
+                <script location="component://order/groovyScripts/request/GetNextSequenceNum.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.CommonId}:${custRequestItem.custRequestItemSeqId} ${custRequestItem.description}">
+                            <container>
+                                <link target="requestitem" text="${uiLabelMap.OrderNewRequestItem}" style="buttontext">
+                                    <parameter param-name="custRequestId"/>
+                                </link>
+                            </container>
+                            <include-form name="EditCustRequestItem" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                            <platform-specific>
+                                <html><html-template location="component://order/template/request/CopyRequestItem.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="RequestItemNotes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleRequestItemNotes"/>
+                <set field="tabButtonItem" value="requestitemnotes"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <set field="custRequestItemSeqId" from-field="parameters.custRequestItemSeqId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+                <script location="component://order/groovyScripts/request/RequestItemNotes.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.CommonId}:${custRequestItem.custRequestItemSeqId} ${custRequestItem.description}">
+                            <platform-specific>
+                                <html><html-template location="component://order/template/request/RequestItemNotes.ftl"/></html>
+                            </platform-specific>
+                            <include-form name="ListRequestItemNotes" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                            <include-form name="EditRequestItemNote" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="RequestItemRequirements">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleRequestItemRequirements"/>
+                <set field="tabButtonItem" value="requestitemrequirements"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <set field="custRequestItemSeqId" from-field="parameters.custRequestItemSeqId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+                <entity-and entity-name="RequirementCustRequestView" list="custRequestRequirements">
+                    <field-map field-name="custRequestId" from-field="custRequestItem.custRequestId"/>
+                    <field-map field-name="custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.CommonId}:${custRequestItem.custRequestItemSeqId} ${custRequestItem.description}">
+                            <container>
+                                <link target="EditRequirement" text="${uiLabelMap.OrderNewRequirement}" style="buttontext">
+                                    <parameter param-name="custRequestId" from-field="custRequestItem.custRequestId"/>
+                                    <parameter param-name="custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+                                </link>
+                            </container>
+                            <include-form name="ListRequestItemRequirements" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                   </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="RequestItemQuotes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleRequestItemQuotes"/>
+                <set field="tabButtonItem" value="requestitemquotes"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <set field="custRequestItemSeqId" from-field="parameters.custRequestItemSeqId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+                <entity-and entity-name="QuoteItem" list="quotes">
+                    <field-map field-name="custRequestId" from-field="custRequestItem.custRequestId"/>
+                    <field-map field-name="custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+                </entity-and>
+                <script location="component://order/groovyScripts/request/SetRequestQuote.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.CommonId}:${custRequestItem.custRequestItemSeqId} ${custRequestItem.description}">
+                            <platform-specific>
+                                <html><html-template location="component://order/template/request/QuoteLinks.ftl"/></html>
+                            </platform-specific>
+                            <include-form name="ListRequestQuoteItems" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditQuoteItemForRequest">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditQuoteItemForCustRequest"/>
+                <set field="tabButtonItem" value="requestitemquotes"/>
+                <set field="headerItem" value="request"/>
+
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <set field="custRequestItemSeqId" from-field="parameters.custRequestItemSeqId"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <set field="quoteItemSeqId" from-field="parameters.quoteItemSeqId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+                <entity-one entity-name="QuoteItem" value-field="quoteItem"/>
+                <set field="parameters.quantity" from-field="custRequestItem.quantity"/>
+                <set field="parameters.selectedAmount" from-field="custRequestItem.selectedAmount"/>
+                <set field="parameters.comments" from-field="custRequestItem.story"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.CommonId}:${custRequestItem.custRequestItemSeqId} ${custRequestItem.description}">
+                            <include-form name="EditQuoteItemForRequest" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CreateQuoteAndQuoteItemForRequest">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleCreateQuoteForCustRequest"/>
+                <set field="tabButtonItem" value="requestitemquotes"/>
+                <set field="headerItem" value="request"/>
+
+                <set field="custRequestId"  from-field="parameters.custRequestId"/>
+                <set field="custRequestItemSeqId" from-field="parameters.custRequestItemSeqId"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <set field="quoteItemSeqId" from-field="parameters.quoteItemSeqId"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+                <entity-one entity-name="QuoteItem" value-field="quoteItem"/>
+                <set field="parameters.quantity" from-field="custRequestItem.quantity"/>
+                <set field="parameters.selectedAmount" from-field="custRequestItem.selectedAmount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.CommonId}:${custRequestItem.custRequestItemSeqId} ${custRequestItem.description}">
+                            <include-form name="CreateQuoteAndQuoteItemForRequest" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditRequestItemWorkEfforts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRequestItemWorkEffort"/>
+                <set field="tabButtonItem" value="task"/>
+                <set field="headerItem" value="request"/>
+
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <set field="custRequestItemSeqId" from-field="parameters.custRequestItemSeqId"/>
+
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+                <entity-and entity-name="CustRequestItemWorkEffort" list="custRequestItemWorkEffortList">
+                    <field-map field-name="custRequestId"/>
+                    <field-map field-name="custRequestItemSeqId"/>
+                    <order-by field-name="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddCustRequestItemWorkEffortPanel" title="${uiLabelMap.CommonId}:${custRequestItem.custRequestItemSeqId} ${custRequestItem.description}" collapsible="true">
+                            <link  target="EditRequestItem" text="${uiLabelMap.OrderNewRequestItem}" style="buttontext">
+                                <parameter param-name="custRequestId"/>
+                            </link>
+                            <include-form name="AddCustRequestItemWorkEffort" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListCustRequestItemWorkEfforts" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewRequestItemInfo">
+        <section>
+            <condition>
+                <not><if-empty field="requestItems"/></not>
+            </condition>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://order/template/request/ViewRequestItemInfo.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditCustRequestContent">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRequestContent"/>
+                <set field="tabButtonItem" value="custRequestContent"/>
+                <set field="headerItem" value="request"/>
+                <set field="custRequestId" from-field="parameters.custRequestId"/>
+                <entity-condition entity-name="CustRequestAndContent" list="custRequestAndContents">
+                    <condition-list combine="and">
+                        <condition-expr field-name="custRequestId" from-field="custRequestId"/>
+                        <condition-expr field-name="fromDate" operator="less-equals" from-field="nowTimestamp"/>                        
+                        <condition-list combine="or">
+                            <condition-expr field-name="thruDate" operator="greater-equals" from-field="nowTimestamp"/>
+                            <condition-expr field-name="thruDate" from-field="null"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddCustRequestContentsPanel" title="${uiLabelMap.PageTitleAddContent}" collapsible="true">
+                            <include-form name="AddCustRequestContent" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListCustRequestContent" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="IncomingCustRequests">
+        <section>
+            <actions>
+                <set field="custRequestSortField" from-field="parameters.custRequestSortField" default-value="-custRequestDate"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <entity-condition entity-name="CustReqAndTypeAndPartyRel" list="custRequests">
+                    <condition-list combine="and">
+                        <condition-expr field-name="statusId" operator="equals" value="CRQ_SUBMITTED"/>
+                        <condition-list combine="and">
+                            <condition-expr field-name="roleTypeIdTo" operator="equals" value="REQ_TAKER"/>
+                            <condition-expr field-name="partyIdTo" operator="equals" from-field="userLogin.partyId"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="${custRequestSortField}"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <not><if-empty field="custRequests"/></not>
+                    </condition>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.OrderIncomingCustRequests}" navigation-menu-name="RequestScreenletMenu">
+                            <include-menu name="RequestScreenletMenu" location="component://order/widget/ordermgr/OrderMenus.xml"/>
+                            <include-form name="ListRequestList" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <!-- list customer requests to the customer portlet -->
+    <screen name="ListCustRequests">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="fromPartyId" from-field="userLogin.partyId"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-compare field="otherContacts" operator="equals" value="Y"/>
+                    </condition>
+                    <actions>
+                        <script location="component://party/groovyScripts/party/GetMyCompany.groovy"/>
+                        <set field="fromPartyId" from-field=""/>
+                        <set field="notFromPartyId" from-field="userLogin.partyId"/>
+                        <set field="screenletTitle" from-field="uiLabelMap.OrderOpenCompanyCustomerRequests"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="statusGroup" operator="equals" value="OPEN"/>
+                    </condition>
+                    <actions>
+                        <set field="screenletTitle" from-field="uiLabelMap.OrderOpenMyCustomerRequests"/>
+                        <entity-condition entity-name="CustRequestInfoAndWorkEffortAndPartyRel" list="custRequests">
+                            <condition-list combine="and">
+                                <condition-expr field-name="partyIdFrom" operator="equals" from-field="myCompanyId" ignore-if-empty="true"/>
+                                <condition-expr field-name="fromPartyId" operator="equals" from-field="fromPartyId" ignore-if-empty="true"/>
+                                <condition-expr field-name="fromPartyId" operator="not-equals" from-field="notFromPartyId" ignore-if-empty="true"/>
+                                <condition-list combine="or">
+                                    <condition-expr field-name="statusId" operator="equals" value="CRQ_SUBMITTED"/>
+                                    <condition-expr field-name="statusId" operator="equals" value="CRQ_REVIEWED"/>
+                                    <condition-expr field-name="statusId" operator="equals" value="CRQ_ACCEPTED"/>
+                                </condition-list>
+                            </condition-list>
+                            <order-by field-name="+priority"/>
+                            <order-by field-name="+custRequestDate"/>
+                        </entity-condition>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="statusGroup" operator="equals" value="COMPLETED"/>
+                    </condition>
+                    <actions>
+                        <set field="screenletTitle" from-field="uiLabelMap.OrderCompletedMyCustomerRequests"/>
+                        <entity-condition entity-name="CustRequestInfoAndWorkEffortAndPartyRel" list="custRequests">
+                            <condition-list combine="and">
+                                <condition-expr field-name="partyIdFrom" operator="equals" from-field="myCompanyId" ignore-if-empty="true"/>
+                                <condition-expr field-name="fromPartyId" operator="equals" from-field="fromPartyId" ignore-if-empty="true"/>
+                                <condition-expr field-name="fromPartyId" operator="not-equals" from-field="notFromPartyId" ignore-if-empty="true"/>
+                                <condition-expr field-name="statusId" operator="equals" value="CRQ_COMPLETED"/>
+                            </condition-list>
+                            <order-by field-name="-custRequestDate"/>
+                        </entity-condition>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="statusGroup" operator="equals" value="CANCELLED"/>
+                    </condition>
+                    <actions>
+                        <set field="screenletTitle" from-field="uiLabelMap.OrderCancelledMyCustomerRequests"/>
+                        <entity-condition entity-name="CustRequestInfoAndWorkEffortAndPartyRel" list="custRequests">
+                            <condition-list combine="and">
+                                <condition-expr field-name="partyIdFrom" operator="equals" from-field="myCompanyId" ignore-if-null="true"/>
+                                <condition-expr field-name="fromPartyId" operator="equals" from-field="fromPartyId" ignore-if-empty="true"/>
+                                <condition-expr field-name="fromPartyId" operator="not-equals" from-field="notFromPartyId" ignore-if-empty="true"/>
+                                <condition-list combine="or">
+                                    <condition-expr field-name="statusId" operator="equals" value="CRQ_REJECTED"/>
+                                    <condition-expr field-name="statusId" operator="equals" value="CRQ_CANCELLED"/>
+                                </condition-list>
+                            </condition-list>
+                            <order-by field-name="-custRequestDate"/>
+                        </entity-condition>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="otherContacts" operator="not-equals" value="Y"/>
+                    </condition>
+                    <widgets>
+                        <screenlet title="${screenletTitle} ${fromPartyId}" navigation-form-name="ListCustRequests">
+                            <section>
+                                <condition>
+                                    <if-compare field="statusGroup" operator="equals" value="OPEN"/>
+                                </condition>
+                                <widgets>
+                                    <link target="EditRequestCustomer" text="${uiLabelMap.OrderNewRequest}" style="buttontext"/>
+                                </widgets>
+                            </section>
+                            <include-form name="ListMyCustRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                        </screenlet>
+                    </widgets>
+                    <fail-widgets>
+                        <section><!-- only show open requests from other people in the company if there are any to show -->
+                            <condition>
+                                <not><if-empty field="custRequests"/></not>
+                            </condition>
+                            <actions>
+                                <set field="screenletTitle" from-field="uiLabelMap.OrderOpenCollequeCustomerRequests"/>
+                            </actions>
+                            <widgets>
+                                <screenlet title="${screenletTitle}" navigation-form-name="ListCustRequests" >
+                                    <include-form name="ListCustRequests" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CreateCustRequestNotification">
+        <section>
+            <condition><not><if-empty field="custRequestId"/></not></condition>
+            <actions>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="PartyNameView" value-field="person">
+                    <field-map field-name="partyId" from-field="custRequest.fromPartyId"/>
+                </entity-one>
+                <set field="title" value="${uiLabelMap.OrderCustRequestNotificationMailCreation} #${custRequestId}"/>
+                <set field="parameters.subject" value="You request has been received and is registered as Customer request: ${custRequest.custRequestName}[${custRequest.custRequestId}]"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/request/CreateCustRequestNotification.ftl"/></html></platform-specific>
+            </widgets>
+            <fail-widgets>
+                <label text="Customer requestId is required: ${parameters.custRequestId} value: ${custRequestId}"></label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="CompletedCustRequestNotification">
+        <section>
+            <condition><not><if-empty field="custRequestId"/></not></condition>
+            <actions>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="PartyNameView" value-field="person">
+                    <field-map field-name="partyId" from-field="custRequest.fromPartyId"/>
+                </entity-one>
+                <set field="title" value="${uiLabelMap.OrderCustRequestNotificationMailCompleted} #${custRequestId}"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/request/CompletedCustRequestNotification.ftl"/></html></platform-specific>
+            </widgets>
+            <fail-widgets>
+                <label text="Customer requestId is required: ${parameters.custRequestId} value: ${custRequestId}"></label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="AddNoteCustRequestNotification">
+        <section>
+            <condition><not><if-empty field="custRequestId"/></not></condition>
+            <actions>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="PartyNameView" value-field="person">
+                    <field-map field-name="partyId" from-field="custRequest.fromPartyId"/>
+                </entity-one>
+                <entity-one entity-name="NoteData" value-field="noteData"/>
+                <set field="title" value="${uiLabelMap.OrderCustRequestNotificationMailNoteAdded} #${custRequestId}"/>
+                <set field="subject" value="A note has been added to your Customer request ${custRequest.custRequestName}[${custRequest.custRequestId}]"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template 
+                location="component://order/template/request/AddedNoteCustRequestNotification.ftl"/>
+                </html></platform-specific>
+            </widgets>
+            <fail-widgets>
+                <label text="Customer requestId is required: ${parameters.custRequestId} value: ${custRequestId}"></label>
+            </fail-widgets>
+        </section>
+    </screen>
+
+    <screen name="ListCustReturns">
+        <section>
+            <actions>
+                <set field="partyId" from-field="userLogin.partyId"/>
+                <set field="screenletTitle" from-field="uiLabelMap.OrderMyReturns"/>
+                <entity-one entity-name="StatusItem" value-field="statusItem">
+                    <field-map field-name="statusId" from-field="statusId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <screenlet title="${screenletTitle} (${statusItem.description})" navigation-form-name="ListCustReturns" >
+                    <include-form name="ListReturns" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+</screens>

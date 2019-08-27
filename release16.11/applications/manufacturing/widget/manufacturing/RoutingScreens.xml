@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="CommonRoutingDecorator">
+        <section>
+            <actions>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="routing"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonManufacturingDecorator" location="${parameters.commonManufacturingDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="routing"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <include-menu name="RoutingTabBar" location="component://manufacturing/widget/manufacturing/ManufacturingMenus.xml"/>
+                                    </widgets>
+                                </section>
+                                <container>
+                                    <label style="h1">[${uiLabelMap.CommonId} ${routing.workEffortId}] ${routing.workEffortName}</label>
+                                </container>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonRoutingTaskDecorator">
+        <section>
+            <actions>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="routingTask"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonManufacturingDecorator" location="${parameters.commonManufacturingDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="routingTask"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <include-menu name="RoutingTaskTabBar" location="component://manufacturing/widget/manufacturing/ManufacturingMenus.xml"/>
+                                    </widgets>
+                                </section>
+                                <container>
+                                    <label style="h1">[${uiLabelMap.CommonId} ${routingTask.workEffortId}] ${routingTask.workEffortName}</label>
+                                </container>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindRouting">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindRouting"/>
+                <set field="tabButtonItem" value="findRouting"/>
+                <set field="headerItem" value="routing"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+                
+                <set field="asm_multipleSelectForm" value="FindRoutings"/>
+                <set field="asm_formSize" value="700"/>
+                <set field="asm_multipleSelect" value="FindRoutings_currentStatusId"/>
+                <set field="asm_sortable" value="false"/>
+                <set field="asm_title" value=" "/>
+                <set field="requestParameters.workEffortTypeId" to-scope="screen" default-value="ROUTING"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonManufacturingDecorator" location="${parameters.commonManufacturingDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://common/template/includes/SetMultipleSelectJs.ftl"/></html></platform-specific>
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="EditRouting" text="${uiLabelMap.ManufacturingNewRouting}" style="buttontext create"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindRoutings" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListRoutings" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRouting">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRouting"/>
+                <set field="headerItem" value="routing"/>
+                <set field="tabButtonItem" value="editRouting"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="routing"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${groovy: workEffortId ? uiLabelMap.PageTitleEditRouting : uiLabelMap.ManufacturingNewRouting}">
+                            <container style="button-bar">
+                                <link target="EditRouting" text="${uiLabelMap.ManufacturingNewRouting}" style="buttontext create"/>
+                            </container>
+                            <include-form name="EditRouting" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindRoutingTask">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindRoutingTask"/>
+                <set field="tabButtonItem" value="routingTask"/>
+                <set field="headerItem" value="routingTask"/>
+
+                <set field="requestParameters.workEffortTypeId" to-scope="screen" default-value="ROU_TASK"/>
+                <set field="requestParameters.currentStatusId" to-scope="screen" default-value="ROU_ACTIVE"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonManufacturingDecorator" location="${parameters.commonManufacturingDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="EditRoutingTask" text="${uiLabelMap.ManufacturingNewRoutingTask}" style="buttontext create"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindRoutingTasks" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListRoutingTasks" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRoutingTask">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRoutingTask"/>
+                <set field="headerItem" value="routingTask"/>
+                <set field="tabButtonItem" value="editRoutingTask"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="routingTask"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingTaskDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${groovy: workEffortId ? uiLabelMap.PageTitleEditRoutingTask : uiLabelMap.ManufacturingNewRoutingTask}">
+                            <container style="button-bar">
+                                <link target="EditRoutingTask" text="${uiLabelMap.ManufacturingNewRoutingTask}" style="buttontext create"/>
+                            </container>
+                            <include-form name="EditRoutingTask" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRoutingTaskCosts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRoutingTaskCosts"/>
+                <set field="headerItem" value="routingTask"/>
+                <set field="tabButtonItem" value="editRoutingTaskCosts"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="routingTask"/>
+                <entity-and entity-name="WorkEffortCostCalc" list="allCosts">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingTaskDecorator">
+                    <decorator-section name="body">
+                        <screenlet id="AddRoutingTaskCostPanel" title="${uiLabelMap.CommonAdd} ${uiLabelMap.ManufacturingRoutingTaskCosts}" collapsible="true">
+                            <include-form name="AddRoutingTaskCost" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListRoutingTaskCosts" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListRoutingTaskRoutings">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListRoutingTaskRoutings"/>
+                <set field="headerItem" value="routingTask"/>
+                <set field="tabButtonItem" value="listRoutingTaskRoutings"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="routingTask"/>
+                <entity-and entity-name="WorkEffortAssoc" list="allRoutings">
+                    <field-map field-name="workEffortIdTo" from-field="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingTaskDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListRoutingTaskRoutings}">
+                            <include-form name="ListRoutingTaskRoutings" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListRoutingTaskProducts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListRoutingTaskProducts"/>
+                <set field="headerItem" value="routingTask"/>
+                <set field="tabButtonItem" value="listRoutingTaskProducts"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="routingTask"/>
+                <entity-and entity-name="WorkEffortGoodStandard" list="allProducts">
+                    <field-map field-name="workEffortGoodStdTypeId" value="PRUNT_PROD_DELIV"/>
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingTaskDecorator">
+                    <decorator-section name="body">
+                        <screenlet id="EditRoutingTaskProductPanel" title="${uiLabelMap.PageTitleListRoutingTaskProducts}">
+                            <link target="EditRoutingTaskProduct" text="${uiLabelMap.ManufacturingNewRoutingTaskProduct}" style="buttontext">
+                                <parameter param-name="workEffortId"/>
+                            </link>
+                            <include-form name="ListRoutingTaskProducts" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRoutingTaskProduct">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRoutingTaskProduct"/>
+                <set field="headerItem" value="routingTask"/>
+                <set field="tabButtonItem" value="listRoutingTaskProducts"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-and entity-name="WorkEffortGoodStandard" list="allRoutingProductLinks">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                    <field-map field-name="workEffortGoodStdTypeId" value="PRUNT_PROD_DELIV"/>
+                </entity-and>
+                <entity-one entity-name="WorkEffortGoodStandard" value-field="routingProductLink" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingTaskDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditRoutingTaskProduct}">
+                            <include-form name="EditRoutingTaskProduct" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRoutingTaskAssoc">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRoutingTaskAssoc"/>
+                <set field="tabButtonItem" value="routingTaskAssoc"/>
+                <set field="headerItem" value="routing"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <set field="workEffortAssocTypeId" value="ROUTING_COMPONENT"/>
+                <entity-and entity-name="WorkEffortAssocView" list="allRoutingTasks">
+                    <field-map field-name="workEffortIdFrom" from-field="workEffortId"/>
+                    <field-map field-name="workEffortAssocTypeId" from-field="workEffortAssocTypeId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="fromDate"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditRoutingTaskAssoc}">
+                            <platform-specific>
+                                <html><html-template location="component://manufacturing/template/routing/EditRoutingTaskAssoc.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleListRoutingTaskAssoc}">
+                            <include-form name="ListRoutingTaskAssoc" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRoutingProductLink">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRoutingProductLink"/>
+                <set field="tabButtonItem" value="routingProductLink"/>
+                <!--<set field="labelTitleProperty" value="ProductProductBom"/>-->
+                <set field="headerItem" value="routing"/>
+
+                <set field="workEffortGoodStdTypeId" value="ROU_PROD_TEMPLATE"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <!--<entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>-->
+                <entity-and entity-name="WorkEffortGoodStandard" list="allRoutingProductLinks">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                    <field-map field-name="workEffortGoodStdTypeId" from-field="workEffortGoodStdTypeId"/>
+                </entity-and>
+                <entity-one entity-name="WorkEffortGoodStandard" value-field="routingProductLink" auto-field-map="true"/>
+                <!--<script location="component://manufacturing/groovyScripts/routing/EditRoutingProductLink.groovy"/>-->
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingDecorator">
+                    <decorator-section name="body">
+                        <screenlet id="EditRoutingProductLinkPanel" title="${uiLabelMap.PageTitleEditRoutingProductLink}" collapsible="true">
+                            <include-form name="EditRoutingProductLink" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListRoutingProductLink" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRoutingTaskFixedAssets">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditRoutingTaskFixedAsset"/>
+                <set field="tabButtonItem" value="editRoutingTaskFixedAssets"/>
+                <set field="headerItem" value="routingTask"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-and entity-name="WorkEffortFixedAssetStd" list="allFixedAssets">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingTaskDecorator">
+                    <decorator-section name="body">
+                        <screenlet id="EditRoutingTaskFixedAssetPanel" title="${uiLabelMap.CommonAdd} ${uiLabelMap.ManufacturingRoutingTasks} ${uiLabelMap.ManufacturingRoutingTaskFixedAssets}" collapsible="true">
+                            <include-form name="EditRoutingTaskFixedAsset" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListRoutingTaskFixedAssets" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditRoutingTaskParties">
+        <section>
+            <actions>
+                <set field="titleProperty" value="WorkEffortParties"/>
+                <entity-and entity-name="WorkEffortPartyAssignment" list="routingTaskParties">
+                    <field-map field-name="workEffortId" from-field="parameters.workEffortId"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonRoutingTaskDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AddParty}">
+                            <include-form name="AddRoutingTaskParty" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListRoutingTaskParties" location="component://manufacturing/widget/manufacturing/RoutingTaskForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

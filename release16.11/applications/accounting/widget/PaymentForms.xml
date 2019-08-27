@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="FindPayments" type="single" target="findPayments"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="paymentId"><text-find ignore-case="true"/></field>
+        <field name="comments"><text-find ignore-case="true"/></field>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}" position="1">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PaymentType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="2">
+            <check all-checked="false">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="PMNT_STATUS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </check>
+        </field>
+        <field position="1" name="partyIdFrom"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="2" name="partyIdTo"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="1" name="amount"><text/></field>
+        <field name="paymentRefNum"><text-find ignore-case="true"/></field>
+        <field name="paymentGatewayResponseId"><text/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListPayments" type="list" separate-columns="true" default-entity-name="Payment" list-name="listIt" paginate-target="findPayments" paginate="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PaymentAndTypeAndCreditCard"/>
+                <field-map field-name="orderBy" value="effectiveDate DESC"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <row-actions>
+            <set field="amountToApply" value="${groovy:org.apache.ofbiz.accounting.payment.PaymentWorker.getPaymentNotApplied(delegator,paymentId);}"/>
+        </row-actions>
+        <field name="paymentId" widget-style="buttontext">
+            <hyperlink description="${paymentId}" target="paymentOverview">
+                <parameter param-name="paymentId"/>
+            </hyperlink>
+        </field>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}"><display-entity entity-name="PaymentType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="comments"><display/></field>
+        <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${lastName},${firstName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyIdFrom}]" >
+                    <parameter param-name="partyId" from-field="partyIdFrom"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.AccountingToParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${lastName},${firstName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyIdTo}]" >
+                    <parameter param-name="partyId" from-field="partyIdTo"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="effectiveDate"><display/></field>
+        <field name="currencyUomId"><hidden/></field>
+        <field name="amount"><display also-hidden="false" type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply"><display also-hidden="false" type="currency" currency="${currencyUomId}"/></field>
+    </form>
+
+    <form name="EditPaymentAttributes" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+        <field name="partyIdFrom"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyIdTo"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="statusId" entry-name="attributeMap.statusId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="PMNT_STATUS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="saveButton"><submit/></field>
+    </form>
+
+    <form name="NewPaymentOut" type="single" target="createPayment" default-map-name="payment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-condition entity-name="PaymentType" list="paymentTypes">
+                <condition-list combine="or">
+                    <condition-expr field-name="parentTypeId" operator="equals" value="DISBURSEMENT"/>
+                    <condition-expr field-name="parentTypeId" operator="equals" value="TAX_PAYMENT"/>
+                </condition-list>
+                <order-by field-name="description"/>
+            </entity-condition>
+            <entity-one entity-name="PartyGroup" use-cache="true" value-field="partyGroup">
+                <field-map field-name="partyId" from-field="parameters.partyIdFrom"/>
+            </entity-one>
+            <set field="partyGroupName" from-field="partyGroup.groupName"/>
+            <set field="paymentPartyId" from-field="parameters.partyIdFrom" default-value="${defaultOrganizationPartyId}"/>
+            <entity-condition entity-name="PaymentMethodAndFinAccount" list="paymentMethodAndFinAccounts">
+                <condition-list>
+                    <condition-expr field-name="partyId" from-field="paymentPartyId"/>
+                    <condition-expr field-name="statusId" operator="not-equals" value="FNACT_MANFROZEN"/>
+                    <condition-expr field-name="statusId" operator="not-equals" value="FNACT_CANCELLED"/>
+                </condition-list>
+            </entity-condition>
+        </actions>
+        <field name="statusId"><hidden value="PMNT_NOT_PAID"/></field>
+        <field name="currencyUomId"><hidden value="${defaultOrganizationPartyCurrencyUomId}"/></field>
+        <field position="1" name="organizationPartyId" parameter-name="partyIdFrom" event="onchange" action="javascript:(document.NewPaymentOut.action = 'newPayment'),(document.NewPaymentOut.submit())">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyId}">
+                <option key="${parameters.partyIdFrom}" description="${partyGroupName}"/>
+                <entity-options description="${groupName}" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyIdTo" position="2"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}" position="1">
+            <drop-down allow-empty="false">
+                <list-options list-name="paymentTypes" key-name="paymentTypeId"/>
+            </drop-down>
+        </field>
+        <field name="paymentMethodId" title="${uiLabelMap.AccountingPaymentMethodId}" position="2">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PaymentMethod">
+                    <entity-constraint name="partyId" operator="equals" env-name="defaultOrganizationPartyId"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="paymentRefNum" position="1"><text/></field>
+        <field name="overrideGlAccountId" position="2"><lookup target-form-name="LookupGlAccount"/></field>
+        <field name="amount" position="1"><text/></field>
+        <field name="comments" position="2"><text size="70"/></field>
+        <field name="isDepositWithDrawPayment"><hidden value="Y"/></field>
+        <field name="finAccountTransTypeId"><hidden value="WITHDRAWAL"/></field>
+        <field position="1" name="createButton" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="NewPaymentIn" type="single" target="createPayment" default-map-name="payment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="statusId"><hidden value="PMNT_NOT_PAID"/></field>
+        <field name="currencyUomId"><hidden value="${defaultOrganizationPartyCurrencyUomId}"/></field>
+        <field position="1" name="organizationPartyId" parameter-name="partyIdTo">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyId}">
+                <entity-options description="${groupName}" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyIdFrom" position="2"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}" position="1">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PaymentType">
+                    <entity-constraint name="parentTypeId" value="RECEIPT"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="paymentMethodId" title="${uiLabelMap.AccountingPaymentMethodId}" position="2">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PaymentMethod">
+                    <entity-constraint name="partyId" operator="equals" env-name="defaultOrganizationPartyId"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="paymentRefNum" position="1"><text/></field>
+        <field name="overrideGlAccountId" position="2"><lookup target-form-name="LookupGlAccount"/></field>
+        <field name="amount" position="1"><text/></field>
+        <field name="comments" position="2"><text size="70"/></field>
+        <field name="finAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FinAccount" description="${finAccountName} [${finAccountId}]" filter-by-date="true">
+                    <entity-constraint name="finAccountTypeId" value="BANK_ACCOUNT"/>
+                    <entity-constraint name="statusId" operator="not-equals" value="FNACT_MANFROZEN"/>
+                    <entity-constraint name="statusId" operator="not-equals" value="FNACT_CANCELLED"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="isDepositWithDrawPayment"><hidden value="Y"/></field>
+        <field name="finAccountTransTypeId"><hidden value="DEPOSIT"/></field>
+        <field position="1" name="createButton" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="EditPayment" type="single" target="updatePayment" default-map-name="payment">
+        <actions>
+            <set field="isDisbursement" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.isDisbursement(payment);}" type="Boolean"/>
+        </actions>
+        <field name="paymentId"><hidden/></field>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}" position="1">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PaymentType">
+                    <entity-constraint name="parentTypeId" value="${groovy:isDisbursement==true?&quot;DISBURSEMENT&quot;:&quot;RECEIPT&quot;}"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" position="2">
+            <display-entity entity-name="StatusItem"/>
+        </field>
+        <field name="paymentMethodId" title="${uiLabelMap.AccountingPaymentMethodId}" position="1">
+            <drop-down allow-empty="true">
+                <entity-options  key-field-name="paymentMethodId" entity-name="PaymentMethod" description="${paymentMethodTypeId} (${paymentMethodId})">
+                    <entity-constraint name="partyId" operator="equals" value="${groovy:isDisbursement==true?payment.partyIdFrom:payment.partyIdTo}"/>
+                    <entity-order-by field-name="paymentMethodTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyIdFrom" position="1"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyIdTo" position="2"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="amount" position="1"><text/></field>
+        <field position="2" name="currencyUomId">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="actualCurrencyAmount" position="1" title="${uiLabelMap.AccountingActualCurrencyAmount}"><text/></field>
+        <field name="actualCurrencyUomId" position="2" title="${uiLabelMap.AccountingActualCurrencyUomId}">
+            <drop-down allow-empty="true">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="effectiveDate" position="2"><date-time/></field>
+        <field name="paymentRefNum" position="1"><text/></field>
+        <field name="comments" position="2"><text/></field>
+        <field name="paymentPreferenceId"><ignored/></field>
+        <field name="paymentGatewayResponseId"><ignored/></field>
+        <field name="finAccountTransId" position="1"><text/></field>
+        <field name="overrideGlAccountId" position="2"><lookup target-form-name="LookupGlAccount"/></field>
+        <field position="1" name="updateButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="EditPaymentApplicationsInv" default-entity-name="PaymentApplication" list-name="paymentApplicationsInv" target="removePaymentApplication" type="list" separate-columns="false"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="paymentApplicationId"><hidden/></field>
+        <field name="paymentId"><hidden/></field>
+        <field name="invoiceId">
+            <display-entity entity-name="Invoice">
+                <sub-hyperlink target="invoiceOverview" description="[${invoiceId}]">
+                    <parameter param-name="invoiceId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="invoiceItemSeqId"><display/></field>
+        <field name="amountApplied"><display/></field>
+        <field name="removeButton"><submit/></field>
+    </form>
+    <form name="EditPaymentApplicationsPay" default-entity-name="PaymentApplication" list-name="paymentApplicationsPay" target="removePaymentApplication" type="list" separate-columns="false"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="paymentApplicationId"><hidden/></field>
+        <field name="paymentId"><hidden/></field>
+        <field name="toPaymentId"><display/></field>
+        <field name="amountApplied"><display/></field>
+        <field name="removeButton"><submit/></field>
+    </form>
+    <form name="EditPaymentApplicationsBil" default-entity-name="PaymentApplication" list-name="paymentApplicationsBil" target="removePaymentApplication"  type="list" separate-columns="false"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="paymentApplicationId"><hidden/></field>
+        <field name="paymentId"><hidden/></field>
+        <field name="billingAccountId"><display/></field>
+        <field name="invoiceId"><hidden/></field>
+        <field name="amountApplied"><display/></field>
+        <field name="removeButton" title="${uiLabelMap.CommonRemove}"><submit/></field>
+    </form>
+    <form name="EditPaymentApplicationsTax" default-entity-name="PaymentApplication" list-name="paymentApplicationsTax" target="removePaymentApplication"  type="list" separate-columns="false"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="paymentApplicationId"><hidden/></field>
+        <field name="paymentId"><hidden/></field>
+        <field name="taxAuthGeoId"><display/></field>
+        <field name="amountApplied"><display/></field>
+        <field name="removeButton" title="${uiLabelMap.CommonRemove}"><submit/></field>
+    </form>
+
+    <form name="ListInvoicesNotApplied" type="list" list-name="invoices" target="createPaymentApplication" title=""
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="paymentId"><hidden/></field>
+        <field name="invoiceId" widget-style="buttontext">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="description"><display/></field>
+        <field name="invoiceDate"><display type="date"/></field>
+        <field name="amount"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountApplied" parameter-name="dummy"><display  type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" parameter-name="amountApplied"><text size="10"/></field>
+        <field name="invoiceProcessing" use-when="&quot;${uiConfigMap.invoiceProcessing}&quot;.equals(&quot;Y&quot;)"><check/></field>
+        <field name="invoiceProcessing" use-when="&quot;${uiConfigMap.invoiceProcessing}&quot;.equals(&quot;N&quot;)"><check/></field>
+        <field name="applyButton" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="ListInvoicesNotAppliedOtherCurrency" extends="ListInvoicesNotApplied" list-name="invoicesOtherCurrency"/>
+
+    <form name="ListPaymentsNotApplied" type="list" list-name="payments" target="createPaymentApplication" title=""
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="paymentId"><hidden/></field>
+        <field name="toPaymentId" widget-style="buttontext">
+            <hyperlink description="[${toPaymentId}]" target="paymentOverview">
+                <parameter param-name="paymentId" from-field="toPaymentId"/>
+            </hyperlink>
+        </field>
+        <field name="effectiveDate"><display/></field>
+        <field name="amount"><display  type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountApplied" parameter-name="dummy"><display  type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" parameter-name="amountApplied"><text size="10"/></field>
+        <field name="applyButton" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="AddPaymentApplication" type="single" target="createPaymentApplication" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="paymentId"><hidden/></field>
+        <field name="invoiceId"><lookup target-form-name="LookupInvoice"/></field>
+        <field name="invoiceItemSeqId" use-when="&quot;${uiConfigMap.invoiceProcessing}&quot;.equals(&quot;YY&quot;)"><text size="10"/></field>
+        <field name="toPaymentId"><lookup target-form-name="LookupPayment"/></field>
+        <field name="billingAccountId"><lookup target-form-name="LookupBillingAccount"/></field>
+        <field name="taxAuthGeoId"><lookup target-form-name="LookupGeo"/></field>
+        <field name="amountToApply" parameter-name="amountApplied" tooltip="${uiLabelMap.AccountingLeaveEmptyForMaximumAmount}"><text/></field>
+        <field name="invoiceProcessing" use-when="&quot;${uiConfigMap.invoiceProcessing}&quot;.equals(&quot;Y&quot;)"><check/></field>
+        <field name="invoiceProcessing" use-when="&quot;${uiConfigMap.invoiceProcessing}&quot;.equals(&quot;N&quot;)"><check/></field>
+        <field name="applyButton" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="PaymentHeader" type="single" default-map-name="payment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="payment.partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="payment.effectiveDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="payment.partyIdTo"/>
+                <field-map field-name="compareDate" from-field="payment.effectiveDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+        </actions>
+        <field name="paymentId"><hidden/></field>
+        <field name="paymentTypeId" position="1"><display-entity entity-name="PaymentType"/></field>
+        <field name="paymentMethodTypeId" position="2"><display-entity entity-name="PaymentMethodType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="1"><display-entity entity-name="StatusItem"/></field>
+        <field name="paymentMethodId" position="2"><display-entity entity-name="PaymentMethod" description="${description} [${paymentMethodId}]"/></field>
+        <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}" position="1">
+            <hyperlink description="${partyNameResultFrom.fullName} [${payment.partyIdFrom}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="payment.partyIdFrom"/>
+            </hyperlink>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.AccountingToParty}" position="2">
+            <hyperlink description="${partyNameResultTo.fullName} [${payment.partyIdTo}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="payment.partyIdTo"/>
+            </hyperlink>
+        </field>
+        <field name="paymentRefNum" position="1"><display/></field>
+        <field name="paymentPreferenceId" position="2"><display/></field>
+        <field name="amount" position="1"><display type="currency" currency="${payment.currencyUomId}"/></field>
+        <field name="actualCurrencyAmount" title="${uiLabelMap.AccountingActualCurrencyAmount}" position="2"><display type="currency" currency="${payment.actualCurrencyUomId}"/></field>
+        <field name="effectiveDate" position="1"><display type="date"/></field>
+        <field name="comments" position="2"><display/></field>
+        <field name="overrideGlAccountId" position="1"><display/></field>
+        <field name="paymentGatewayResponseId" position="2">
+            <hyperlink description="${payment.paymentGatewayResponseId}" target="ViewGatewayResponse">
+                <parameter param-name="paymentGatewayResponseId" from-field="payment.paymentGatewayResponseId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="PaymentApplications" type="list" list-name="paymentApplications"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="PaymentApplication">
+                <condition-list combine="or">
+                    <condition-expr field-name="paymentId" from-field="paymentId"/>
+                    <condition-expr field-name="toPaymentId" from-field="paymentId"/>
+                </condition-list>
+                <order-by field-name="invoiceId"/>
+                <order-by field-name="invoiceItemSeqId"/>
+            </entity-condition>
+        </actions>
+        <row-actions>
+            <set field="amountApplied" value="${groovy:org.apache.ofbiz.accounting.payment.PaymentWorker.getPaymentAppliedAmount(delegator, paymentApplicationId);}"/>
+        </row-actions>
+        <auto-fields-entity entity-name="PaymentApplication" default-field-type="display"/>
+        <field name="paymentApplicationId"><hidden/></field>
+        <field name="paymentId"><hidden/></field>
+        <field name="invoiceId" widget-style="buttontext">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceItemSeqId" widget-style="buttontext">
+            <hyperlink description="${invoiceItemSeqId}" target="listInvoiceItems">
+                <parameter param-name="invoiceId"/>
+                <parameter param-name="invoiceItemSeqId"/>
+            </hyperlink>
+        </field>
+        <field name="toPaymentId" widget-style="buttontext">
+            <hyperlink description="${toPaymentId}" target="paymentOverview">
+                <parameter param-name="paymentId" from-field="toPaymentId"/>
+            </hyperlink>
+        </field>
+        <field name="billingAccountId" widget-style="buttontext">
+            <hyperlink description="${billingAccountId}" target="EditBillingAccount">
+                <parameter param-name="billingAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="taxAuthGeoId"><display-entity entity-name="Geo" key-field-name="geoId" description="${geoName}"></display-entity></field>
+        <field name="amountApplied"><display type="currency" currency="${payment.currencyUomId}"/></field>
+    </form>
+
+    <form name="AcctgTransAndEntries" type="list" list-name="AcctgTransAndEntries" extends="AcctgTransAndEntries" extends-resource="component://accounting/widget/InvoiceForms.xml">
+        <field name="paymentId"><hidden/></field>
+        <field name="invoiceId"><hyperlink description="${invoiceId}" target="invoiceOverview?invoiceId=${invoiceId}"/></field>
+    </form>
+
+    <form name="ListChecksToPrint" type="multi" list-name="payments" target="printChecks" separate-columns="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" target-window="_blank">
+        <field name="paymentId">
+            <hyperlink description="${paymentId}" target="paymentOverview">
+                <parameter param-name="paymentId"/>
+            </hyperlink>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.PartyPartyTo}">
+          <display-entity description="${firstName} ${middleName} ${lastName} ${groupName}" entity-name="PartyNameView" key-field-name="partyId"/>
+        </field>
+        <field name="amount" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="effectiveDate"><display/></field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><check/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonPrint}" widget-style="smallSubmit">
+            <submit/>
+        </field>
+    </form>
+    <form name="ListChecksToSend" type="multi" use-row-submit="true" list-name="payments" target="quickSendPayment?organizationPartyId=${organizationPartyId}" separate-columns="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="paymentId"><hidden/></field>
+        <field name="paymentId">
+            <hyperlink description="${paymentId}" target="paymentOverview">
+                <parameter param-name="paymentId"/>
+            </hyperlink>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.PartyPartyTo}">
+          <display-entity description="${firstName} ${middleName} ${lastName} ${groupName}" entity-name="PartyNameView" key-field-name="partyId"/>
+        </field>
+        <field name="amount" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="effectiveDate"><display/></field>
+        <field name="paymentRefNum"><text/></field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><check/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSend}" widget-style="smallSubmit"><submit/></field>
+    </form>
+
+    <form name="FindSalesInvoicesByDueDate" type="single" target="FindSalesInvoicesByDueDate"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="invoiceTypeId"><hidden value="SALES_INVOICE"/></field>
+        <field name="organizationPartyId" parameter-name="partyIdFrom">
+            <drop-down allow-empty="false">
+                <entity-options description="${partyId}" entity-name="PartyRole" key-field-name="partyId">
+                    <entity-constraint name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
+                    <entity-order-by field-name="partyId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="daysOffset"><text default-value="0"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonSelect}">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="FindPurchaseInvoicesByDueDate" type="single" target="FindPurchaseInvoicesByDueDate"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="invoiceTypeId"><hidden value="PURCHASE_INVOICE"/></field>
+        <field name="organizationPartyId" parameter-name="partyId">
+            <drop-down allow-empty="false">
+                <entity-options description="${partyId}" entity-name="PartyRole" key-field-name="partyId">
+                    <entity-constraint name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
+                    <entity-order-by field-name="partyId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyIdFrom"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="daysOffset"><text default-value="0"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonSelect}">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="ListInvoicesByDueDate" type="list" list-name="invoicePaymentInfoList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="invoiceId" widget-style="buttontext">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="termTypeId">
+            <display-entity entity-name="TermType"/>
+        </field>
+        <field name="dueDate"><display/></field>
+        <field name="amount" position="1"><display type="currency" currency="${payment.currencyUomId}"/></field>
+        <field name="paidAmount"><display type="currency" currency="${payment.currencyUomId}"/></field>
+        <field name="outstandingAmount"><display type="currency" currency="${payment.currencyUomId}"/></field>
+    </form>
+    <form name="FinAccountTransAssociatedWithPayment" type="single" default-map-name="finAccountTrans" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="finAccountTransId" position="1"><display/></field>
+        <field name="finAccountTransTypeId" title="${uiLabelMap.FormFieldTitle_finAccountTransType}" position="2"><display-entity entity-name="FinAccountTransType"/></field>
+        <field name="amount" position="1"><display type="currency" currency="${payment.currencyUomId}"/></field>
+        <field name="glReconciliationId" position="2">
+            <hyperlink description="${finAccountTrans.glReconciliationId}" target="ViewGlReconciliationWithTransaction">
+                <parameter param-name="glReconciliationId" from-field="finAccountTrans.glReconciliationId"/>
+                <parameter param-name="finAccountId" from-field="finAccountTrans.finAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="transactionDate" position="1"><display/></field>
+        <field name="statusId"  position="2" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+    </form>
+</forms>

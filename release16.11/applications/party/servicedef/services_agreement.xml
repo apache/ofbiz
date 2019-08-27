@@ -1,0 +1,98 @@
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Party Component Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <service name="createAgreementTermAttribute" engine="entity-auto" default-entity-name="AgreementTermAttribute" invoke="create" auth="true">
+        <auto-attributes mode="INOUT" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateAgreementTermAttribute" engine="entity-auto" default-entity-name="AgreementTermAttribute" invoke="update" auth="true">
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteAgreementTermAttribute" engine="entity-auto" default-entity-name="AgreementTermAttribute" invoke="delete" auth="true">
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+
+    <!-- Agreement item type services -->
+    <service name="createAgreementItemType" default-entity-name="AgreementItemType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a AgreementItemType record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateAgreementItemType" default-entity-name="AgreementItemType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a AgreementItemType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteAgreementItemType" default-entity-name="AgreementItemType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an AgreementItemType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <!-- TermType services -->
+    <service name="createTermType" default-entity-name="TermType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create TermType record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateTermType" default-entity-name="TermType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update TermType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteTermType" default-entity-name="TermType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete TermType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <!-- TermTypeAttr services -->
+    <service name="createTermTypeAttr" default-entity-name="TermTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create TermTypeAttr record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateTermTypeAttr" default-entity-name="TermTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update TermTypeAttr record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteTermTypeAttr" default-entity-name="TermTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete TermTypeAttr record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <!-- Addendum services -->
+    <service name="createAddendum" default-entity-name="Addendum" engine="entity-auto" invoke="create" auth="true">
+        <description>Create Addendum Record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateAddendum" default-entity-name="Addendum" engine="entity-auto" invoke="update" auth="true">
+        <description>Update Addendum Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteAddendum" default-entity-name="Addendum" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete Addendum record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <!-- AgreementContentType services -->
+    <service name="createAgreementContentType" default-entity-name="AgreementContentType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create AgreementContentType Record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateAgreementContentType" default-entity-name="AgreementContentType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update AgreementContentType Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteAgreementContentType" default-entity-name="AgreementContentType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete AgreementContentType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+</services>

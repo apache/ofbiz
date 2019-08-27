@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
+    <property key="coreEvents.delegator_not_passed">
+        <value xml:lang="de">Benötigter Parameter 'delegator' fehlt.</value>
+        <value xml:lang="en">Required parameter 'delegator' not passed.</value>
+        <value xml:lang="es">No se proporciono el parametro 'delegator'</value>
+        <value xml:lang="fr">Le paramètre obligatoire 'delegator' n'a pas fonctionné.</value>
+        <value xml:lang="it">Parametro 'delegator' richiesto non passato.</value>
+        <value xml:lang="ja">必要なパラメータ 'デリゲータ' が渡されませんでした。</value>
+        <value xml:lang="ro">Parametru 'delegat' cerut ne trecut.</value>
+        <value xml:lang="ru">Не передан обязательный параметр 'delegator'.</value>
+        <value xml:lang="th">ความต้องการของตัวแปร 'delegator' ไม่ถูกต้อง</value>
+        <value xml:lang="zh">所需的参数 'delegator' 没有传递过来。</value>
+        <value xml:lang="zh-TW">所需的參數 'delegator' 沒有傳遞過來.</value>
+    </property>
+    <property key="coreEvents.dispatcher_context_null">
+        <value xml:lang="de">Dispatch Kontext ist leer</value>
+        <value xml:lang="en">Dispatch context is null</value>
+        <value xml:lang="es">Nombre del Context es nulo</value>
+        <value xml:lang="fr">Le contexte du dispatch est irrecevable</value>
+        <value xml:lang="it">Contesto Dispatch è nullo</value>
+        <value xml:lang="ja">ディスパッチ内容がnullです</value>
+        <value xml:lang="ro">Continut Dispecer este nul</value>
+        <value xml:lang="ru">Контекст диспетчера не имеет значения</value>
+        <value xml:lang="th">รายละเอียดของสิ่งที่ส่งไปเป็นค่าว่าง</value>
+        <value xml:lang="zh">执行context是null</value>
+        <value xml:lang="zh-TW">執行coNtext是null</value>
+    </property>
+    <property key="coreEvents.dispatcher_name_null">
+        <value xml:lang="de">Dispatcher Name ist leer</value>
+        <value xml:lang="en">Dispatcher name is null</value>
+        <value xml:lang="es">Nombre del Dispatcher es nulo</value>
+        <value xml:lang="fr">Le nom du dispatcher est irrecevable</value>
+        <value xml:lang="it">Nome Dispatcher è nullo</value>
+        <value xml:lang="ja">ディスパッチ名称がnullです</value>
+        <value xml:lang="ro">Nume Dispecer este nul</value>
+        <value xml:lang="ru">Имя диспетчера не имеет значения</value>
+        <value xml:lang="th">ชื่อของสิ่งที่ส่งไปเป็นค่าว่าง</value>
+        <value xml:lang="zh">执行程序名称是null</value>
+        <value xml:lang="zh-TW">執行程式名稱是null</value>
+    </property>
+    <property key="coreEvents.dispatcher_not_passed">
+        <value xml:lang="de">Benötigter Parameter 'dispatcher' fehlt</value>
+        <value xml:lang="en">Required parameter 'dispatcher' not passed</value>
+        <value xml:lang="es">El parametro 'dispatcher' no se transmitio</value>
+        <value xml:lang="fr">le paramètre obligatoire 'dispatcher' n'a pas fonctionné</value>
+        <value xml:lang="it">Parameter 'dispatcher' richiesto non passato</value>
+        <value xml:lang="ja">必要なパラメータ 'ディスパッチャ' が渡されませんでした。</value>
+        <value xml:lang="ro">Parametru 'dispecer' cerut ne trecut</value>
+        <value xml:lang="ru">Не передан обязательный параметр 'dispatcher'</value>
+        <value xml:lang="th">ความต้องการของตัวแปร 'dispatcher' ไม่ถูกต้อง</value>
+        <value xml:lang="zh">所需的参数 'dispatcher' 没有传递过来</value>
+        <value xml:lang="zh-TW">所需的參數 'dispatcher' 沒有傳遞過來</value>
+    </property>
+    <property key="coreEvents.error_modelservice_for_srv_name">
+        <value xml:lang="de">Fehler beim Zugriff auf ModelService für serviceName</value>
+        <value xml:lang="en">Error looking up ModelService for serviceName</value>
+        <value xml:lang="es">Error al buscar el 'ModelService' del servicio</value>
+        <value xml:lang="fr">Error looking up ModelService for serviceName </value>
+        <value xml:lang="it">Errore nella ricerca di ModelService per serviceName</value>
+        <value xml:lang="ja">エラー: サービス名に対するモデルサービスが見つかりませんでした</value>
+        <value xml:lang="ro">Eroare in cererea de ModelService pentru serviceName</value>
+        <value xml:lang="ru">Не найден ModelService для serviceName</value>
+        <value xml:lang="th">ผิดพลาด ! ในการค้นหา ModelService สำหรับ serviceName</value>
+        <value xml:lang="zh">为服务名称查找ModelService时出错</value>
+        <value xml:lang="zh-TW">按服務名稱查詢ModelService時出錯</value>
+    </property>
+    <property key="coreEvents.invalid_format_count">
+        <value xml:lang="de">Falsches Format für SERVICE_COUNT</value>
+        <value xml:lang="en">Invalid format for SERVICE_COUNT</value>
+        <value xml:lang="es">Formato invalido de cantidad de sevicio</value>
+        <value xml:lang="fr">Format irrecevable pour SERVICE_COUNT</value>
+        <value xml:lang="it">Formato invalido per SERVICE_COUNT</value>
+        <value xml:lang="ja">SERVICE_COUNTの書式が正しくありません</value>
+        <value xml:lang="ro">Format invalid pentru SERVICE_COUNT</value>
+        <value xml:lang="ru">Неверный формат SERVICE_COUNT</value>
+        <value xml:lang="th">รูปแบบไม่ถูกต้องสำหรับ SERVICE_COUNT</value>
+        <value xml:lang="zh">SERVICE_COUNT格式无效</value>
+        <value xml:lang="zh-TW">SERVICE_COUNT格式無效</value>
+    </property>
+    <property key="coreEvents.invalid_format_frequency">
+        <value xml:lang="de">Falsches Format für SERVICE_FREQUENCY</value>
+        <value xml:lang="en">Invalid format for SERVICE_FREQUENCY</value>
+        <value xml:lang="es">Formato invalido de frecuencia de sevicio</value>
+        <value xml:lang="fr">Format irrecevable pour SERIVCE_FREQUENCY</value>
+        <value xml:lang="it">Formato invalido per SERIVCE_FREQUENCY</value>
+        <value xml:lang="ja">SERVICE_FREQUENCYの書式が正しくありません</value>
+        <value xml:lang="ro">Format invalid pentru SERIVCE_FREQUENCY</value>
+        <value xml:lang="ru">Неверный формат SERVICE_FREQUENCY</value>
+        <value xml:lang="th">รูปแบบไม่ถูกต้องสำหรับ SERVICE_FREQUENCY</value>
+        <value xml:lang="zh">SERIVCE_FREQUENCY格式无效</value>
+        <value xml:lang="zh-TW">SERIVCE_FREQUENCY格式無效</value>
+    </property>
+    <property key="coreEvents.invalid_format_interval">
+        <value xml:lang="de">Falsches Format für SERVICE_INTERVAL</value>
+        <value xml:lang="en">Invalid format for SERVICE_INTERVAL</value>
+        <value xml:lang="es">Formato invalido de intervalo de sevicio</value>
+        <value xml:lang="fr">Format irrecevable pour SERVICE_INTERVAL</value>
+        <value xml:lang="it">Formato invalido per SERVICE_INTERVAL</value>
+        <value xml:lang="ja">SERVICE_INTERVALの書式が正しくありません</value>
+        <value xml:lang="ro">Format Invalid pentru SERVICE_INTERVAL</value>
+        <value xml:lang="ru">Неверный формат SERVICE_INTERVAL</value>
+        <value xml:lang="th">รูปแบบไม่ถูกต้องสำหรับ SERVICE_INTERVAL</value>
+        <value xml:lang="zh">SERVICE_INTERVAL格式无效</value>
+        <value xml:lang="zh-TW">SERVICE_INTERVAL格式無效</value>
+    </property>
+    <property key="coreEvents.invalid_format_time">
+        <value xml:lang="de">Falsches Format für SERVICE_TIME</value>
+        <value xml:lang="en">Invalid format for SERVICE_TIME</value>
+        <value xml:lang="es">Formato invalido de tiempo de sevicio</value>
+        <value xml:lang="fr">Format irrecevable pour SERVICE_TIME</value>
+        <value xml:lang="it">Formato invalido per SERVICE_TIME</value>
+        <value xml:lang="ja">SERVICE_TIMEの書式が正しくありません</value>
+        <value xml:lang="ro">Format invalid pentru SERVICE_TIME</value>
+        <value xml:lang="ru">Неверный формат SERVICE_TIME</value>
+        <value xml:lang="th">รูปแบบไม่ถูกต้องสำหรับ SERVICE_TIME</value>
+        <value xml:lang="zh">SERVICE_TIME格式无效</value>
+        <value xml:lang="zh-TW">SERVICE_TIME格式無效</value>
+    </property>
+    <property key="coreEvents.must_specify_service">
+        <value xml:lang="de">Sie müssen einen Servicenamen 'SERVICE_NAME' angeben (zusätzliche Parameter sind: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="en">You must specify a 'SERVICE_NAME' (other parameters include: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="es">Debe especificar nombre de servicio(además de: tiempo, frecuencia, intervalos y cantidad de servicios)</value>
+        <value xml:lang="fr">Vous devez spécifier un 'SERVICE_NAME'. Les autres paramètres incluent : SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT</value>
+        <value xml:lang="it">Tu devi specificare un 'SERVICE_NAME' (altri parametri inclusi: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="ja">'SERVICE_NAME'を指定してください (その他のパラメータも含みます: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="ro">Trebbie sa specifici un 'SERVICE_NAME' (alti parametri inclusi: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="ru">Вы должны указать 'SERVICE_NAME' (другие параметры: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="th">คุณต้องระบุ 'SERVICE_NAME' (รวมถึงตัวแปรอื่น ๆ: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="zh">你必须指定一个 'SERVICE_NAME' (其它参数包括： SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+        <value xml:lang="zh-TW">你必須指定一個 'SERVICE_NAME' (其他參數包括: SERVICE_TIME, SERVICE_FREQUENCY, SERVICE_INTERVAL, SERVICE_COUNT)</value>
+    </property>
+    <property key="coreEvents.must_specify_service_name">
+        <value xml:lang="de">Sie müssen einen Servicenamen 'SERVICE_NAME' und optional einen Modus angeben (sync oder async, standardmässig auf sync)</value>
+        <value xml:lang="en">You must specify a 'serviceName', and optionally a 'mode' (sync or async, defaults to sync)</value>
+        <value xml:lang="es">Debe especificar un nombre de servicio y opcionalmente el modo (síncrono o asíncrono, Síncrono por defecto)</value>
+        <value xml:lang="fr">Vous devez spécifier un 'service Name', et optionnellement un mode (sync ou async, standard: sync)</value>
+        <value xml:lang="it">Tu devi specificare un 'serviceName', e opzionalmente un 'mode' (sincrono o asincrono, defaults è sincrono)</value>
+        <value xml:lang="ja">'サービス名'を指定してください、オプションで'モード' (同期/非同期、デフォルトは同期)も指定できます</value>
+        <value xml:lang="ro">Trebbie sa specifici un 'serviceName', si  optional un 'mod' (sincron sau asincron, de default este sincron)</value>
+        <value xml:lang="ru">Вы должны указать 'serviceName', и не объязательно 'mode' (sync или async, обычное значение sync)</value>
+        <value xml:lang="th">คุณต้องระบุ 'serviceName', และเลือก 'mode' (sync หรือ async, ค่ามาตรฐานถึง sync)</value>
+        <value xml:lang="zh">你必须指定一个'服务名称'，'状态'可选 (同步或异步，缺省是同步)</value>
+        <value xml:lang="zh-TW">你必須指定一個'服務名稱','狀態'可選 (同步或非同步,預設是同步)</value>
+    </property>
+    <property key="coreEvents.no_delegator_name_defined">
+        <value xml:lang="de">Kein Delegator definiert mit diesem Namen</value>
+        <value xml:lang="en">No delegator defined by that name</value>
+        <value xml:lang="es">No se ha definido un delegator con ese nombre</value>
+        <value xml:lang="fr">Aucun delegator défini par ce nom</value>
+        <value xml:lang="it">Nessun delegator definito da questo nome</value>
+        <value xml:lang="ja">'サービス名'を指定してください、オプションで'モード' (同期/非同期、デフォルトは同期)も指定できます</value>
+        <value xml:lang="ro">Nici-un delegat definit la acest nume</value>
+        <value xml:lang="ru">Нет делегаторов определенных под таким именем</value>
+        <value xml:lang="th">ไม่มีตัวแปรที่ระบุด้วยชื่อนี้</value>
+        <value xml:lang="zh">没有定义使用那个名字的代表</value>
+        <value xml:lang="zh-TW">沒有定義使用那個名字的代表</value>
+    </property>
+    <property key="coreEvents.no_dispachter_name_registered">
+        <value xml:lang="de">Kein Dispatcher mit dem angegebenen Names ist im System registriert</value>
+        <value xml:lang="en">No dispatcher with that name has been registered</value>
+        <value xml:lang="es">No se ha registrado un dispachador con ese nombre</value>
+        <value xml:lang="fr">Aucun dispatcher défini par ce nom</value>
+        <value xml:lang="it">Nessun dispatcher con questo nome è stato registrato</value>
+        <value xml:lang="ja">指定した名称のディスパッチャが登録されていません</value>
+        <value xml:lang="ro">Nu a fost inregistrat nici-un dispecer cu acest nume</value>
+        <value xml:lang="ru">Нет диспетчеров зарегистрированных под таким именем</value>
+        <value xml:lang="th">ไม่มีการส่งของด้วยชื่อที่ลงทะเบียนนี้</value>
+        <value xml:lang="zh">已注册的执行程序中没有那个名字</value>
+        <value xml:lang="zh-TW">已註冊的執行程式中沒有那個名字</value>
+    </property>
+    <property key="coreEvents.no_fields_in_session">
+        <value xml:lang="de">Keine 'previous fields' auf der Session gefunden</value>
+        <value xml:lang="en">No previous fields found in session</value>
+        <value xml:lang="fr">Aucun champ précédent appartenant à la session</value>
+        <value xml:lang="it">Nessun campo precedentemente trovato in questa sessione</value>
+        <value xml:lang="ja">セッションに前の項目が見つかりません</value>
+        <value xml:lang="ru">Предыдущие поля в сессии не найдены</value>
+        <value xml:lang="th">ไม่พบข้อมูลก่อนหน้านี้ใน session</value>
+        <value xml:lang="zh">会话中没有找到以前的数据项</value>
+        <value xml:lang="zh-TW">會話中沒有找到以前的欄位</value>
+    </property>
+    <property key="coreEvents.not_authorized_to_call">
+        <value xml:lang="de">Sie sind nicht berechtigt, diesen 'non-exported' Service aufzurufen. Sie müssen sich am System anmelden und die Sicherheitsberechtigung SERVICE_INVOKE_ANY besitzen.</value>
+        <value xml:lang="en">You are not authorized to call this non-exported service, you must be logged in and have the SERVICE_INVOKE_ANY permission</value>
+        <value xml:lang="es">Usten no está autorizada a invocar a este servicio, para lo cual debe contar con el permiso: SERVICE_INVOKE_ANY</value>
+        <value xml:lang="fr">Vous n'êtes pas autorisé à appeler ce sercie non exporté, vous devez  être connecté et avoir l'autorisation du SERVICE_INVOKE_ANY.</value>
+        <value xml:lang="it">Tu non sei autorizzato ad eseguire questo servizio non-esportato, tu devi essere autenticato e avere il permesso SERVICE_INVOKE_ANY</value>
+        <value xml:lang="ja">このサービスを呼び出す権限がありません。ログインして SERVICE_INVOKE_ANY 権限が必要です</value>
+        <value xml:lang="ro">Nu esti autorizat sa chemi acest serviciu ne-exportat, trebuie sa fii autentificat si sa ai permisul SERVICE_INVOKE_ANY</value>
+        <value xml:lang="ru">Вы не авторизированны для вызова этой не экспортируемой службы, вы должны быть зарегистрированным в системе и иметь права SERVICE_INVOKE_ANY</value>
+        <value xml:lang="th">คุณไม่สามารถเรียก service ออกมาได้ คุณต้องเข้าสู่ระบบและได้รับอนุญาตจาก SERVICE_INVOKE_ANY ก่อน</value>
+        <value xml:lang="zh">你无权调用这个非输出的服务，你必须登录，并具有SERVICE_INVOKE_ANY权限才行</value>
+        <value xml:lang="zh-TW">你無權呼叫這個非輸出的服務,你必須登入,並具有SERVICE_INVOKE_ANY權限才行</value>
+    </property>
+    <property key="coreEvents.not_authorized_use_fct">
+        <value xml:lang="de">Sie sind nicht berechtigt, diese Funktion zu verwenden</value>
+        <value xml:lang="en">You are not authorized to use this function</value>
+        <value xml:lang="es">Usted no está autorizada a usar esta función</value>
+        <value xml:lang="fr">Vous n'êtes pas autorisé à utiliser cette fonction</value>
+        <value xml:lang="it">Tu non sei autorizzato ad usare questa funzione</value>
+        <value xml:lang="ja">この機能を使用する権限がありません</value>
+        <value xml:lang="ro">Tu nu esti autorizat sa folosesti aceasta functie</value>
+        <value xml:lang="ru">Вы не авторизированны для использования этой функции</value>
+        <value xml:lang="th">คุณยังไม่ได้รับสิทธิ์ให้ใช้ฟังก์ชันนี้</value>
+        <value xml:lang="zh">你没有被授权使用这个功能</value>
+        <value xml:lang="zh-TW">你沒有被授權使用這個功能</value>
+    </property>
+    <property key="coreEvents.service_dispatcher_exception">
+        <value xml:lang="de">Der Service Dispatcher hat eine Exception geworfen: </value>
+        <value xml:lang="en">Service dispatcher threw an exception: </value>
+        <value xml:lang="es">Service dispatcher lanzo una excepción: </value>
+        <value xml:lang="fr">Le service dispatcher a renvoyé une exception : </value>
+        <value xml:lang="it">Dispatcher servizio ha lanciato una eccezione: </value>
+        <value xml:lang="ja">サービスディスパッチャが例外を投げました: </value>
+        <value xml:lang="ro">Dispeceratul de serviciu a lansat o exceptie: </value>
+        <value xml:lang="ru">Диспетчер служб вызвал исключение: </value>
+        <value xml:lang="th">Service dispatcher threw an exception: </value>
+        <value xml:lang="zh">服务执行程序抛出一个意外错误: </value>
+        <value xml:lang="zh-TW">服務執行程式拋出一個異常</value>
+    </property>
+    <property key="coreEvents.service_eventhandler_exception">
+        <value xml:lang="de">Der ServiceEventHandler hat eine Exception geworfen</value>
+        <value xml:lang="en">ServiceEventHandler threw an exception</value>
+        <value xml:lang="es">ServiceEventHandler lanzo una excepción</value>
+        <value xml:lang="fr">Le ServiceEventHandler a envoyer une exception</value>
+        <value xml:lang="it">ServiceEventHandler ha lanciato una eccezione</value>
+        <value xml:lang="ja">サービスイベントハンドラが例外を投げました</value>
+        <value xml:lang="ro">ServiceEventHandler a lansat o exceptie</value>
+        <value xml:lang="ru">ServiceEventHandler вызвал исключение</value>
+        <value xml:lang="th">ข้อยกเว้นของ ServiceEventHandler</value>
+        <value xml:lang="zh">ServiceEventHandler抛出一个意外错误</value>
+        <value xml:lang="zh-TW">ServiceEventHandler拋出一個異常</value>
+    </property>
+    <property key="coreEvents.service_name_not_find">
+        <value xml:lang="de">Ein Service mit diesem Namen wurde nicht gefunden</value>
+        <value xml:lang="en">Could not find a service with the serviceName</value>
+        <value xml:lang="es">No se pudo encontrar un servicio con ese nombre</value>
+        <value xml:lang="fr">Un service ne peut être trouvé par ce nom de service</value>
+        <value xml:lang="it">Non è possibile trovare un servizio con serviceName</value>
+        <value xml:lang="ja">サービスが見つかりません、サービス名:</value>
+        <value xml:lang="ro">Nu este posibila gasirea unui serviciu cu serviceName</value>
+        <value xml:lang="ru">Не могу найти службу с serviceName</value>
+        <value xml:lang="th">ไม่พบ service ด้วย serviceName นี้</value>
+        <value xml:lang="zh">无法找到这个服务：服务名称</value>
+        <value xml:lang="zh-TW">無法找到這個服務:服務名稱</value>
+    </property>
+    <property key="coreEvents.service_scheduled">
+        <value xml:lang="de">Service wurde eingeplant</value>
+        <value xml:lang="en">Service has been scheduled</value>
+        <value xml:lang="es">El servicio a sido programado</value>
+        <value xml:lang="fr">Le service a été planifié</value>
+        <value xml:lang="it">Servizio è stato schedulato</value>
+        <value xml:lang="ja">サービスがスケジュールされました</value>
+        <value xml:lang="ro">Serviciu a fost Planificat</value>
+        <value xml:lang="ru">Служба запланирована</value>
+        <value xml:lang="th">Service มีการทำรายการ</value>
+        <value xml:lang="zh">服务已列入计划</value>
+        <value xml:lang="zh-TW">服務已列入排程</value>
+    </property>
+    <property key="coreEvents.service_time_already_passed">
+        <value xml:lang="de">SERVICE_TIME ist bereits vorbei</value>
+        <value xml:lang="en">SERVICE_TIME has already passed</value>
+        <value xml:lang="es">El tiempo de servicio a concluido</value>
+        <value xml:lang="fr">SERVICE_TIME a déjà réussi </value>
+        <value xml:lang="it">SERVICE_TIME è già stato passato</value>
+        <value xml:lang="ja">SERVICE_TIMEはすでに渡されています</value>
+        <value xml:lang="ro">SERVICE_TIME a fost deja trecut</value>
+        <value xml:lang="ru">SERVICE_TIME уже передан</value>
+        <value xml:lang="th">SERVICE_TIME ผ่านเรียบร้อยแล้ว</value>
+        <value xml:lang="zh">SERVICE_TIME已经传递了</value>
+        <value xml:lang="zh-TW">SERVICE_TIME已經傳遞了</value>
+    </property>
+    <property key="protectedviewevents.blocked_message">
+        <value xml:lang="en">This is the blocked message (to be adapted).</value>
+        <value xml:lang="fr">Ceci est le message de bloquage (à adapter).</value>
+        <value xml:lang="it">Questo è il messaggio bloccante (che deve essere adattato).</value>
+        <value xml:lang="ja">これはブロックされたメッセージです(適用してください)。</value>
+        <value xml:lang="zh">这是(要被采用的)被阻塞的信息。</value>
+        <value xml:lang="zh-TW">這是(要被採用的)被阻塞的資訊.</value>
+    </property>
+    <property key="protectedviewevents.tarpitted_message">
+        <value xml:lang="en">This is the tarpitted message (to be adapted).</value>
+        <value xml:lang="fr">Ceci est le message d'engluage (à adapter).</value>
+        <value xml:lang="it">Questo è il messaggio (che deve essere adattato).</value>
+        <value xml:lang="ja">これは応答遅延メッセージです(適用してください)。</value>
+        <value xml:lang="zh">这是(要被采用的)被延迟的信息。</value>
+        <value xml:lang="zh-TW">這是(要被採用的)被延遲的資訊.</value>
+    </property>
+    <property key="requestHandler.error_call_event">
+        <value xml:lang="de">Fehler beim Aufruf eines Events</value>
+        <value xml:lang="en">Error calling event</value>
+        <value xml:lang="es">Error en la llamada el evento</value>
+        <value xml:lang="fr">Erreur lors de l'appel de l'événement</value>
+        <value xml:lang="it">Errore esecuzione evento</value>
+        <value xml:lang="ja">エラー: イベント呼び出し</value>
+        <value xml:lang="ro">Eroare la executia evenimentului</value>
+        <value xml:lang="ru">Ошибка вызова события</value>
+        <value xml:lang="th">เกิดความผิดพลาดในการเรียกเหตุการณ์</value>
+        <value xml:lang="zh">调用事件时出错</value>
+        <value xml:lang="zh-TW">呼叫事件時出錯</value>
+    </property>
+    <property key="requestHandler.InsecureFormPostToSecureRequest">
+        <value xml:lang="en">Not accepting insecure form data posted to a secure request</value>
+        <value xml:lang="es">No permite enviarle un forma inseguro a un pedido seguro</value>
+        <value xml:lang="ja">セキュアなリクエストに対して送信された、インセキュアなフォームデータを受け付けることはできません</value>
+        <value xml:lang="zh">不接受把不安全的表单数据提交到安全的请求</value>
+        <value xml:lang="zh-TW">不接受把不安全的表單資料提交到安全的請求</value>
+    </property>
+    <property key="simpleEventHandler.event_not_completed">
+        <value xml:lang="de">Event konnte nicht abgeschlossen werden</value>
+        <value xml:lang="en">Could not complete event</value>
+        <value xml:lang="es">No se pudo completar el evento</value>
+        <value xml:lang="fr">L'événement n'a pas pu être terminé</value>
+        <value xml:lang="it">Non è possibile completare questo evento</value>
+        <value xml:lang="ja">イベントを完了できません</value>
+        <value xml:lang="ro">Nu este posibila completarea acestui eveniment</value>
+        <value xml:lang="ru">Не могу завершить событие</value>
+        <value xml:lang="th">เหตุการณ์ยังไม่เสร็จสมบูรณ์</value>
+        <value xml:lang="zh">没有完成事件</value>
+        <value xml:lang="zh-TW">沒有完成事件</value>
+    </property>
+</resource>

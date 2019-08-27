@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="FindAccounts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="MarketingFindAccounts"/>
+                <set field="currentUrl" value="FindAccounts"/>
+                <set field="headerItem" value="Accounts"/>
+                <set field="setAccountDescription" value="${groovy:session.setAttribute(&quot;accountDescription&quot;,headerItem)}"/>
+                <set field="removeContactDescription" value="${groovy:session.removeAttribute(&quot;contactDescription&quot;)}"/>
+                <set field="removeLeadDescription" value="${groovy:session.removeAttribute(&quot;leadDescription&quot;)}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <include-menu name="AccountSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                                <section>
+                                    <widgets>
+                                        <container style="no-clear">
+                                            <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                                <decorator-section name="search-options">
+                                                    <include-menu name="AccountFindTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                                                    <include-form name="FindAccounts" location="component://marketing/widget/sfa/forms/AccountForms.xml"/>
+                                                </decorator-section>
+                                                <decorator-section name="search-results">
+                                                    <section>
+                                                        <condition>
+                                                            <or>
+                                                                <if-empty field="parameters.all"/>
+                                                                <if-compare field="parameters.all" operator="equals" value="true"/>
+                                                            </or>
+                                                        </condition>
+                                                        <widgets>
+                                                            <!-- list all accounts -->
+                                                            <label style="h1" text="${uiLabelMap.SfaAllAccounts}"/>
+                                                            <include-form name="ListAccounts" location="component://marketing/widget/sfa/forms/AccountForms.xml"/>
+                                                        </widgets>
+                                                        <fail-widgets>
+                                                            <!-- list my accounts -->
+                                                            <label style="h1" text="${uiLabelMap.SfaMyAccounts}"/>
+                                                            <include-form name="ListMyAccounts" location="component://marketing/widget/sfa/forms/AccountForms.xml"/>
+                                                        </fail-widgets>
+                                                    </section>
+                                                </decorator-section>
+                                            </decorator-screen>
+                                        </container>
+                                    </widgets>
+                                </section>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="NewAccount">
+        <section>
+            <actions>
+                <set field="headerItem" value="Accounts"/>
+                <set field="titleProperty" value="PageTitleCreateAccount"/>
+                <set field="accountType" from-field="parameters.accountType"/>
+                <property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="USA"/>
+                
+                <set field="dependentForm" value="NewAccount"/>
+                <set field="paramKey" value="countryGeoId"/>
+                <set field="mainId" value="countryGeoId"/>
+                <set field="dependentId" value="stateProvinceGeoId"/>
+                <set field="requestName" value="getAssociatedStateList"/>
+                <set field="responseName" value="stateList"/>
+                <set field="dependentKeyName" value="geoId"/>
+                <set field="descName" value="geoName"/>
+                <set field="selectedDependentOption" from-field="selectedStateName" default-value="_none_"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAccountDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="no-clear">
+                            <screenlet title="${uiLabelMap.PageTitleCreateAccount}">
+                                <platform-specific>
+                                <html>
+                                <html-template location="component://common/template/includes/SetDependentDropdownValuesJs.ftl"/>
+                                </html>
+                                </platform-specific>   
+                                <include-form name="NewAccount" location="component://marketing/widget/sfa/forms/AccountForms.xml"/>
+                            </screenlet>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>    
+    <screen name="ContactMechTypeOnly">
+        <section>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="ELECTRONIC_ADDRESS"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindInfoStringContactMech"/>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="POSTAL_ADDRESS"/>
+                    </condition>
+                    <widgets>
+                        <section>
+                            <actions>
+                                <entity-condition entity-name="Geo" list="states">
+                                    <condition-list combine="or">
+                                        <condition-expr field-name="geoTypeId" value="STATE"/>
+                                        <condition-expr field-name="geoTypeId" value="PROVINCE"/>
+                                        <condition-expr field-name="geoTypeId" value="TERRITORY"/>
+                                    </condition-list>
+                                    <order-by field-name="geoName"/>
+                                </entity-condition>
+                                <entity-condition entity-name="Geo" list="countries">
+                                    <condition-list combine="or">
+                                        <condition-expr field-name="geoTypeId" value="COUNTRY"/>
+                                    </condition-list>
+                                    <order-by field-name="geoName"/>
+                                </entity-condition>
+                            </actions>
+                            <widgets>
+                                <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindPostalAddress"/>
+                            </widgets>
+                        </section>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="TELECOM_NUMBER"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindTelecomNumber"/>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="EMAIL_ADDRESS"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindInfoStringContactMech"/>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="IP_ADDRESS"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindInfoStringContactMech"/>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="DOMAIN_NAME"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindInfoStringContactMech"/>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="WEB_ADDRESS"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindInfoStringContactMech"/>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="INTERNAL_PARTYID"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindInfoStringContactMech"/>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.contactMechTypeId" operator="equals" value="LDAP_ADDRESS"/>
+                    </condition>
+                    <widgets>
+                        <include-form location="component://marketing/widget/sfa/forms/AccountForms.xml" name="FindInfoStringContactMech"/>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+</screens>

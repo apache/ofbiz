@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <!-- FinAccountTrans Services -->
+    <simple-method method-name="postFinAccountTransToGl" short-description="Post a Financial Account Transaction to the General Ledger">
+        <!-- NOTE: this is not yet complete -->
+        <now-timestamp field="nowTimestamp"/>
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans"/>
+        <set field="finAccountId" from-field="finAccountTrans.finAccountId"/>
+        <entity-one entity-name="FinAccount" value-field="finAccount"/>
+        <set field="organizationPartyId" from-field="finAccount.organizationPartyId"/>
+
+        <if-not-empty field="finAccount.postToGlAccountId">
+            <set field="glAccountId" from-field="finAccount.postToGlAccountId"/>
+            <else>
+                <entity-one entity-name="FinAccountTypeGlAccount" value-field="finAccountTypeGlAccount" auto-field-map="false">
+                    <field-map field-name="organizationPartyId"/>
+                    <field-map field-name="finAccountTypeId" from-field="finAccount.finAccountTypeId"/>
+                </entity-one>
+                <if-not-empty field="finAccountTypeGlAccount">
+                    <set field="glAccountId" from-field="finAccountTypeGlAccount.glAccountId"/>
+                </if-not-empty>
+            </else>
+        </if-not-empty>
+
+        <!-- set values for AcctgTrans -->
+        <set field="quickCreateAcctgTransAndEntries.finAccountTransId" from-field="parameters.finAccountTransId"/>
+        <set field="quickCreateAcctgTransAndEntries.transactionDate" from-field="nowTimestamp"/>
+        <set field="quickCreateAcctgTransAndEntries.glFiscalTypeId" value="ACTUAL"/>
+        <set field="quickCreateAcctgTransAndEntries.partyId" from-field="finAccountTrans.partyId"/>
+        <set field="quickCreateAcctgTransAndEntries.isPosted" value="N"/>
+        
+        <!-- set values for AcctgTransEntry -->
+        <set field="quickCreateAcctgTransAndEntries.organizationPartyId" from-field="finAccount.organizationPartyId"/>
+        <set field="quickCreateAcctgTransAndEntries.amount" from-field="finAccountTrans.amount"/>
+        <set field="quickCreateAcctgTransAndEntries.acctgTransEntryTypeId" value="_NA_"/>
+
+        <!-- Find the other side to post to/from -
+            if payment directory to account do from Payment;
+            if from account refill product purchase pull from special account where those funds wait;
+            if purchase on account, balance like bank account received or something -->
+        <if>
+            <condition><if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="DEPOSIT"/></condition>
+            <then>
+                <!-- TODO: somehow check to see if the deposit was not from a product, or didn't get into the general CUSTOMER CREDITS 213000 account -->
+                <!--
+                    Handle the case where a product is purchased to deposit to account.
+                    The Product should be setup so that funds go to the general CUSTOMER CREDITS account, 213000.
+                    This will simply transfer from that account to the configured account above.
+                -->
+                <set field="quickCreateAcctgTransAndEntries.creditGlAccountId" from-field="parameters.glAccountId"/>
+                <set field="quickCreateAcctgTransAndEntries.debitGlAccountId" from-field="glAccountId"/>
+                <set field="quickCreateAcctgTransAndEntries.acctgTransTypeId" value="RECEIPT"/>
+            </then>
+            <else-if>
+                <condition><if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="WITHDRAWAL"/></condition>
+                <then>
+                    <!-- TODO: somehow determine if this is an order placed against the account or some other type of withdrawal -->
+                    <!-- TODO: handle order placed against (paid for with) the account -->
+
+                    <set field="quickCreateAcctgTransAndEntries.debitGlAccountId" from-field="glAccountId"/>
+                    <set field="quickCreateAcctgTransAndEntries.creditGlAccountId" from-field="parameters.glAccountId"/>
+                    <set field="quickCreateAcctgTransAndEntries.acctgTransTypeId" value="PAYMENT_ACCTG_TRANS"/>
+                </then>
+            </else-if>
+            <else-if>
+                <condition><if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="ADJUSTMENT"/></condition>
+                <then>
+                    <!-- if positive will go to one account for write-off, if negative will go to another account for a fee -->
+                    <!-- these will reverse depending on positive/negative amount -->
+                    <if-compare field="finAccountTrans.amount" operator="less" value="0">
+                        <set field="quickCreateAcctgTransAndEntries.debitGlAccountId" from-field="parameters.glAccountId"/>
+                        <set field="quickCreateAcctgTransAndEntries.creditGlAccountId" from-field="glAccountId"/>
+                        <set field="quickCreateAcctgTransAndEntries.acctgTransTypeId" value="OUTGOING_PAYMENT"/>
+                    <else>
+                        <set field="quickCreateAcctgTransAndEntries.creditGlAccountId" from-field="parameters.glAccountId"/>
+                        <set field="quickCreateAcctgTransAndEntries.debitGlAccountId" from-field="glAccountId"/>
+                        <set field="quickCreateAcctgTransAndEntries.acctgTransTypeId" value="INCOMING_PAYMENT"/>
+                    </else>
+                    </if-compare>
+                </then>
+            </else-if>
+        </if>
+
+        <!-- Make sure we have the glAccountId, glAccountIdOffset, organizationPartyId -->
+        <if-empty field="quickCreateAcctgTransAndEntries.debitGlAccountId">
+            <set field="creditDebit" value="Debit"/>
+            <set field="requiredField" value="glAccountId"/>
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountCannotPost"/>
+            </add-error>
+        </if-empty>
+        <if-empty field="quickCreateAcctgTransAndEntries.creditGlAccountId">
+            <set field="creditDebit" value="credit"/>
+            <set field="requiredField" value="glAccountId"/>
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountCannotPost"/>
+            </add-error>
+        </if-empty>
+        <if-empty field="organizationPartyId">
+            <set field="creditDebit" value=""/>
+            <set field="requiredField" value="organizationPartyId"/>
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountCannotPost"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+        <call-service service-name="quickCreateAcctgTransAndEntries" in-map-name="quickCreateAcctgTransAndEntries" include-user-login="true"/>
+    </simple-method>
+</simple-methods>

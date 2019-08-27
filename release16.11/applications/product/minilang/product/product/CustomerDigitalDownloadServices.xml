@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    <simple-method method-name="createCustomerDigitalDownloadProduct" short-description="createCustomerDigitalDownloadProduct">
+        <now-timestamp field="nowTimestamp"/>
+
+        <make-value value-field="createProductMap" entity-name="Product"/>
+        <sequenced-id sequence-name="Product" field="createProductMap.productId"/>
+        <set field="productId" from-field="createProductMap.productId"/>
+
+        <set field="createProductMap.productName" from-field="parameters.productName"/>
+        <set field="createProductMap.internalName" from-field="parameters.productName"/>
+        <set field="createProductMap.description" from-field="parameters.description"/>
+        <set field="createProductMap.productTypeId" value="DIGITAL_GOOD"/>
+        <create-value value-field="createProductMap"/>
+
+        <make-value value-field="createProductPriceMap" entity-name="ProductPrice"/>
+        <set field="createProductPriceMap.productId" from-field="productId"/>
+        <set field="createProductPriceMap.productPriceTypeId" value="DEFAULT_PRICE"/>
+        <set field="createProductPriceMap.productPricePurposeId" value="PURCHASE"/>
+        <set field="createProductPriceMap.currencyUomId" from-field="parameters.currencyUomId" default-value="USD"/>
+        <set field="createProductPriceMap.productStoreGroupId" value="_NA_"/>
+        <set field="createProductPriceMap.fromDate" from-field="nowTimestamp"/>
+        <set field="createProductPriceMap.price" from-field="parameters.price"/>
+        <create-value value-field="createProductPriceMap"/>
+
+        <make-value value-field="createProductSupplierMap" entity-name="SupplierProduct"/>
+        <set field="createProductSupplierMap.productId" from-field="productId"/>
+        <set field="createProductSupplierMap.partyId" from-field="userLogin.partyId"/>
+        <set field="createProductSupplierMap.currencyUomId" from-field="parameters.currencyUomId" default-value="USD"/>
+        <set field="createProductSupplierMap.minimumOrderQuantity" value="1" type="BigDecimal"/>
+        <set field="createProductSupplierMap.availableFromDate" from-field="nowTimestamp"/>
+        <create-value value-field="createProductSupplierMap"/>
+
+        <field-to-result field="productId"/>
+        <field-to-result field="createProductSupplierMap.currencyUomId" result-name="currencyUomId"/>
+        <field-to-result field="createProductSupplierMap.minimumOrderQuantity" result-name="minimumOrderQuantity"/>
+        <field-to-result field="createProductSupplierMap.availableFromDate" result-name="availableFromDate"/>
+
+        <!-- create association with ProductStore.digProdUploadCategoryId -->
+        <entity-one entity-name="ProductStore" value-field="productStore"/>
+        <if-not-empty field="productStore.digProdUploadCategoryId">
+            <make-value value-field="addProductToCategoryMap" entity-name="ProductCategoryMember"/>
+            <set field="addProductToCategoryMap.productId" from-field="productId"/>
+            <set field="addProductToCategoryMap.productCategoryId" from-field="productStore.digProdUploadCategoryId"/>
+            <create-value value-field="addProductToCategoryMap"/>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateCustomerDigitalDownloadProduct" short-description="updateCustomerDigitalDownloadProduct">
+        <now-timestamp field="nowTimestamp"/>
+
+        <!-- make sure SupplierProduct exists for userLogin.partyId -->
+        <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        <entity-one entity-name="SupplierProduct" value-field="supplierProduct"/>
+
+        <if-empty field="supplierProduct">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductMustBeAssociatedWithSupplier"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+
+        <!-- update productName/description -->
+        <if>
+            <condition>
+                <or>
+                    <not><if-empty field="parameters.productName"></if-empty></not>
+                    <not><if-empty field="parameters.description"></if-empty></not>
+                </or>
+            </condition>
+            <then>
+                <entity-one entity-name="Product" value-field="product"/>
+                <set field="product.productName" from-field="parameters.productName" set-if-empty="false"/>
+                <set field="product.description" from-field="parameters.description" set-if-empty="false"/>
+                <store-value value-field="product"/>
+            </then>
+        </if>
+
+        <!-- update price -->
+        <if-not-empty field="parameters.price">
+            <entity-and entity-name="ProductPrice" list="productPriceList">
+                <field-map field-name="productId" from-field="parameters.productId"/>
+                <field-map field-name="productPriceTypeId" value="DEFAULT_PRICE"/>
+                <field-map field-name="productPricePurposeId" value="PURCHASE"/>
+                <field-map field-name="productStoreGroupId" value="_NA_"/>
+            </entity-and>
+            <!-- should just be one -->
+            <first-from-list list="productPriceList" entry="productPrice"/>
+            <set field="productPrice.price" from-field="parameters.price"/>
+            <store-value value-field="productPrice"/>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="deleteCustomerDigitalDownloadProduct" short-description="deleteCustomerDigitalDownloadProduct">
+        <now-timestamp field="nowTimestamp"/>
+
+        <!-- make sure SupplierProduct exists for userLogin.partyId -->
+        <entity-and entity-name="SupplierProduct" list="supplierProductList">
+            <field-map field-name="productId" from-field="parameters.productId"/>
+            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+        </entity-and>
+
+        <if-empty field="supplierProductList">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductMustBeAssociatedWithSupplier"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+
+        <!-- keep the product around, just expire SupplierProduct and ProductCategoryMember records -->
+        <iterate list="supplierProductList" entry="supplierProduct">
+            <set field="supplierProduct.availableThruDate" from-field="nowTimestamp"/>
+            <store-value value-field="supplierProduct"/>
+        </iterate>
+
+        <entity-and entity-name="ProductCategoryMember" list="productCategoryMemberList">
+            <field-map field-name="productId"/>
+        </entity-and>
+        <iterate list="productCategoryMemberList" entry="productCategoryMember">
+            <set field="productCategoryMember.thruDate" from-field="nowTimestamp"/>
+            <store-value value-field="productCategoryMember"/>
+        </iterate>
+    </simple-method>
+
+    <simple-method method-name="addCustomerDigitalDownloadProductFile" short-description="addCustomerDigitalDownloadProductFile">
+        <now-timestamp field="nowTimestamp"/>
+
+        <!-- make sure SupplierProduct exists for userLogin.partyId -->
+        <entity-and entity-name="SupplierProduct" list="supplierProductList">
+            <field-map field-name="productId" from-field="parameters.productId"/>
+            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+        </entity-and>
+        <if-empty field="supplierProductList">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductMustBeAssociatedWithSupplier"/>
+            </add-error>
+        </if-empty>
+
+        <!-- make sure there is a ContentRole for userLogin.partyId and parameters.contentId and roleTypeId=OWNER -->
+        <entity-and entity-name="ContentRole" list="contentRoleList">
+            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+            <field-map field-name="contentId" from-field="parameters.contentId"/>
+            <field-map field-name="roleTypeId" value="OWNER"/>
+        </entity-and>
+        <if-empty field="contentRoleList">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductCannotAssociatedToContent"/>
+            </add-error>
+        </if-empty>
+
+        <check-errors/>
+
+        <make-value value-field="productContent" entity-name="ProductContent"/>
+        <set field="productContent.productId" from-field="parameters.productId"/>
+        <set field="productContent.contentId" from-field="parameters.contentId"/>
+        <set field="productContent.productContentTypeId" value="DIGITAL_DOWNLOAD"/>
+        <set field="productContent.fromDate" from-field="nowTimestamp"/>
+        <create-value value-field="productContent"/>
+    </simple-method>
+    <simple-method method-name="removeCustomerDigitalDownloadProductFile" short-description="removeCustomerDigitalDownloadProductFile">
+        <now-timestamp field="nowTimestamp"/>
+
+        <!-- make sure SupplierProduct exists for userLogin.partyId -->
+        <entity-and entity-name="SupplierProduct" list="supplierProductList">
+            <field-map field-name="productId" from-field="parameters.productId"/>
+            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+        </entity-and>
+
+        <if-empty field="supplierProductList">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductMustBeAssociatedWithSupplier"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+
+        <entity-one entity-name="ProductContent" value-field="productContent"/>
+        <set field="productContent.thruDate" from-field="nowTimestamp"/>
+        <store-value value-field="productContent"/>
+    </simple-method>
+</simple-methods>

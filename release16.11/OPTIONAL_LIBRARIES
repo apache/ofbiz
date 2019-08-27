@@ -1,0 +1,45 @@
+DESCRIPTION
+This file contains information about libraries that are supported
+by code in OFBiz but that are left out of SVN because of licensing issues.
+What is below is a list of jar files and where to put them, and the file(s)
+to change to include them in the OFBiz build and/or run-time configuration.
+
+-=- Reporting: ________________________________________________________________________________________________________________________________________________
+
+-=- Accounting: Payment Processing ____________________________________________________________________________________________________________________________
+
+-CyberSource
+  applications/accounting/lib/cybersource:
+    cybsclients.jar
+    cybssecurity.jar
+  TO BUILD comment out the following line in build.gradle:
+    excludedJavaSources.add 'org/apache/ofbiz/accounting/thirdparty/cybersource/IcsPaymentServices.java'
+
+-Securepay
+  applications/accounting/lib/cybersource:
+    Base64.jar
+    securepayxmlapi_obf.jar
+    xercesImpl-2.4.0.jar
+    xmlParserAPIs-2.4.0.jar
+  TO BUILD comment out the following lines in build.gradle:
+    excludedJavaSources.add 'org/apache/ofbiz/accounting/thirdparty/securepay/SecurePayPaymentServices.java'
+    excludedJavaSources.add 'org/apache/ofbiz/accounting/thirdparty/securepay/SecurePayServiceTest.java'
+
+-WorldPay
+  applications/accounting/lib/worldpay:
+    config
+    config/currency.properties
+    config/keystore
+    config/keystore/wcc
+    config/keystore/wcc/public-1.key
+    config/keystore/wcc/revision
+    cryptix-lib
+    cryptix-lib/Cryptix.properties
+    cryptix.jar
+    ijce-lib
+    ijce-lib/IJCE.properties
+    ijce-lib/java.security.fallback
+    ijce-lib/TargetHelp.html
+    readme.txt
+    select.jar
+    select.properties

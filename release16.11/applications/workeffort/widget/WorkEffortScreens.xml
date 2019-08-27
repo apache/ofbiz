@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="UserJobs">
+        <section>
+            <actions>
+                <set field="headerItem" value="userJobs"/>
+                <set field="titleProperty" value="WorkEffortJobList"/>
+                <set field="filterByStatusId" from-field="parameters.statusId" default-value="SERVICE_RUNNING"/>
+                <entity-condition entity-name="JobSandbox" list="userJobs">
+                    <condition-list>
+                        <condition-expr field-name="authUserLoginId" from-field="userLogin.userLoginId"/>
+                        <condition-expr field-name="statusId" from-field="filterByStatusId"/>
+                    </condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="WORKEFFORTMGR" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.WorkEffortJobList}">
+                                    <include-form name="FilterUserJobs" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                    <include-form name="UserJobsList" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WorkEffortViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="mytasks">
+        <section>
+            <actions>
+                <set field="headerItem" value="task"/>
+                <set field="titleProperty" value="PageTitleViewActivityAndTaskList"/>
+
+                <service service-name="getWorkEffortAssignedActivities"/>
+                <service service-name="getWorkEffortAssignedActivitiesByRole"/>
+                <service service-name="getWorkEffortAssignedActivitiesByGroup"/>
+                <service service-name="getWorkEffortAssignedTasks"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="workEffortGenericPermission" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <platform-specific><html><html-template location="component://workeffort/template/task/MyTasks.ftl"/></html></platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WorkEffortViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWorkEffort">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffort"/>
+                <set field="tabButtonItem" value="WorkEffort"/>
+                <set field="labelTitleProperty" value="PageTitleEditWorkEffort"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="/workeffort/control/ListWorkEfforts"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <set field="thisWorkEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-empty field="workEffort"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleAddWorkEffort}">
+                                    <include-form name="EditWorkEffort" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet>
+                                    <include-form name="EditWorkEffort" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
+                        <screenlet title="${uiLabelMap.WorkEffortDuplicateWorkEffort}">
+                            <include-form name="EditWorkEffortDuplicate" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindWorkEffort">
+        <section>
+            <actions>
+                <set field="headerItem" value="workeffort"/>
+                <set field="titleProperty" value="PageTitleFindWorkEffort"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link  text="${uiLabelMap.WorkEffortCreate}" target="EditWorkEffort" style="buttontext">
+                                        <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                    </link>
+                                    <link  text="${uiLabelMap.CommonAdvancedSearch}" target="WorkEffortSearchOptions" style="buttontext"/>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form name="FindWorkEffort" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="FoundWorkEfforts" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListWorkEfforts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEfforts"/>
+                <set field="tabButtonItem" value="WorkEffort"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEfforts"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListWorkEfforts}" navigation-form-name="ListWorkEfforts">
+                            <include-form name="ListWorkEfforts" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ChildWorkEfforts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleTreeWorkEfforts"/>
+                <set field="tabButtonItem" value="WorkEffortAssocs"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEfforts"/>
+                <set field="trail" from-field="requestParameters.trail"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="ChildWorkEfforts?workEffortId=${parameters.workEffortId}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <container style="button-bar">
+                                    <link target="AddWorkEffortAndAssoc" text="${uiLabelMap.WorkEffortAddChild}" style="buttontext">
+                                        <parameter param-name="workEffortIdFrom" from-field="workEffortId"/>
+                                    </link>
+                                    <link target="AddWorkEffortAssoc" text="${uiLabelMap.WorkEffortAddExistingWorkEffortChild}" style="buttontext">
+                                        <parameter param-name="workEffortIdFrom" from-field="workEffortId"/>
+                                    </link>
+                                </container>
+                                <include-tree name="TreeWorkEffort" location="component://workeffort/widget/WorkEffortTrees.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AddWorkEffortAndAssoc">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffort"/>
+                <set field="tabButtonItem" value="WorkEffort"/>
+                <set field="labelTitleProperty" value="PageTitleEditWorkEffort"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="ChildWorkEfforts?workEffortId=${parameters.workEffortIdFrom}"/>
+                <set field="workEffortIdFrom" from-field="parameters.workEffortIdFrom"/>
+                <set field="workEffortAssocTypeId" value=""/>
+                <set field="fromDate" from-field="nowTimestamp"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="h1">
+                            <label text="${uiLabelMap.PageTitleAddWorkEffort} ${uiLabelMap.WorkEffortAssociatedFromParentToChild}"/>
+                        </container>
+                        <include-form name="AddWorkEffortAndAssoc" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWorkEffortAndAssoc">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffort"/>
+                <set field="tabButtonItem" value="WorkEffort"/>
+                <set field="labelTitleProperty" value="PageTitleEditWorkEffort"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE"/>
+                <set field="workEffortIdTo" from-field="parameters.workEffortIdTo"/>
+                <set field="workEffortIdFrom" from-field="parameters.workEffortIdFrom"/>
+                <set field="workEffortId" from-field="parameters.workEffortIdTo" default-value="${parameters.workEffortId}"/>
+                <set field="workEffortAssocTypeId" from-field="parameters.workEffortAssocTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <entity-one entity-name="WorkEffortAssoc" value-field="workEffortAssoc"/>
+                <set field="parameters.workEffortId" from-field="workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="EditWorkEffortAndAssoc" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AddWorkEffortAssoc">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffortAssoc"/>
+                <set field="tabButtonItem" value="WorkEffort"/>
+                <set field="labelTitleProperty" value="PageTitleEditWorkEffortAssoc"/>
+                <set field="workEffortIdFrom" from-field="parameters.workEffortIdFrom"/>
+                <entity-one entity-name="WorkEffortAssoc" value-field="workEffortAssoc"/>
+                <set field="donePage" value="ChildWorkEfforts?workEffortId=${workEffortIdFrom}&amp;trail=${workEffortIdFrom}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="h1">
+                            <label text="${uiLabelMap.PageTitleEditWorkEffortAssoc}"/>
+                        </container>
+                        <include-form name="AddWorkEffortAssoc" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditWorkEffortAssoc">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffortAssoc"/>
+                <set field="tabButtonItem" value="WorkEffort"/>
+                <set field="labelTitleProperty" value="PageTitleEditWorkEffortAssoc"/>
+                <set field="workEffortIdTo" from-field="parameters.workEffortIdTo"/>
+                <set field="workEffortIdFrom" from-field="parameters.workEffortIdFrom"/>
+                <set field="workEffortAssocTypeId" from-field="parameters.workEffortAssocTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <entity-one entity-name="WorkEffortAssoc" value-field="workEffortAssoc"/>
+                <set field="donePage" value="ChildWorkEfforts?workEffortId=${workEffortIdFrom}&amp;trail=${workEffortIdFrom}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditWorkEffortAssoc}">
+                            <include-form name="EditWorkEffortAssoc" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListWorkEffortPartyAssigns">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortPartyAssigns"/>
+                <set field="tabButtonItem" value="WorkEffortPartyAssigns"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortPartyAssigns"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffortPartyAssignment" value-field="workEffortPartyAssignment"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortPartyAssignsPanel" title="${uiLabelMap.PageTitleAddWorkEffortPartyAssign}" collapsible="true">
+                            <include-form name="EditWorkEffortPartyAssign" location="component://workeffort/widget/WorkEffortPartyAssignForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortPartyAssigns" location="component://workeffort/widget/WorkEffortPartyAssignForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListWorkEffortFixedAssetAssigns">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortFixedAssetAssigns"/>
+                <set field="labelTitleProperty" from-field="titleProperty"/>
+                <set field="tabButtonItem" value="WorkEffortFixedAssetAssigns"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortFixedAssetAssign" title="${uiLabelMap.PageTitleAddWorkEffortFixedAssetAssign}" collapsible="true">
+                            <include-form name="EditWorkEffortFixedAssetAssign" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortFixedAssetAssigns" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWorkEffortRates">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortAssignmentRates"/>
+                <set field="tabButtonItem" value="WorkEffortRates"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortAssignmentRates"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortRatesPanel" title="${uiLabelMap.PageTitleAddWorkEffortAssignmentRate}" collapsible="true">
+                            <include-form name="AddWorkEffortRate" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortRates" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListWorkEffortCommEvents">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortCommEvents"/>
+                <set field="tabButtonItem" value="WorkEffortCommEvents"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortCommEvents"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortCommEventsPanel" title="${uiLabelMap.PageTitleAddWorkEffortCommEvent}" collapsible="true">
+                            <include-form name="AddWorkEffortCommEvent" location="component://workeffort/widget/WorkEffortCommEventForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortCommEvents" location="component://workeffort/widget/WorkEffortCommEventForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListWorkEffortShopLists">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortShopLists"/>
+                <set field="tabButtonItem" value="WorkEffortShopLists"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortShopLists"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortShopListsPanel" title="${uiLabelMap.PageTitleAddWorkEffortShopList}" collapsible="true">
+                            <include-form name="AddWorkEffortShopList" location="component://workeffort/widget/WorkEffortShopListForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortShopLists" location="component://workeffort/widget/WorkEffortShopListForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListWorkEffortRequests">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortRequests"/>
+                <set field="tabButtonItem" value="WorkEffortRequests"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortRequests"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortRequestsPanel" title="${uiLabelMap.PageTitleAddWorkEffortRequest}" collapsible="true">
+                            <include-form name="AddWorkEffortRequest" location="component://workeffort/widget/WorkEffortRequestForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortRequests" location="component://workeffort/widget/WorkEffortRequestForms.xml"/>
+                        <screenlet id="AddWorkEffortRequestItemPanel" title="${uiLabelMap.PageTitleAddWorkEffortRequestItem}" collapsible="true">
+                            <include-form name="AddWorkEffortRequestItem" location="component://workeffort/widget/WorkEffortRequestForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortRequestItems" location="component://workeffort/widget/WorkEffortRequestForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListWorkEffortRequirements">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortRequirements"/>
+                <set field="tabButtonItem" value="WorkEffortRequirements"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortRequirements"/>
+
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="/workeffort/control/ListWorkEfforts"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortRequirementsPanel" title="${uiLabelMap.PageTitleAddWorkEffortRequirement}" collapsible="true">
+                            <include-form name="AddWorkEffortRequirement" location="component://workeffort/widget/WorkEffortRequirementForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortRequirements" location="component://workeffort/widget/WorkEffortRequirementForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListWorkEffortQuotes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortQuotes"/>
+                <set field="tabButtonItem" value="WorkEffortQuotes"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortQuotes"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortQuotesPanel" title="${uiLabelMap.PageTitleAddWorkEffortQuote}" collapsible="true">
+                            <include-form name="AddWorkEffortQuote" location="component://workeffort/widget/WorkEffortQuoteForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortQuotes" location="component://workeffort/widget/WorkEffortQuoteForms.xml"/>
+                        <screenlet id="AddWorkEffortQuoteItemPanel" title="${uiLabelMap.PageTitleAddWorkEffortQuoteItem}" collapsible="true">
+                            <include-form name="AddWorkEffortQuoteItem" location="component://workeffort/widget/WorkEffortQuoteForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortQuoteItems" location="component://workeffort/widget/WorkEffortQuoteForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListWorkEffortOrderHeaders">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortOrderHeaders"/>
+                <set field="tabButtonItem" value="WorkEffortOrderHeaders"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortOrderHeaders"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortOrderHeadersPanel" title="${uiLabelMap.PageTitleAddWorkEffortOrderHeader}" collapsible="true">
+                            <include-form name="AddWorkEffortOrderHeader" location="component://workeffort/widget/WorkEffortOrderHeaderForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortOrderHeaders" location="component://workeffort/widget/WorkEffortOrderHeaderForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditWorkEffortTimeEntries">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortTimeEntries"/>
+                <set field="tabButtonItem" value="WorkEffortTimeEntries"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortTimeEntries"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <include-form name="ListWorkEffortTimeEntries" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddWorkEffortTimeEntry}">
+                            <include-form name="AddWorkEffortTimeEntry" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddWorkEffortTimeToInvoice}">
+                            <include-form name="AddWorkEffortTimeToInvoice" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddWorkEffortTimeToNewInvoice}">
+                            <include-form name="AddWorkEffortTimeToNewInvoice" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWorkEffortNotes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortNotes"/>
+                <set field="tabButtonItem" value="WorkEffortNotes"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortNotes"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <set field="noteId" from-field="parameters.noteId"/>
+                <entity-one entity-name="WorkEffortNoteAndData" value-field="workEffortNoteAndData"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="add-workeffort-note" title="${uiLabelMap.PageTitleAddWorkEffortNotes}" collapsible="true">
+                            <include-form name="AddWorkEffortNote" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortNotes" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWorkEffortContents">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffortContent"/>
+                <set field="tabButtonItem" value="WorkEffortContents"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortContentsPanel" title="${uiLabelMap.PageTitleAddContent}" collapsible="true">
+                            <include-form name="AddWorkEffortContent" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortContents" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWorkEffortGoodStandards">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffortGoodStandards"/>
+                <set field="tabButtonItem" value="WorkEffortGoodStandards"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortGoodStandardsPanel" title="${uiLabelMap.WorkEffortAddGoodStandard}" collapsible="true">
+                            <include-form name="AddWorkEffortGoodStandard" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortGoodStandards" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWorkEffortReviews">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortReviews"/>
+                <set field="tabButtonItem" value="WorkEffortReviews"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortReviews"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <set field="defaultUserLoginId" from-field="parameters.userLogin.userLoginId"/>
+                <set field="partyId" from-field="parameters.userLogin.partyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortReviewsPanel" title="${uiLabelMap.PageTitleAddWorkEffortReviews}" collapsible="true">
+                            <include-form name="AddWorkEffortReview" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortReviews" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditWorkEffortKeywords">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortKeyword"/>
+                <set field="tabButtonItem" value="WorkEffortKeywords"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortKeyword"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortKeywordsPanel" title="${uiLabelMap.PageTitleAddWorkEffortKeyword}" collapsible="true">
+                            <include-form name="AddWorkEffortKeyword" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortKeywords" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditWorkEffortContactMechs">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWorkEffortContactMechs"/>
+                <set field="tabButtonItem" value="WorkEffortContactMechs"/>
+                <set field="labelTitleProperty" value="PageTitleEditWorkEffortContactMechs"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortContactMechsPanel" title="${uiLabelMap.CommonCreate}" collapsible="true">
+                            <include-form name="AddWorkEffortContactMech" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortContactMechs" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WorkEffortSearchResults">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleSearchResults"/>
+                <script location="component://workeffort/groovyScripts/workeffort/find/WorkEffortSearchResults.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                         <platform-specific>
+                              <html><html-template location="component://workeffort/template/find/WorkEffortSearchResults.ftl"/></html>
+                         </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WorkEffortSearchOptions">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleSearchResults"/>
+                <script location="component://workeffort/groovyScripts/workeffort/find/WorkEffortSearchOptions.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                         <platform-specific>
+                              <html><html-template location="component://workeffort/template/find/WorkEffortSearchOptions.ftl"/></html>
+                         </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditAgreementWorkEffortApplics">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementWorkEffortApplics"/>
+                <set field="tabButtonItem" value="WorkEffortAgreementAppls"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddAccountingAgreementWorkEffortApplicsPanel" title="${uiLabelMap.AccountingAddAgreementWorkEffortApplic}" collapsible="true">
+                            <include-form name="AddAgreementWorkEffortApplic" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListAgreementWorkEffortApplics" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListWorkEffortAttributes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortAttributes"/>
+                <set field="labelTitleProperty" from-field="titleProperty"/>
+                <set field="tabButtonItem" value="WorkEffortAttributes"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortEventAttribute" title="${uiLabelMap.PageTitleAddWorkEffortAttribute}" collapsible="true">
+                            <include-form name="EditWorkEffortAttribute" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortAttributes" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListWorkEffortEventReminders">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListWorkEffortEventReminders"/>
+                <set field="labelTitleProperty" from-field="titleProperty"/>
+                <set field="tabButtonItem" value="WorkEffortEventReminders"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWorkEffortDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AddWorkEffortEventReminder" title="${uiLabelMap.PageTitleAddWorkEffortEventReminder}" collapsible="true">
+                            <include-form name="EditWorkEffortEventReminder" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListWorkEffortEventReminders" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WorkEffortEventReminderEmail">
+        <section>
+            <actions>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <get-related-one value-field="workEffort" relation-name="WorkEffortType" to-value-field="workEffortType"/>
+                <get-related-one value-field="workEffort" relation-name="CurrentStatusItem" to-value-field="currentStatusItem"/>
+                <get-related-one value-field="workEffort" relation-name="WorkEffortPurposeType" to-value-field="workEffortPurposeType"/>
+                <get-related-one value-field="workEffort" relation-name="ScopeEnumeration" to-value-field="scopeEnumeration"/>
+                <entity-and entity-name="WorkEffortPartyAssignView" list="partyAssignments">
+                    <field-map field-name="workEffortId"/>
+                </entity-and>
+                <entity-and entity-name="WorkEffortAndFixedAssetAssign" list="fixedAssetAssignments" filter-by-date="true">
+                    <field-map field-name="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://workeffort/template/workeffort/EventReminderEmail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="iCalendarDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="WorkEffortICalendar"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="workEffort"/></not>
+                            </condition>
+                            <widgets>
+                                <include-menu name="ICalendarTabBar" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <or>
+                                    <if-service-permission service-name="workEffortICalendarPermission" main-action="CREATE" context-map="parameters"/>
+                                    <if-service-permission service-name="workEffortICalendarPermission" main-action="UPDATE" context-map="parameters"/>
+                                </or>
+                            </condition>
+                            <widgets>
+                                <container style="button-bar">
+                                    <link text="${uiLabelMap.CommonCreate}" target="EditICalendar" style="buttontext"/>
+                                </container>
+                                <container style="h1">
+                                    <label text="${title}"/>
+                                </container>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WorkEffortViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindICalendars">
+        <section>
+            <actions>
+                <set field="headerItem" value="WorkEffortICalendar"/>
+                <set field="titleProperty" value="WorkEffortICalendarFind"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="workEffortManagerPermission" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <container style="h1">
+                                    <label text="${uiLabelMap.WorkEffortICalendarFind}"/>
+                                </container>
+                                <container style="button-bar">
+                                    <link text="${uiLabelMap.CommonCreate}" target="EditICalendar" style="buttontext"/>
+                                    <link text="${uiLabelMap.CommonHelp}" target="ICalendarHelp" style="buttontext"/>
+                                </container>
+                                <include-form name="ListIcalendars" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WorkEffortViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditICalendar">
+        <section>
+            <actions>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap"/>
+                <set field="tabButtonItem" value="WorkEffort"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <set field="title" value="${uiLabelMap.WorkEffortICalendarEdit} - ${workEffort.workEffortName}"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-empty field="workEffort"/>
+                    </condition>
+                    <actions>
+                        <set field="title" value="${uiLabelMap.WorkEffortICalendarAdd}"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <decorator-screen name="iCalendarDecorator" location="${parameters.iCalendarDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <if-empty field="workEffort"/>
+                                    </condition>
+                                    <actions>
+                                        <set field="quickAssignPartyId" from-field="userLogin.partyId"/>
+                                    </actions>
+                                    <widgets>
+                                        <include-form name="EditICalendar" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <include-form name="EditICalendar" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                    </fail-widgets>
+                                </section>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditICalendarData">
+        <section>
+            <actions>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap"/>
+                <set field="tabButtonItem" value="ICalendarData"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <get-related-one value-field="workEffort" relation-name="WorkEffortIcalData" to-value-field="iCalData"/>
+                <set field="title" value="${uiLabelMap.WorkEffortICalendarEditData} - ${workEffort.workEffortName}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="iCalendarDecorator" location="${parameters.iCalendarDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <include-form name="EditICalendarData" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ICalendarChildren">
+        <section>
+            <actions>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap"/>
+                <set field="tabButtonItem" value="WorkEffortAssocs"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <set field="trail" from-field="requestParameters.trail"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <set field="title" value="${uiLabelMap.PageTitleTreeWorkEfforts} - ${workEffort.workEffortName}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="iCalendarDecorator" location="${parameters.iCalendarDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <include-tree name="ICalendarTree" location="component://workeffort/widget/WorkEffortTrees.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ICalendarParties">
+        <section>
+            <actions>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap"/>
+                <set field="tabButtonItem" value="WorkEffortPartyAssigns"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <set field="title" value="${uiLabelMap.WorkEffortICalendarAddParty} - ${workEffort.workEffortName}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="iCalendarDecorator" location="${parameters.iCalendarDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <include-form name="EditICalendarPartyAssign" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                <include-form name="ListICalendarPartyAssigns" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ICalendarFixedAssets">
+        <section>
+            <actions>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap"/>
+                <set field="tabButtonItem" value="WorkEffortFixedAssetAssigns"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <set field="title" value="${uiLabelMap.WorkEffortICalendarAddFixedAsset} - ${workEffort.workEffortName}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="iCalendarDecorator" location="${parameters.iCalendarDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <include-form name="EditICalendarFixedAssetAssign" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                                <include-form name="ListICalendarFixedAssetAssigns" location="component://workeffort/widget/WorkEffortForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ICalendarHelp">
+        <section>
+            <actions>
+                <set field="layoutSettings.styleSheets[+0]" value="/images/wiki-content.css" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap"/>
+                <set field="tabButtonItem" value="ICalendarHelp"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <set field="title" value="${uiLabelMap.WorkEffortICalendarHelp}"/>
+                <set field="document" from-field="dom:readHtmlDocument(uiLabelMap.WorkEffortICalendarHelpUrl)"/>
+                <set field="wikiDivList" from-field="document[&quot;//DIV[@class='wiki-content']&quot;]"/>
+                <set field="wikiContent" from-field="dom:toHtmlString(wikiDivList[0], 'UTF-8', true, 2)"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="iCalendarDecorator" location="${parameters.iCalendarDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://workeffort/template/workeffort/ICalendarHelp.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+</screens>

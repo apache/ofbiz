@@ -1,0 +1,1292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="ListCompanies" type="list" title="Internal Organizations" list-name="parties"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="partyId" title="${uiLabelMap.AccountingCompanies}"><display-entity entity-name="PartyGroup" description="${groupName}"/></field>
+        <field name="setup" title=" " use-when="hasPrefPermission" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.AccountingSetup}" target="AdminMain">
+                <parameter param-name="organizationPartyId" from-field="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="accounting" title=" " use-when="hasBasicPermission" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.AccountingAccounting}" target="PartyAccountsSummary">
+                <parameter param-name="organizationPartyId" from-field="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="importexport" title=" " use-when="hasBasicPermission" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonImportExport}" target="ImportExport">
+                <parameter param-name="organizationPartyId" from-field="partyId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="ListGlAccountOrganization" list-name="listIt" target="" title="" type="list" view-size="50"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate-target="ListGlAccountOrganization">
+        <actions>
+            <entity-condition entity-name="GlAccountOrganizationAndClass">
+                <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                <order-by field-name="accountCode"/>
+            </entity-condition>
+        </actions>
+        <field name="accountCode" title="${uiLabelMap.CommonCode}" widget-style="buttontext">
+            <hyperlink description="${accountCode}" target="GlAccountNavigate" also-hidden="false">
+                <parameter param-name="glAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
+        <field name="parentGlAccountId">
+            <display-entity entity-name="GlAccount" description="${accountName}" key-field-name="glAccountId">
+                <sub-hyperlink target="GlAccountNavigate" description="[${parentGlAccountId}]" use-when="parentGlAccountId!=null">
+                    <parameter param-name="glAccountId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="glAccountTypeId"><display-entity entity-name="GlAccountType"/></field>
+        <field name="glAccountClassId"><display-entity entity-name="GlAccountClass"/></field>
+        <field name="glResourceTypeId"><display-entity entity-name="GlResourceType"/></field>
+        <field name="glXbrlClassId"><display-entity entity-name="GlXbrlClass"/></field>
+
+        <field name="description"><display/></field>
+        <field name="productId"><display-entity entity-name="Product"/></field>
+        <field name="externalId"><display/></field>
+    </form>
+
+    <form name="AddCompany" type="single" target="AdminMain" title="" >
+        <field name="organizationPartyId">
+            <drop-down>
+                <entity-options description="${groupName}[${partyId}]" entity-name="PartyRoleAndPartyDetail" key-field-name="partyId">
+                    <entity-constraint name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.AccountingNewCompany}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ExportInvoice" type="single" target="ExportInvoiceCsv.csv" title="" >
+        <field name="organizationPartyId"><hidden value="${parameters.organizationPartyId}"/></field>
+        <field name="invoiceId"><lookup target-form-name="LookupInvoice"/></field>
+        <field name="startDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ExportInvoiceCsv" list-name="listIt" target="" title="" type="list" view-size="99999"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate="false">
+        <actions>
+            <entity-condition entity-name="InvoiceExport">
+                <condition-list combine="and">
+                    <condition-list combine="or">
+                        <condition-expr field-name="partyIdFrom" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="partyId" operator="equals" from-field="organizationPartyId"/>
+                    </condition-list>
+                    <condition-expr field-name="invoiceDate" operator="greater-equals" from-field="parameters.startDate" ignore-if-empty="true"/>
+                    <condition-expr field-name="invoiceId" operator="equals" from-field="parameters.invoiceId" ignore-if-empty="true"/>
+                </condition-list>
+                <order-by field-name="invoiceId"/>
+            </entity-condition>
+        </actions>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceId" title="invoiceId"><display/></field>
+        <field name="invoiceTypeId" title="invoiceTypeId"><display/></field>
+        <field name="invoiceDate" title="invoiceDate"><display/></field>
+        <field name="dueDate" title="dueDate"><display/></field>
+        <field name="partyIdFrom" title="partyIdFrom"><display/></field>
+        <field name="partyIdFromTrans" title="partyIdFromTrans"><display/></field>
+        <field name="partyId" title="partyId"><display/></field>
+        <field name="partyIdTrans" title="partyIdTrans"><display/></field>
+        <field name="currencyUomId" title="currencyUomId"><display/></field>
+        <field name="description" title="description"><display/></field>
+        <field name="referenceNumber" title="referenceNumber"><display/></field>
+        <field name="invoiceItemSeqId" title="invoiceItemSeqId"><display/></field>
+        <field name="invoiceItemTypeId" title="invoiceItemTypeId"><display/></field>
+        <field name="productId" title="productId"><display/></field>
+        <field name="productIdTrans" title="productIdTrans"><display/></field>
+        <field name="itemDescription" title="itemDescription"><display/></field>
+        <field name="quantity" title="quantity"><display/></field>
+        <field name="amount" title="amount"><display/></field>
+    </form>
+    
+    <form name="ImportInvoice" type="upload" target="ImportInvoice" title="" >
+        <field name="organizationPartyId"><hidden value="${parameters.organizationPartyId}"/></field>
+        <field name="uploadedFile"><file/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpload}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AssignGlAccount" type="single" target="createGlAccountOrganization" title="" default-map-name="account"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glAccountId">
+            <drop-down>
+                <entity-options entity-name="GlAccount" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="submitButton" title="${uiLabelMap.AccountingCreateAssignment}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="PartyAcctgPreference" type="single" target="createPartyAcctgPreference" default-map-name="aggregatedPartyAcctgPreference"
+            header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <service service-name="getPartyAccountingPreferences" result-map="result">
+                <field-map field-name="organizationPartyId"/>
+            </service>
+            <set field="aggregatedPartyAcctgPreference" from-field="result.partyAccountingPreference" type="Object"/>
+        </actions>
+        <alt-target use-when="partyAcctgPreference!=null" target="updatePartyAcctgPreference"/>
+        <auto-fields-service service-name="createPartyAcctgPreference"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <!-- the partyId is always displayed -->
+        <field name="partyId" title="${uiLabelMap.AccountingOrganizationPartyId}"><display/></field>
+        <!-- if there is no partyAcctgPreference yet, then we show drop-downs for the fields and a submit button -->
+        <field name="fiscalYearStartMonth" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartMonth')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <option key="1" description="${uiLabelMap.AccountingFiscalMonth01}"/>
+                <option key="2" description="${uiLabelMap.AccountingFiscalMonth02}"/>
+                <option key="3" description="${uiLabelMap.AccountingFiscalMonth03}"/>
+                <option key="4" description="${uiLabelMap.AccountingFiscalMonth04}"/>
+                <option key="5" description="${uiLabelMap.AccountingFiscalMonth05}"/>
+                <option key="6" description="${uiLabelMap.AccountingFiscalMonth06}"/>
+                <option key="7" description="${uiLabelMap.AccountingFiscalMonth07}"/>
+                <option key="8" description="${uiLabelMap.AccountingFiscalMonth08}"/>
+                <option key="9" description="${uiLabelMap.AccountingFiscalMonth09}"/>
+                <option key="10" description="${uiLabelMap.AccountingFiscalMonth10}"/>
+                <option key="11" description="${uiLabelMap.AccountingFiscalMonth11}"/>
+                <option key="12" description="${uiLabelMap.AccountingFiscalMonth12}"/>
+            </drop-down>
+        </field>
+        <field name="fiscalYearStartDay" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartDay')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <option key="1"/><option key="2"/><option key="3"/><option key="4"/><option key="5"/>
+                <option key="6"/><option key="7"/><option key="8"/><option key="9"/><option key="10"/>
+                <option key="11"/><option key="12"/><option key="13"/><option key="14"/><option key="15"/>
+                <option key="16"/><option key="17"/><option key="18"/><option key="19"/><option key="20"/>
+                <option key="21"/><option key="22"/><option key="23"/><option key="24"/><option key="25"/>
+                <option key="26"/><option key="27"/><option key="28"/><option key="29"/><option key="30"/>
+                <option key="31"/>
+            </drop-down>
+        </field>
+        <field name="taxFormId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('taxFormId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="TAX_FORMS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="cogsMethodId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('cogsMethodId')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="COGS_METHODS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="baseCurrencyUomId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('baseCurrencyUomId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="invoiceIdPrefix" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('invoiceIdPrefix')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <text maxlength="10" size="5"/>
+        </field>
+        <field name="oldInvoiceSequenceEnumId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldInvoiceSequenceEnumId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="INVOICE_SEQMD"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="useInvoiceIdForReturns" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('useInvoiceIdForReturns')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down allow-empty="true">
+                <option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/>
+            </drop-down>
+        </field>
+        <field name="quoteIdPrefix" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('quoteIdPrefix')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <text maxlength="10" size="5"/>
+        </field>
+        <field name="oldQuoteSequenceEnumId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldQuoteSequenceEnumId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="QUOTE_SEQMD"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="orderIdPrefix" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('orderIdPrefix')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <text maxlength="10" size="5"/>
+        </field>
+        <field name="oldOrderSequenceEnumId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldOrderSequenceEnumId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="ORDER_SEQMD"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="createButton" use-when="partyAcctgPreference==null" title="${uiLabelMap.CommonAdd}"><submit/></field>
+        <field name="updateButton" use-when="partyAcctgPreference!=null" title="${uiLabelMap.CommonUpdate}"><submit/></field>
+
+        <!-- otherwise, we just display the fields.  there is no submit button because we shouldn't try to create it again and don't support an update option right now-->
+        <field name="fiscalYearStartMonth" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('fiscalYearStartMonth')==null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartMonth')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="fiscalYearStartDay" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+            if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('fiscalYearStartDay')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartDay')!=null)return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="taxFormId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('taxFormId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('taxFormId')!=null)return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="cogsMethodId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+            if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('cogsMethodId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('cogsMethodId')!=null)return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="baseCurrencyUomId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('baseCurrencyUomId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('baseCurrencyUomId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="invoiceIdPrefix" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('invoiceIdPrefix')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('invoiceIdPrefix')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="oldInvoiceSequenceEnumId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('oldInvoiceSequenceEnumId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldInvoiceSequenceEnumId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="useInvoiceIdForReturns" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('useInvoiceIdForReturns')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('useInvoiceIdForReturns')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="oldQuoteSequenceEnumId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('oldQuoteSequenceEnumId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldQuoteSequenceEnumId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="quoteIdPrefix" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('quoteIdPrefix')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('quoteIdPrefix')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="lastQuoteNumber" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('lastQuoteNumber')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastQuoteNumber')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="oldOrderSequenceEnumId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('oldOrderSequenceEnumId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldOrderSequenceEnumId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="orderIdPrefix" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('orderIdPrefix')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('orderIdPrefix')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="lastOrderNumber" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('lastOrderNumber')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastOrderNumber')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+
+        <!-- these 2 are ONLY displayed, never allow manual editing -->
+        <field name="lastInvoiceNumber" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceNumber')!=null) ||
+                (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('lastInvoiceNumber')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceNumber')!=null))return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="lastInvoiceRestartDate" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceRestartDate')!=null) ||
+                (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('lastInvoiceRestartDate')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceRestartDate')!=null))return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <!-- these 2 are always can be updated -->
+        <field name="refundPaymentMethodId" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+                if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('refundPaymentMethodId')!=null) ||
+                (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('refundPaymentMethodId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('refundPaymentMethodId')!=null))return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="PaymentMethod" key-field-name="paymentMethodId">
+                    <entity-constraint name="partyId" operator="equals" env-name="organizationPartyId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="errorGlJournalId" tooltip="${groovy: import org.apache.ofbiz.base.util.UtilProperties;
+            if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('errorGlJournalId')!=null) ||
+            (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('errorGlJournalId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('errorGlJournalId')!=null))return 
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlJournal" key-field-name="glJournalId" description="${glJournalName} [${glJournalId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="glJournalName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+    </form>
+
+    <!-- forms for managing FX rates -->
+    <form name="ListConversions" type="list" list-name="conversions"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="uomId" title="${uiLabelMap.CommonFrom} ${uiLabelMap.CommonCurrency}"><display/></field>
+        <field name="uomIdTo" title="${uiLabelMap.CommonTo} ${uiLabelMap.CommonCurrency}"><display/></field>
+        <field name="purposeEnumId" title="${uiLabelMap.CommonPurpose}"><display-entity entity-name="Enumeration" key-field-name="enumId"/></field>
+        <field name="conversionFactor"><display/></field>
+        <field name="fromDate" title="${uiLabelMap.CommonFrom}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThru}"><display/></field>
+    </form>
+
+    <form name="UpdateFXConversion" type="single" target="updateFXConversion" default-service-name="updateFXConversion"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="uomId" title="${uiLabelMap.CommonFrom} ${uiLabelMap.CommonCurrency}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="uomIdTo" title="${uiLabelMap.CommonTo} ${uiLabelMap.CommonCurrency}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="purposeEnumId" title="${uiLabelMap.CommonPurpose}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="CONVERSION_PURPOSE"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="conversionFactor"><text/></field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.AccountingUpdateFX}"><submit/></field>
+    </form>
+
+
+    <form name="ListGlAccountTypeDefaults" type="list" target="" list-name="glAccountTypeDefaults"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="GlAccountTypeDefault" list="glAccountTypeDefaults">
+                <condition-list>
+                    <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                </condition-list>
+                <order-by field-name="glAccountTypeId"/>
+            </entity-condition>
+        </actions>
+        <field name="glAccountTypeId">
+            <display-entity entity-name="GlAccountType"/>
+        </field>
+        <field name="glAccountId">
+            <display-entity entity-name="GlAccount" description="${accountCode} ${accountName}">
+                <sub-hyperlink target="GlAccountNavigate" description="${glAccountId}">
+                    <parameter param-name="glAccountId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="remove" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeGlAccountTypeDefault">
+                <parameter param-name="glAccountTypeId"/><parameter param-name="glAccountId"/><parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditGlAccountTypeDefault" type="single" title="" target="createGlAccountTypeDefault"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createGlAccountTypeDefault"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="glAccountTypeId" title="${uiLabelMap.FormFieldTitle_glAccountType}">
+            <drop-down>
+                <entity-options entity-name="GlAccountType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}"><submit/></field>
+    </form>
+
+    <!-- forms for Sales invoice Itemtypes to GLAccount number -->
+    <form name="ListSalInvoiceItemTypeGlAssignments" type="list" list-name="invoiceItemTypes"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <script location="component://accounting/groovyScripts/admin/ListInvoiceItemTypesGlAccount.groovy"/>
+        </actions>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId"><hidden/></field>
+        <field name="description"><display/></field>
+        <field name="defaultGlAccountId">
+            <hyperlink description="${defaultGlAccountId}" target="GlAccountNavigate">
+                <parameter param-name="glAccountId" from-field="defaultGlAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="overrideGlAccountId"><display/></field>
+        <field name="activeGlDescription"><display/></field>
+        <field name="remove" title=" " widget-style="buttontext" use-when="defaultAccount==false">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeSalInvoiceItemTypeGlAssignment">
+                <parameter param-name="organizationPartyId"/><parameter param-name="invoiceItemTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddSalInvoiceItemTypeGlAssignment" type="single" target="addSalInvoiceItemTypeGlAssignment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="GlAccountClass" value-field="revenueGlAccountClass">
+                <field-map field-name="glAccountClassId" value="REVENUE"/>
+            </entity-one>
+            <set field="revenueAccountClassIds" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(revenueGlAccountClass)}" type="List"/>
+        </actions>
+        <auto-fields-service service-name="addInvoiceItemTypeGlAssignment"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId">
+            <drop-down allow-empty="false" >
+                <entity-options entity-name="InvoiceItemType">
+                    <entity-constraint name="invoiceItemTypeId" operator="like" value="INV_%"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingOverrideRevenueGlAccountId}">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="in" env-name="revenueAccountClassIds"></entity-constraint>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonSave}"><submit/></field>
+    </form>
+
+    <!-- forms for Purchase invoice Itemtypes to GLAccount number -->
+    <form name="ListPurInvoiceItemTypeGlAssignments" type="list" list-name="invoiceItemTypes" default-map-name="iTypes"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="invItemTypePrefix" value="PINV"/>
+            <script location="component://accounting/groovyScripts/admin/ListInvoiceItemTypesGlAccount.groovy"/>
+        </actions>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId"><hidden/></field>
+        <field name="description"><display/></field>
+        <field name="defaultGlAccountId">
+            <hyperlink description="${defaultGlAccountId}" target="GlAccountNavigate">
+                <parameter param-name="glAccountId" from-field="defaultGlAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="overrideGlAccountId" title="${uiLabelMap.AccountingInvoiceOverrideExpenseGlAccountId}"><display/></field>
+        <field name="activeGlDescription"><display/></field>
+        <field name="remove" title=" " widget-style="buttontext" use-when="defaultAccount==false">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removePurInvoiceItemTypeGlAssignment">
+                <parameter param-name="organizationPartyId"/><parameter param-name="invoiceItemTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddPurInvoiceItemTypeGlAssignment" type="single" target="addPurInvoiceItemTypeGlAssignment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="GlAccountClass" value-field="expenseGlAccountClass">
+                <field-map field-name="glAccountClassId" value="EXPENSE"/>
+            </entity-one>
+            <set field="expenseAccountClassIds" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(expenseGlAccountClass)}" type="List"/>
+        </actions>
+        <auto-fields-service service-name="addInvoiceItemTypeGlAssignment"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId" title="${uiLabelMap.AccountingInvoicePurchaseItemType}">
+            <drop-down allow-empty="false" >
+                <entity-options entity-name="InvoiceItemType">
+                    <entity-constraint name="invoiceItemTypeId" operator="like" value="PINV%"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingInvoiceOverrideExpenseGlAccountId}">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="in" env-name="expenseAccountClassIds"></entity-constraint>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}"><submit/></field>
+    </form>
+
+    <!-- forms for payment types to GLAccount type -->
+    <form name="ListPaymentTypeGlAssignments" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="PaymentGlAccountTypeMap">
+                <condition-expr field-name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                <order-by field-name="paymentTypeId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="PaymentGlAccountTypeMap" default-field-type="display"/>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}"><display-entity entity-name="PaymentType"/></field>
+        <field name="glAccountTypeId" title="${uiLabelMap.FormFieldTitle_glAccountType}"><display-entity entity-name="GlAccountType"/></field>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="remove" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removePaymentTypeGlAssignment">
+                <parameter param-name="organizationPartyId"/><parameter param-name="paymentTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddPaymentTypeGlAssignment" type="single" target="addPaymentTypeGlAssignment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addPaymentTypeGlAssignment"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}">
+            <drop-down>
+                <entity-options entity-name="PaymentType" key-field-name="paymentTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountTypeId" title="${uiLabelMap.FormFieldTitle_glAccountType}">
+            <drop-down>
+                <entity-options entity-name="GlAccountType" key-field-name="glAccountTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonSave}"><submit/></field>
+    </form>
+    <!-- forms for payment method Type to GLAccounts -->
+    <form name="ListPaymentMethodTypeGlAssignments" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="PaymentMethodTypeGlAccount">
+                <condition-expr field-name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                <order-by field-name="paymentMethodTypeId"/>
+            </entity-condition>
+        </actions>
+        <row-actions>
+            <entity-one entity-name="PaymentMethodType" value-field="paymentMethodType"/>
+            <set field="defaultGlAccountId" value="${paymentMethodType.defaultGlAccountId}"/>
+            <entity-one entity-name="GlAccount" value-field="glAccount"/>
+            <set field="description" value="${glAccount.description}"/>
+        </row-actions>
+        <auto-fields-entity entity-name="PaymentMethodTypeGlAccount" default-field-type="display"/>
+        <field name="paymentMethodTypeId"><display-entity entity-name="PaymentMethodType"/></field>
+        <field name="glAccountId">
+            <display-entity entity-name="GlAccount" description="${accountName}">
+                <sub-hyperlink target="GlAccountNavigate" description="[${glAccountId}]">
+                    <parameter param-name="glAccountId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="defaultGlAccountId">
+            <hyperlink description="${defaultGlAccountId} : ${description}" target="GlAccountNavigate">
+                <parameter param-name="glAccountId" from-field="defaultGlAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="remove" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removePaymentMethodTypeGlAssignment">
+                <parameter param-name="organizationPartyId"/><parameter param-name="paymentMethodTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddPaymentMethodTypeGlAssignment" type="single" target="addPaymentMethodTypeGlAssignment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addPaymentMethodTypeGlAssignment"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="paymentMethodTypeId">
+            <drop-down>
+                <entity-options entity-name="PaymentMethodType" key-field-name="paymentMethodTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonSave}"><submit/></field>
+    </form>
+
+    <!-- Accounting Time Period forms-->
+    <form name="ListClosedTimePeriods" type="list" list-name="closedTimePeriods"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="CustomTimePeriod" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="isClosed"><hidden/></field>
+        <field name="periodTypeId">
+          <display-entity entity-name="PeriodType"/>
+        </field>
+        <field name="parentPeriodId">
+          <display-entity entity-name="CustomTimePeriod" key-field-name="customTimePeriodId" description="[${customTimePeriodId}] ${periodName}: ${fromDate} - ${thruDate}"/>
+        </field>
+    </form>
+    <form name="ListOpenTimePeriods" type="list" list-name="openTimePeriods"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="CustomTimePeriod" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="isClosed"><hidden/></field>
+        <field name="periodTypeId">
+          <display-entity entity-name="PeriodType"/>
+        </field>
+        <field name="parentPeriodId">
+          <display-entity entity-name="CustomTimePeriod" key-field-name="customTimePeriodId" description="[${customTimePeriodId}] ${periodName}: ${fromDate} - ${thruDate}"/>
+        </field>
+        <field name="close" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonClose}" target="closeFinancialTimePeriod">
+                <parameter param-name="organizationPartyId"/><parameter param-name="customTimePeriodId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="CreateTimePeriod" type="single" title="" target="createCustomTimePeriod"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createCustomTimePeriod"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="isClosed">
+            <drop-down>
+                <option description="${uiLabelMap.CommonNo}" key="N"/>
+                <option description="${uiLabelMap.CommonYes}" key="Y"/>
+            </drop-down>
+        </field>
+        <field name="parentPeriodId">
+            <drop-down allow-empty="true">
+                <list-options list-name="openTimePeriods" key-name="customTimePeriodId" description="[${customTimePeriodId}] ${periodName}: ${fromDate} - ${thruDate}"/>
+            </drop-down>
+        </field>
+        <field name="periodTypeId">
+            <drop-down>
+                <entity-options entity-name="PeriodType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}"><submit/></field>
+    </form>
+
+    <form name="EditGlJournal" type="single" target="createGlJournal" title="" default-map-name="glJournal"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="glJournal!=null" target="updateGlJournal"/>
+        <auto-fields-service service-name="createGlJournal"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glJournalId" use-when="glJournal!=null"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+    <form name="ListGlJournals" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="GlJournal">
+                <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                <order-by field-name="glJournalId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="GlJournal" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glJournalId" widget-style="buttontext">
+            <hyperlink description="${glJournalId}" target="SetupGlJournals">
+                <parameter param-name="organizationPartyId"/><parameter param-name="glJournalId"/>
+            </hyperlink>
+        </field>
+        <field name="remove" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteGlJournal">
+                <parameter param-name="organizationPartyId"/><parameter param-name="glJournalId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="ListProductGlAccounts" type="list" target="updateProductGlAccount" list-name="productGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateProductGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glAccountTypeId"><display-entity entity-name="GlAccountType"/></field>
+        <field name="glAccountId" title="${uiLabelMap.ProductGlAccount}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteProductGlAccount">
+                <parameter param-name="organizationPartyId"/><parameter param-name="productId"/><parameter param-name="glAccountTypeId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddProductGlAccount" type="single" target="createProductGlAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glAccountTypeId" title="${uiLabelMap.ProductAccountType}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="GlAccountType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.ProductGlAccount}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productId" title="${uiLabelMap.AccountingProductId}">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListFinAccountTypeGlAccounts" type="list" target="updateFinAccountTypeGlAccount" list-name="finAccountTypeGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateFinAccountTypeGlAccount"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="finAccountTypeId"><display-entity entity-name="FinAccountType"/></field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteFinAccountTypeGlAccount">
+                <parameter param-name="organizationPartyId"/><parameter param-name="finAccountTypeId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddFinAccountTypeGlAccount" type="single" target="createFinAccountTypeGlAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="finAccountTypeId" title="${uiLabelMap.FormFieldTitle_finAccountTypeId}">
+            <drop-down allow-empty="false">
+                <list-options key-name="finAccountTypeId" list-name="finAccountTypes"/>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListProductCategoryGlAccounts" type="list" target="updateProductCategoryGlAccount" list-name="productCategoryGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateProductCategoryGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glAccountTypeId"><display-entity entity-name="GlAccountType"/></field>
+        <field name="glAccountId" title="${uiLabelMap.ProductGlAccount}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteProductCategoryGlAccount">
+                <parameter param-name="organizationPartyId"/><parameter param-name="productCategoryId"/><parameter param-name="glAccountTypeId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddProductCategoryGlAccount" type="single" target="createProductCategoryGlAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glAccountTypeId" title="${uiLabelMap.ProductAccountType}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="GlAccountType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.ProductGlAccount}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productCategoryId" title="${uiLabelMap.ProductProductCategoryId}">
+            <lookup target-form-name="LookupProductCategory"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListVarianceReasonGlAccounts" type="list" target="updateVarianceReasonGlAccount" list-name="varianceReasonGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateVarianceReasonGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="varianceReasonId"><display-entity entity-name="VarianceReason"/></field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteVarianceReasonGlAccount">
+                <parameter param-name="organizationPartyId"/><parameter param-name="varianceReasonId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddVarianceReasonGlAccount" type="single" target="createVarianceReasonGlAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="varianceReasonId" title="${uiLabelMap.FormFieldTitle_varianceReasonId}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="VarianceReason">
+                    <entity-order-by field-name="varianceReasonId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.FormFieldTitle_glAccountTypeId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListCreditCardTypeGlAccounts" type="list" target="updateCreditCardTypeGlAccount" list-name="creditCardTypeGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateCreditCardTypeGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteCreditCardTypeGlAccount">
+                <parameter param-name="organizationPartyId"/><parameter param-name="cardType"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddCreditCardTypeGlAccount" type="single" target="createCreditCardTypeGlAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="cardType">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Enumeration" key-field-name="enumId" description="${enumCode}">
+                    <entity-constraint name="enumTypeId" operator="equals" value="CREDIT_CARD_TYPE"/>
+                    <entity-order-by field-name="enumId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListTaxAuthorityGlAccounts" type="list" target="updateOrganizationTaxAuthorityGlAccount" list-name="taxAuthorityGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <auto-fields-service service-name="updateTaxAuthorityGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="taxAuthGeoId" title="${uiLabelMap.AccountingTaxAuthorityGeo}">
+            <display-entity entity-name="Geo" key-field-name="geoId" description="[${geoId}] ${geoName}"/>
+        </field>
+        <field name="taxAuthPartyId" title="${uiLabelMap.AccountingTaxAuthorityParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink description="${taxAuthPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app" link-style="buttontext">
+                    <parameter param-name="partyId" from-field="taxAuthPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteOrganizationTaxAuthorityGlAccount">
+                <parameter param-name="organizationPartyId"/><parameter param-name="taxAuthGeoId"/><parameter param-name="taxAuthPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddTaxAuthorityGlAccount" type="list" target="createOrganizationTaxAuthorityGlAccount" list-name="taxAuthorityHavingNoGlAccountList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="taxAuthGeoId" title="${uiLabelMap.AccountingTaxAuthorityGeo}">
+            <display-entity entity-name="Geo" key-field-name="geoId" description="[${geoId}] ${geoName}"/>
+        </field>
+        <field name="taxAuthPartyId" title="${uiLabelMap.AccountingTaxAuthorityParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink description="${taxAuthPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app" link-style="buttontext">
+                    <parameter param-name="partyId" from-field="taxAuthPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListPartyGlAccounts" type="list" target="updatePartyGlAccount" list-name="partyGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updatePartyGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="partyId">
+            <hyperlink description="${partyId}" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePartyGlAccount">
+                <parameter param-name="organizationPartyId"/><parameter param-name="partyId"/><parameter param-name="glAccountId"/><parameter param-name="roleTypeId"/><parameter param-name="glAccountTypeId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddPartyGlAccount" type="single" target="createPartyGlAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createPartyGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId" title="${uiLabelMap.FormFieldTitle_roleTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RoleType" key-field-name="roleTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountTypeId" title="${uiLabelMap.FormFieldTitle_glAccountTypeId}">
+            <drop-down>
+                <entity-options entity-name="GlAccountType" key-field-name="glAccountTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListGlAccountOrgCsv" list-name="listIt" target="" title="" type="list" view-size="99999"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate="false">
+        <actions>
+            <entity-condition entity-name="GlAccountOrganizationAndClass">
+                <condition-expr field-name="organizationPartyId" value="${groovy:parameters.get('ApplicationDecorator|organizationPartyId')}"/>
+                <order-by field-name="glAccountId"/>
+            </entity-condition>
+        </actions>
+        <field name="glAccountId"><display description="${glAccountId}"/></field>
+        <field name="glAccountTypeId"><display-entity entity-name="GlAccountType"/></field>
+        <field name="glAccountClassId"><display-entity entity-name="GlAccountClass" key-field-name="glAccountClassId"/></field>
+        <field name="glResourceTypeId"><display-entity entity-name="GlResourceType" key-field-name="glResourceTypeId"/></field>
+        <field name="glXbrlClassId"><display-entity entity-name="GlXbrlClass" key-field-name="glXbrlClassId"/></field>
+        <field name="parentGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${parentGlAccountId}"/></field>            
+        <field name="accountCode" ><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode}"/></field>
+        <field name="accountName" ><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
+        <field name="description"><display description="${description}"/></field>
+        <field name="productId"><display description="${productId}"/></field>
+    </form>
+    
+    <form name="FindGlAccountCategory" type="single" target="FindGlAccountCategory" default-entity-name="GlAccountCategory">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="glAccountCategoryId"><text-find/></field>
+        <field name="glAccountCategoryTypeId" title="${uiLabelMap.FormFieldTitle_glAccountCategoryType}">
+            <drop-down>
+                <entity-options entity-name="GlAccountCategoryType" key-field-name="glAccountCategoryTypeId"/>
+            </drop-down>
+        </field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListGlAccountCategory" type="list" list-name="listIt" paginate-target="FindGlAccountCategory" default-entity-name="GlAccountCategory" separate-columns="true"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="GlAccountCategory"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="glAccountCategoryId" widget-style="buttontext">
+            <hyperlink description="${glAccountCategoryId}" target="EditGlAccountCategory" also-hidden="false">
+                <parameter param-name="glAccountCategoryId"/>
+                <parameter param-name="glAccountCategoryTypeId"/>
+            </hyperlink>
+        </field>
+        <field name="glAccountCategoryTypeId"><display-entity entity-name="GlAccountCategoryType"/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}" sort-field="true"><display/></field>
+    </form>
+
+    <form name="EditGlAccountCategory" type="single"  target="updateGlAccountCategory" default-map-name="glAccountCategory">
+        <alt-target use-when="glAccountCategory==null" target="createGlAccountCategory"/>
+        <auto-fields-entity entity-name="GlAccountCategory" default-field-type="edit"/>
+        <field name="glAccountCategoryId" use-when="glAccountCategoryId!=null"><display/></field>
+        <field name="glAccountCategoryId" use-when="glAccountCategoryId==null"><hidden/></field>
+        <field name="glAccountCategoryTypeId" title="${uiLabelMap.FormFieldTitle_glAccountCategoryType}">
+            <drop-down>
+                <entity-options entity-name="GlAccountCategoryType" key-field-name="glAccountCategoryTypeId"/>
+            </drop-down>
+        </field>
+        <field name="submit" use-when="glAccountCategory==null" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+        <field name="submit" use-when="glAccountCategory!=null" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListGlAccountCategoryMember" type="list" list-name="glAccountCategoryMemberList" target="updateGlAccountCategoryMember">
+        <actions>
+            <entity-condition entity-name="GlAccountCategoryMember" list="glAccountCategoryMemberList">
+                <condition-expr field-name="glAccountCategoryId" from-field="glAccountCategoryId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="GlAccountCategoryMember" default-field-type="edit"/>
+        <field name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${glAccountId}-${accountName}"/></field>
+        <field name="glAccountCategoryId"><display-entity entity-name="GlAccountCategory"/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="deleteLink" title="" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteGlAccountCategoryMember" also-hidden="false">
+                <parameter param-name="glAccountId" from-field="glAccountId"/>
+                <parameter param-name="glAccountCategoryId" from-field="glAccountCategoryId"/>
+                <parameter param-name="fromDate" from-field="fromDate"/>
+            </hyperlink>
+        </field>
+        
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddGlAccountCategoryMember" type="single" target="createGlAccountCategoryMember">
+        <field name="glAccountCategoryId"><display/></field>
+        <field name="glAccountId">
+            <drop-down allow-empty="false">
+                <entity-options description="${glAccountId}" entity-name="GlAccount"/>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="amountPercentage"><text/></field>
+        <field name="submit" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+    <form name="AddFixedAssetTypeGlAccount" type="single" target="createFixedAssetTypeGlAccount" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createFixedAssetTypeGlAccount" default-field-type="edit"/>
+        <field name="fixedAssetId">
+            <drop-down allow-empty="false">
+                <option key="_NA_" description="${uiLabelMap.CommonAll}"/>
+                <entity-options entity-name="FixedAsset" description="${fixedAssetId} - ${fixedAssetName}">
+                    <entity-constraint name="partyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="fixedAssetId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fixedAssetTypeId">
+            <drop-down allow-empty="false">
+                <option key="_NA_" description="${uiLabelMap.CommonAll}"/>
+                <entity-options entity-name="FixedAssetType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="assetGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="LONGTERM_ASSET"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="accDepGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="ACCUM_DEPRECIATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="ACCUM_AMORTIZATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="depGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="DEPRECIATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="AMORTIZATION"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="profitGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="CASH_INCOME"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="lossGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="equals" value="SGA_EXPENSE"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="FixedAssetTypeGlAccounts" type="list" list-name="fixedAssetTypeGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="FixedAssetTypeGlAccount" list="fixedAssetTypeGlAccounts">
+                <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+            </entity-condition>
+        </actions>
+        <field name="fixedAssetTypeId"><display-entity entity-name="FixedAssetType"/></field>
+        <field name="fixedAssetId"><display-entity entity-name="FixedAsset" description="${fixedAssetId} ${fixedAssetName}"/></field>
+        <field name="assetGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="accDepGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="depGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="profitGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="lossGlAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteFixedAssetTypeGlAccount" also-hidden="false">
+                <parameter param-name="fixedAssetTypeId"/>
+                <parameter param-name="fixedAssetId"/>
+                <parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+    </form>
+</forms>

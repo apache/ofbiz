@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <!-- Forms for FacilityGroups -->
+    <form name="FindFacilityGroup" type="list" title="" list-name="facilityGroups" paginate-target="FindFacilityGroup"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="FacilityGroup" default-field-type="display"/>
+        <field name="facilityGroupId" widget-style="buttontext">
+            <hyperlink description="${facilityGroupId}" target="EditFacilityGroup">
+                <parameter param-name="facilityGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="facilityGroupTypeId"><display-entity entity-name="FacilityGroupType"/></field>
+        <field name="description"><display/></field>
+    </form>
+    <form name="EditFacilityGroup" type="single" target="updateFacilityGroup" title="" default-map-name="facilityGroup"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="facilityGroup==null" target="createFacilityGroup"/>
+        <auto-fields-service service-name="updateFacilityGroup"/>
+        <field name="facilityGroupId" use-when="facilityGroup!=null" tooltip="${uiLabelMap.ProductNotModificationRecrationFacilityGroup}"><display/></field>
+        <field name="facilityGroupId" use-when="facilityGroup==null"><hidden/></field>
+        <field name="facilityGroupTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FacilityGroupType" key-field-name="facilityGroupTypeId">
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="primaryParentGroupId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FacilityGroup" key-field-name="facilityGroupId" description="${facilityGroupName}">
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+    <form name="UpdateFacilityGroupRollupTo" type="list" target="updateFacilityGroupToGroup" title="" list-name="currentGroupRollups"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateFacilityGroupToGroup"/>
+        <field name="showFacilityGroupId"><hidden value="${facilityGroupId}"/></field>
+        <field name="facilityGroupId"><hidden value="${facilityGroupId}"/></field>
+        <field name="parentFacilityGroupId">
+            <display-entity entity-name="FacilityGroup" key-field-name="facilityGroupId" description="${facilityGroupName}">
+                <sub-hyperlink target="EditFacilityGroup" description="[${parentFacilityGroupId}]">
+                    <parameter param-name="facilityGroupId" from-field="parentFacilityGroupId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="fromDate"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="removeFacilityGroupFromGroup" also-hidden="false">
+                <parameter param-name="showFacilityGroupId" from-field="facilityGroupId"/>
+                <parameter param-name="facilityGroupId"/>
+                <parameter param-name="parentFacilityGroupId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddFacilityGroupRollupFrom" target="addFacilityGroupToGroup" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addFacilityGroupToGroup"/>
+        <field name="facilityGroupId"><hidden/></field>
+        <field name="parentFacilityGroupId">
+            <drop-down>
+                <entity-options entity-name="FacilityGroup" key-field-name="facilityGroupId" description="${facilityGroupName} [${facilityGroupId}]">
+                    <entity-order-by field-name="facilityGroupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+    <form name="UpdateFacilityGroupRollupFrom" type="list" target="updateFacilityGroupToGroup" title="" list-name="parentGroupRollups"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateFacilityGroupToGroup"/>
+        <field name="showFacilityGroupId"><hidden value="${parentFacilityGroupId}"/></field>
+        <field name="parentFacilityGroupId"><hidden/></field>
+        <field name="facilityGroupId">
+            <display-entity entity-name="FacilityGroup" description="${facilityGroupName}">
+                <sub-hyperlink target="EditFacilityGroup" description="[${facilityGroupId}]">
+                    <parameter param-name="facilityGroupId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="fromDate"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="removeFacilityGroupFromGroup" also-hidden="false">
+                <parameter param-name="showFacilityGroupId" from-field="parentFacilityGroupId"/>
+                <parameter param-name="facilityGroupId"/>
+                <parameter param-name="parentFacilityGroupId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddFacilityGroupRollupTo" target="addFacilityGroupToGroup" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addFacilityGroupToGroup"/>
+        <field name="showFacilityGroupId"><hidden value="${facilityGroupId}"/></field>
+        <field name="parentFacilityGroupId"><hidden value="${facilityGroupId}"/></field>
+        <field name="facilityGroupId">
+            <drop-down>
+                <entity-options entity-name="FacilityGroup" description="${facilityGroupName} [${facilityGroupId}]">
+                    <entity-order-by field-name="facilityGroupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+    <form name="UpdateFacilityGroupMembers" type="list" target="updateFacilityToGroup" title="" list-name="facilityGroupMembers"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true">
+        <auto-fields-service service-name="updateFacilityToGroup"/>
+        <field name="facilityGroupId"><hidden value="${facilityGroupId}"/></field>
+        <field name="facilityId">
+            <display-entity entity-name="Facility" key-field-name="facilityId" description="${facilityName}">
+                <sub-hyperlink target="EditFacility" description="[${facilityId}]">
+                    <parameter param-name="facilityId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="fromDate"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeFacilityFromGroup" also-hidden="false">
+                <parameter param-name="facilityGroupId"/>
+                <parameter param-name="facilityId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddFacilityGroupMember" target="addFacilityToGroup" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addFacilityToGroup"/>
+        <field name="facilityGroupId"><hidden/></field>
+        <field name="facilityId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" description="${facilityName} [${facilityId}]">
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+    <form name="UpdateFacilityGroupRoles" type="list" target="removePartyFromFacilityGroup" title="" list-name="facilityRoles"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <auto-fields-service service-name="removePartyFromFacilityGroup"/>
+        <field name="facilityGroupId"><hidden value="${facilityGroupId}"/></field>
+        <field name="partyId">
+            <display-entity entity-name="Party" key-field-name="partyId" description="${partyId}">
+                <sub-hyperlink target="viewProfile" description="[${partyId}]">
+                    <parameter param-name="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="roleTypeId">
+            <display-entity entity-name="RoleType" key-field-name="roleTypeId"/>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removePartyFromFacilityGroup" also-hidden="false">
+                <parameter param-name="facilityGroupId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddFacilityGroupRole" target="addPartyToFacilityGroup" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="addPartyToFacilityGroup"/>
+        <field name="facilityGroupId"><hidden/></field>
+        <field name="partyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId">
+            <drop-down>
+                <entity-options entity-name="RoleType" description="${description} [${roleTypeId}]">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+</forms>

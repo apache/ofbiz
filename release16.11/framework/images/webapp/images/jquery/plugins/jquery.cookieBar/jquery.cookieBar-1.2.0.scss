@@ -1,0 +1,198 @@
+/*!
+ * Cookie Bar component (https://github.com/kovarp/jquery.cookieBar)
+ * Version 1.2.0
+ *
+ * Copyright 2018 Pavel Kovář - Frontend developer [www.pavelkovar.cz]
+ * Licensed under MIT (https://github.com/kovarp/jquery.cookieBar/blob/master/LICENSE)
+ */
+
+/* Settings */
+$primary: #0275d8 !default;
+$cb-background: #000 !default;
+$cb-color: #fff !default;
+$cb-btn-color: $cb-color !default;
+$font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !default;
+$grid-gutter-width: 1.875rem !default;
+$bottom-style-offset: ($grid-gutter-width / 2) !default;
+
+/* Cookie Bar styles */
+.cookie-bar__inner {
+	background-color: $cb-background;
+	color: $cb-color;
+	font-family: $font-family-base;
+	font-size: .875rem;
+	padding: .375rem .5rem;
+	text-align: center;
+
+	@media (min-width: 62rem) {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+}
+
+// Buttons wrapper
+.cookie-bar__buttons {
+	display: block;
+	margin-top: .375rem;
+
+	@media (min-width: 62rem) {
+		display: inline;
+		margin-top: 0;
+	}
+}
+
+// Accept button
+.cookie-bar__btn {
+	background-color: $primary;
+	color: $cb-btn-color;
+	border: none;
+	margin: 0 .875rem;
+	padding: .125rem .875rem;
+	transition: background-color .3s;
+	cursor: pointer;
+
+	@media (max-width: 36rem) {
+		display: block;
+		margin: 0 auto .25rem;
+	}
+
+	&:hover {
+		background-color: darken($primary, 5%);
+	}
+
+	&:active {
+		background-color: darken($primary, 7%);
+	}
+}
+
+// Info links
+.cookie-bar__link {
+	margin: 0 .5rem;
+}
+
+.cookie-bar a {
+	color: $cb-color;
+	text-decoration: underline;
+
+	&:hover {
+		text-decoration: none;
+	}
+}
+
+/* Privacy popup */
+.cookie-bar-privacy-popup {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(black, .5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	&.cookie-bar-privacy-popup--hidden {
+		display: none;
+	}
+}
+
+.cookie-bar-privacy-popup__dialog {
+	background-color: white;
+	width: 100%;
+	max-width: 50rem;
+	max-height: 90vh;
+	overflow: auto;
+	padding: 2rem 1.5rem 1.5rem;
+	position: relative;
+}
+
+.cookie-bar-privacy-popup__dialog__close {
+	position: absolute;
+	top: 0;
+	right: 0;
+	background-color: black;
+	color: white;
+	display: block;
+	width: 2rem;
+	height: 2rem;
+	border: none;
+	cursor: pointer;
+
+	&:before,
+	&:after {
+		content: '';
+		display: block;
+		width: 1rem;
+		height: .25rem;
+		background-color: white;
+		position: absolute;
+		top: 50%;
+		left: 25%;
+		transform-origin: center center;
+		margin-top: -.125rem;
+	}
+
+	&:before {
+		transform: rotate(45deg);
+	}
+
+	&:after {
+		transform: rotate(-45deg);
+	}
+}
+.cookie-bar-privacy-popup__dialog p:last-child {
+	margin-bottom: 0;
+}
+
+/* Cookie Bar layouts */
+.cookie-bar--bottom-left,
+.cookie-bar--bottom-right,
+.cookie-bar--bottom {
+	z-index: 100;
+	position: fixed;
+}
+
+.cookie-bar--bottom {
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+
+.cookie-bar--bottom-left {
+	left: $bottom-style-offset;
+}
+
+.cookie-bar--bottom-right {
+	right: $bottom-style-offset;
+}
+
+.cookie-bar--bottom-right,
+.cookie-bar--bottom-left {
+	bottom: $bottom-style-offset;
+
+	@media (min-width: 48rem) {
+		width: 22.5rem;
+	}
+}
+
+.cookie-bar--bottom-right .cookie-bar__inner,
+.cookie-bar--bottom-left .cookie-bar__inner,
+.cookie-bar--bottom-right .cookie-bar__buttons,
+.cookie-bar--bottom-left .cookie-bar__buttons {
+	@media (min-width: 48rem) {
+		display: block;
+	}
+}
+
+.cookie-bar--bottom-right .cookie-bar__buttons,
+.cookie-bar--bottom-left .cookie-bar__buttons {
+	@media (min-width: 48rem) {
+		margin-top: .375rem;
+	}
+}
+
+.cookie-bar--bottom-right .cookie-bar__inner,
+.cookie-bar--bottom-left .cookie-bar__inner {
+	line-height: 1.3;
+}

@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!--
+    *This is the DTD for the Apache OFBiz Generic Entity Model entity definition XML file.
+    *This DTD is meant to be as simple as possible, and is modelled from the standard ejb deployment descriptor ejb-jar.xml.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <!-- ====================== Root Element ======================= -->
+    <xs:simpleType name="boolean">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="aggregate-function">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="min"/>
+            <xs:enumeration value="max"/>
+            <xs:enumeration value="sum"/>
+            <xs:enumeration value="avg"/>
+            <xs:enumeration value="count"/>
+            <xs:enumeration value="count-distinct"/>
+            <xs:enumeration value="upper"/>
+            <xs:enumeration value="lower"/>
+            <xs:enumeration value="extract-year"/>
+            <xs:enumeration value="extract-month"/>
+            <xs:enumeration value="extract-day"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="entitymodel">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="title"/>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="copyright"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="author"/>
+                <xs:element minOccurs="0" ref="version"/>
+                <xs:element minOccurs="0" ref="default-resource-name"/>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element ref="entity"/>
+                    <xs:element ref="view-entity"/>
+                    <xs:element ref="extend-entity"/>
+                </xs:choice>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <!-- ================= Children of entitymodel =================== -->
+    <xs:element name="title" type="xs:string"/>
+    <xs:element name="description" type="xs:string"/>
+    <xs:element name="copyright" type="xs:string"/>
+    <xs:element name="author" type="xs:string"/>
+    <xs:element name="version" type="xs:string"/>
+    <xs:element name="default-resource-name" type="xs:string"/>
+    <!-- ================== entity ===================== -->
+    <xs:element name="entity">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element maxOccurs="unbounded" ref="field"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="prim-key"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="relation"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="index"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.entity"/>
+        </xs:complexType>
+    </xs:element>
+    <!-- see the children of entitymodel section for description, etc. -->
+    <xs:attributeGroup name="attlist.entity">
+        <xs:attribute name="entity-name" type="xs:string" use="required"/>
+        <xs:attribute name="table-name" type="xs:string"/>
+        <xs:attribute name="package-name" type="xs:string" use="required"/>
+        <xs:attribute name="default-resource-name" type="xs:string"/>
+        <xs:attribute name="dependent-on" type="xs:string"/>
+        <xs:attribute name="sequence-bank-size" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    The 10 default value is defined in the SequenceBank class by the defaultBankSize constant.
+                    Can't be more than 5000 which is defined by the maxBankSize constant.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enable-lock" default="false" type="boolean"/>
+        <xs:attribute name="no-auto-stamp" default="false" type="boolean"/>
+        <xs:attribute name="never-cache" default="false" type="boolean"/>
+        <xs:attribute name="never-check" default="false" type="boolean"/>
+        <xs:attribute name="auto-clear-cache" default="true" type="boolean"/>
+        <xs:attribute name="redefinition" type="boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    Indicates if this entity redefines an existing entity.
+                    When set to "true" it will suppress "Entity is defined more than once" warnings.
+                    Defaults to "false".
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="title" type="xs:string"/>
+        <xs:attribute name="copyright" type="xs:string"/>
+        <xs:attribute name="author" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
+    </xs:attributeGroup>
+    <xs:element name="prim-key">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.prim-key"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.prim-key">
+        <xs:attribute name="field" type="xs:string" use="required"/>
+    </xs:attributeGroup>
+    <!-- ==================== field ===================== -->
+    <xs:element name="field">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="validate"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.field"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.field">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="col-name" type="xs:string"/>
+        <xs:attribute name="type" type="xs:string" use="required"/>
+        <xs:attribute name="encrypt" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                    <xs:enumeration value="salt"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="enable-audit-log" default="false" type="boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    If this is set to true then whenever the value for this field on a record changes the Entity Engine will record the change in the EntityAuditLog entity.
+                    Defaults to false.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="not-null" default="false" type="boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    This makes the field NOT NULL on the database (like primary key fields).
+                    It's possible to use an id-ne similiar field type.
+                    But rows can be added from outside of ofbiz (e.g. database manager, third party programm, etc).
+                    This uses the ability of a database to set not null constraints.
+                    Defaults to false.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="field-set" default="" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Any fields that have the same field-set will be selected together in generated queries.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="validate">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.validate"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.validate">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+    </xs:attributeGroup>
+    <!-- ==================== relation ====================== -->
+    <!-- specifies whether or not the relation is a dependent one; ie if the related entity can exist without the main entity -->
+    <xs:element name="relation">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element maxOccurs="unbounded" ref="key-map"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.relation"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.relation">
+        <xs:attribute name="type" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="one"/>
+                    <xs:enumeration value="many"/>
+                    <xs:enumeration value="one-nofk"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="title" type="xs:string"/>
+        <xs:attribute name="rel-entity-name" type="xs:string" use="required"/>
+        <xs:attribute name="fk-name" type="xs:string"/>
+    </xs:attributeGroup>
+    <xs:element name="key-map">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.key-map"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.key-map">
+        <xs:attribute name="field-name" type="xs:string" use="required"/>
+        <xs:attribute name="rel-field-name" type="xs:string"/>
+    </xs:attributeGroup>
+    <!-- ==================== index ===================== -->
+    <xs:element name="index">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element maxOccurs="unbounded" ref="index-field"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.index"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.index">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="unique" default="false" type="boolean"/>
+    </xs:attributeGroup>
+    <xs:element name="index-field">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.index-field"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.index-field">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="function">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="lower"/>
+                    <xs:enumeration value="upper"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+    
+    <!-- ================== view-entity ===================== -->
+    <xs:element name="view-entity">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element maxOccurs="unbounded" ref="member-entity"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="alias-all"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="alias"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="view-link"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="relation"/>
+                <xs:element minOccurs="0" ref="entity-condition"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.view-entity"/>
+        </xs:complexType>
+    </xs:element>
+    <!-- see the children of entitymodel section for description, etc. -->
+    <xs:attributeGroup name="attlist.view-entity">
+        <xs:attribute name="entity-name" type="xs:string" use="required"/>
+        <xs:attribute name="package-name" type="xs:string" use="required"/>
+        <xs:attribute name="dependent-on" type="xs:string"/>
+        <xs:attribute name="default-resource-name" type="xs:string"/>
+        <xs:attribute name="never-cache" default="false" type="boolean"/>
+        <xs:attribute name="auto-clear-cache" default="true" type="boolean"/>
+        <xs:attribute name="title" type="xs:string"/>
+        <xs:attribute name="copyright" type="xs:string"/>
+        <xs:attribute name="author" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
+        <xs:attribute name="redefinition" type="boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    Indicates if this entity redefines an existing entity.
+                    When set to "true" it will suppress "Entity is defined more than once" warnings.
+                    Defaults to "false".
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="member-entity">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.member-entity"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.member-entity">
+        <xs:attribute name="entity-alias" type="xs:string" use="required"/>
+        <xs:attribute name="entity-name" type="xs:string" use="required"/>
+    </xs:attributeGroup>
+    <xs:element name="alias-all">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="exclude"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.alias-all"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.alias-all">
+        <xs:attribute name="entity-alias" type="xs:string" use="required"/>
+        <xs:attribute name="prefix" type="xs:string"/>
+        <xs:attribute name="group-by" default="false" type="boolean"/>
+        <xs:attribute name="function" type="aggregate-function"/>
+        <xs:attribute name="field-set" default="" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Any fields that have the same field-set will be selected together in generated queries.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="exclude">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.exclude"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.exclude">
+        <xs:attribute name="field" type="xs:string" use="required"/>
+    </xs:attributeGroup>
+    <xs:element name="alias">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element minOccurs="0" ref="complex-alias"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.alias"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.alias">
+        <xs:attribute name="entity-alias" type="xs:string"/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="field" type="xs:string"/>
+        <xs:attribute name="col-alias" type="xs:string"/>
+        <xs:attribute name="prim-key" type="xs:string"/>
+        <xs:attribute name="group-by" default="false" type="boolean"/>
+        <xs:attribute name="function" type="aggregate-function"/>
+        <xs:attribute name="field-set" default="" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Any fields that have the same field-set will be selected together in generated queries.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="complex-alias">
+        <xs:annotation>
+            <xs:documentation>
+                In every SELECT statement, the fields that are normally used are really defined to be expressions.
+                This means for example that you can supply an expression like (discountPercent * 100) in place of  just a field name.
+                The complex-alias tag is the Ofbiz way to do this.
+
+                The argument to the right of operator = can be any operator valid for that data type on the database system you are using.
+                For example, *, +, -, and / are commonly available mathematical operators (min, max, sum, avg, count, count-distinct, upper, lower)
+                You can also use any operator on any data type supported on the underlying database system including string and date operators.
+                complex-alias can be as complex as you need by adding nested complex-alias statements and complex-alias-field
+                can use the same functions (min, max, count, count-distinct, sum, avg, upper, and lower) as the alias tag.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="complex-alias"/>
+                <xs:element ref="complex-alias-field"/>
+            </xs:choice>
+            <xs:attributeGroup ref="attlist.complex-alias"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.complex-alias">
+        <xs:attribute name="operator" type="xs:string" use="required"/>
+    </xs:attributeGroup>
+    <xs:element name="complex-alias-field">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.complex-alias-field"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.complex-alias-field">
+        <xs:attribute name="entity-alias" type="xs:string"/>
+        <xs:attribute name="field" type="xs:string"/>
+        <xs:attribute name="default-value" type="xs:string"/>
+        <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="function" type="aggregate-function"/>
+    </xs:attributeGroup>
+    <xs:element name="view-link">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="description"/>
+                <xs:element maxOccurs="unbounded" ref="key-map"/>
+                <xs:element minOccurs="0" ref="entity-condition"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.view-link"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.view-link">
+        <xs:attribute name="entity-alias" type="xs:string" use="required"/>
+        <xs:attribute name="rel-entity-alias" type="xs:string" use="required"/>
+        <xs:attribute name="rel-optional" default="false" type="boolean"/>
+    </xs:attributeGroup>
+    <xs:element name="entity-condition">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:choice minOccurs="0">
+                    <xs:element ref="condition-expr"/>
+                    <xs:element ref="condition-list"/>
+                </xs:choice>
+                <xs:element minOccurs="0" ref="having-condition-list"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="order-by"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.entity-condition"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.entity-condition">
+        <xs:attribute name="filter-by-date" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                    <xs:enumeration value="by-name"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <!-- TODO: variation on filter-by-date to easily compare from/thru date to date in another field, ie: alias.from_date <= rel_alias.date_field and (alias.thru_date > rel_alias.date_field or alias.thru_date is null) -->
+        <xs:attribute name="distinct" default="false" type="boolean"/>
+    </xs:attributeGroup>
+    <xs:element name="condition-expr">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.condition-expr"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.condition-expr">
+        <xs:attribute name="entity-alias" type="xs:string"  use="required"/>
+        <xs:attribute name="field-name" type="xs:string" use="required"/>
+        <xs:attribute name="operator" default="equals">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="less"/>
+                    <xs:enumeration value="greater"/>
+                    <xs:enumeration value="less-equals"/>
+                    <xs:enumeration value="greater-equals"/>
+                    <xs:enumeration value="equals"/>
+                    <xs:enumeration value="not-equals"/>
+                    <xs:enumeration value="in"/>
+                    <!-- TODO: add not-in, or handle not in more general way -->
+                    <xs:enumeration value="between"/>
+                    <xs:enumeration value="like"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="rel-entity-alias" type="xs:string"/>
+        <xs:attribute name="rel-field-name" type="xs:string"/>
+        <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="ignore-case" default="false" type="boolean"/>
+    </xs:attributeGroup>
+    <xs:element name="condition-list">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="condition-expr"/>
+                <xs:element ref="condition-list"/>
+            </xs:choice>
+            <xs:attributeGroup ref="attlist.condition-list"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.condition-list">
+        <xs:attribute name="combine" default="and">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="and"/>
+                    <xs:enumeration value="or"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="having-condition-list">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="condition-expr"/>
+                <xs:element ref="condition-list"/>
+            </xs:choice>
+            <xs:attributeGroup ref="attlist.having-condition-list"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.having-condition-list">
+        <xs:attribute name="combine" default="and">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="and"/>
+                    <xs:enumeration value="or"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:element name="order-by">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.order-by"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.order-by">
+        <xs:attribute name="field-name" type="xs:string" use="required"/>
+    </xs:attributeGroup>
+    
+
+    <!-- ================== extend-entity ===================== -->
+    <xs:element name="extend-entity">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="field">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Only overrides of type, colName, description and enable-audit-log are currently supported
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="relation"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="index"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.extend-entity"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.extend-entity">
+        <xs:attribute name="entity-name" type="xs:string" use="required"/>
+        <xs:attribute name="default-resource-name" type="xs:string"/>
+        <xs:attribute name="dependent-on" type="xs:string"/>
+        <xs:attribute name="sequence-bank-size" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    The 10 default value is defined in the SequenceBank class by the defaultBankSize constant.
+                    Can't be more than 5000 which is defined by the maxBankSize constant.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enable-lock" type="boolean"/>
+        <xs:attribute name="no-auto-stamp" type="boolean"/>
+        <xs:attribute name="never-cache" type="boolean"/>
+        <xs:attribute name="auto-clear-cache" type="boolean"/>
+    </xs:attributeGroup>
+</xs:schema>

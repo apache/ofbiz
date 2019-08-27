@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="LookupOrderHeader" target="LookupOrderHeader" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="OrderHeader" default-field-type="find" map-name="parameters"/>
+        <field name="orderHeaderId"><text-find/></field>
+        <field name="orderTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OrderType" key-field-name="orderTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="salesChannelEnumId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="ORDER_SALES_CHANNEL"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productStoreId"><lookup  target-form-name="/marketing/control/LookupProductStore"/></field>
+        <field name="currencyUom">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupOrderHeader" title="" type="list" list-name="listIt"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupOrderHeader">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="OrderHeader"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="OrderHeader" default-field-type="display"/>
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink target-type="plain" also-hidden="true" description="${orderId}" target="javascript:set_value('${orderId}')"/>
+        </field>
+        <field name="orderTypeId"><display-entity entity-name="OrderType" also-hidden="true"/></field>
+    </form>
+
+    <form name="LookupOrderHeaderAndShipInfo" target="LookupOrderHeaderAndShipInfo" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="OrderHeaderAndShipGroups" default-field-type="hidden"/>
+        <field name="orderId"><text-find/></field>
+        <field name="orderTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="OrderType"/>
+             </drop-down>
+        </field>
+        <field name="partyId"><text-find/></field>
+        <field name="shipmentMethodTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ShipmentMethodType">
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="carrierPartyId"><text-find/></field>
+        <field name="shipAfterDate"><date-find type="date"/></field>
+        <field name="shipByDate"><date-find type="date"/></field>
+        <field name="city"><text-find/></field>
+        <field name="postalCode"><text-find/></field>
+        <field name="countryGeoId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="stateProvinceGeoId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                    <entity-constraint name="geoTypeId" value="STATE"/>
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="grandTotal"><range-find/></field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupOrderHeaderAndShipInfo" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupOrderHeaderAndShipInfo">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="OrderHeaderAndShipGroupsByProduct"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="OrderHeaderAndShipGroups" default-field-type="hidden"/>
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink description="${orderId}" target="javascript:set_value('${orderId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="orderTypeId"><display-entity entity-name="OrderType"/></field>
+        <field name="partyId"><display/></field>
+        <field name="shipmentMethodTypeId"><display-entity entity-name="ShipmentMethodType"/></field>
+        <field name="carrierPartyId"><display/></field>
+        <field name="shipAfterDate"><display/></field>
+        <field name="shipByDate"><display/></field>
+        <field name="city"><display/></field>
+        <field name="postalCode"><display/></field>
+        <field name="countryGeoId"><display/></field>
+        <field name="stateProvinceGeoId"><display/></field>
+        <field name="grandTotal"><display/></field>
+        <field name="productId"><display/></field>
+        <field name="brandName"><display/></field>
+        <field name="internalName"><display/></field>
+    </form>
+
+    <form name="LookupPurchaseOrderHeaderAndShipInfo" target="LookupPurchaseOrderHeaderAndShipInfo" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="OrderHeaderAndShipGroups" default-field-type="hidden" map-name="parameters"/>
+        <field name="orderId"><text-find/></field>
+        <field name="orderTypeId"><hidden value="PURCHASE_ORDER"/></field>
+        <field name="roleTypeId"><hidden value="SHIP_FROM_VENDOR"/></field>
+        <field name="partyId"><text-find/></field>
+        <field name="shipmentMethodTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ShipmentMethodType">
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="carrierPartyId"><text-find/></field>
+        <field name="shipAfterDate"><date-find type="date"/></field>
+        <field name="shipByDate"><date-find type="date"/></field>
+        <field name="city"><text-find/></field>
+        <field name="postalCode"><text-find/></field>
+        <field name="countryGeoId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="stateProvinceGeoId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                    <entity-constraint name="geoTypeId" value="STATE"/>
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="grandTotal"><range-find/></field>
+        <field name="productId"><text-find/></field>
+        <field name="brandName"><text-find/></field>
+        <field name="internalName"><text-find/></field>
+        
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="LookupCustRequest" target="LookupCustRequest" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="CustRequest" default-field-type="hidden"/>
+        <field name="custRequestTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="CustRequestType" key-field-name="custRequestTypeId"/>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="CUSTREQ_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="roleTypeId">
+            <drop-down allow-empty="true">
+                <option key="REQ_REQUESTER" description="${uiLabelMap.WorkEffortRequestingParty}"/>
+                <option key="AGENT" description="${uiLabelMap.OrderAgent}"/>
+                <option key="REQ_TAKER" description="${uiLabelMap.WorkEffortRequestTaker}"/>
+                <option key="REQ_MANAGER" description="${uiLabelMap.WorkEffortRequestManager}"/>
+            </drop-down>
+        </field>
+        <!--
+        <field name="roleTypeId" title="${uiLabelMap.PartyRoleType}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RoleType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        -->
+        <field name="partyId"><lookup  target-form-name="LookupPartyName"/></field>
+        <field name="custRequestCategoryId"><hidden/></field>
+        <field name="priority"><hidden/></field>
+        <field name="description"><hidden/></field>
+        <field name="createdDate"><hidden/></field>
+        <field name="createdByUserLogin"><hidden/></field>
+        <field name="lastModifiedDate"><hidden/></field>
+        <field name="lastModifiedByUserLogin"><hidden/></field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupCustRequest" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupCustRequest">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="CustRequest"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="CustRequest" default-field-type="hidden"/>
+        <field name="custRequestId" widget-style="buttontext">
+            <hyperlink description="${custRequestId}" target="javascript:set_value('${custRequestId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="custRequestName"><display/></field>
+        <field name="priority"><display/></field>
+        <field name="responseRequiredDate"><display/></field>
+        <field name="partyId"><display/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity also-hidden="false" entity-name="StatusItem"/></field>
+        <field name="roleTypeId"><display-entity also-hidden="false" entity-name="RoleType"/></field>
+    </form>
+
+    <form name="LookupCustRequestItem" target="LookupCustRequestItem" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="CustRequestItem" default-field-type="find"/>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="CUSTREQ_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="custRequestResolutionId" >
+            <drop-down allow-empty="true">
+                <entity-options entity-name="CustRequestResolution">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="priority"><text-find/></field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupCustRequestItem" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupCustRequestItem">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="CustRequestItem"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="CustRequestItem" default-field-type="hidden"/>
+        <field name="custRequestId"><display/></field>
+        <field name="custRequestItemSeqId" widget-style="buttontext" >
+            <hyperlink description="${custRequestItemSeqId}" target="javascript:set_value('${custRequestItemSeqId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="priority"><display/></field>
+        <field name="custRequestResolutionId"><display-entity also-hidden="false" entity-name="CustRequestResolution"/></field>
+        <field name="productId"><display-entity also-hidden="false" entity-name="Product"/></field>
+        <field name="statusId"><display-entity also-hidden="false" entity-name="StatusItem"/></field>
+    </form>
+
+    <form name="LookupQuote" target="LookupQuote" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="Quote" default-field-type="find"/>
+        <field name="quoteId" title="${uiLabelMap.OrderOrderQuoteId}"></field>
+        <field name="quoteTypeId" title="${uiLabelMap.OrderOrderQuoteTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="QuoteType" key-field-name="quoteTypeId"/>
+            </drop-down>
+        </field>
+        <field name="partyId"><lookup  target-form-name="LookupPartyName"/></field>
+        <field name="issueDate" title="${uiLabelMap.OrderOrderQuoteIssueDate}"></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" value="QUOTE_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productStoreId">
+            <drop-down allow-empty="true">
+                <entity-options description="${storeName}" entity-name="ProductStore" key-field-name="productStoreId"/>
+            </drop-down>
+        </field>
+        <field name="currencyUomId" title="${uiLabelMap.CommonCurrency}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="validFromDate" title="${uiLabelMap.CommonValidFromDate}"></field>
+        <field name="validThruDate" title="${uiLabelMap.CommonValidThruDate}"></field>
+        <field name="quoteName" title="${uiLabelMap.OrderOrderQuoteName}"></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"></field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupQuote" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupQuote">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="Quote"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="Quote" default-field-type="display"/>
+        <field name="quoteId" widget-style="buttontext">
+            <hyperlink description="${quoteId}" target="javascript:set_value('${quoteId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="quoteTypeId" title="${uiLabelMap.OrderOrderQuoteTypeId}"><display-entity entity-name="QuoteType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity also-hidden="false" entity-name="StatusItem"/></field>
+        <field name="partyId"></field>
+        <field name="quoteName" title="${uiLabelMap.OrderOrderQuoteName}"></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"></field>
+        <field name="issueDate" title="${uiLabelMap.OrderOrderQuoteIssueDate}"></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"></field>
+        <field name="currencyUomId" title="${uiLabelMap.CommonCurrency}"></field>
+        <field name="validFromDate" title="${uiLabelMap.CommonValidFromDate}"></field>
+        <field name="validThruDate" title="${uiLabelMap.CommonValidThruDate}"></field>
+    </form>
+
+    <form name="LookupQuoteItem" target="LookupQuoteItem" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="QuoteItem" default-field-type="find"/>
+        <field name="quoteId"><hidden/></field>
+        <field name="isPromo"><hidden/></field>
+        <field name="quoteItemSeqId" title="${uiLabelMap.OrderOrderQuoteItemSeqId}"><display/></field>
+        <field name="productId"><lookup  target-form-name="LookupProduct"/></field>
+        <field name="productFeatureId"><lookup  target-form-name="LookupProductFeature"/></field>
+        <field name="deliverableTypeId" title="${uiLabelMap.OrderOrderQuoteDeliverableTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="DeliverableType" key-field-name="deliverableTypeId"/>
+            </drop-down>
+        </field>
+        <field name="skillTypeId" title="${uiLabelMap.OrderOrderQuoteSkillTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="SkillType" key-field-name="skillTypeId"/>
+            </drop-down>
+        </field>
+        <field name="uomId" title="${uiLabelMap.OrderOrderQuoteUomId}">
+            <drop-down allow-empty="true">
+                <entity-options description="${uomId} - ${description}" entity-name="Uom" key-field-name="uomId">
+                    <!--<entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>-->
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="workEffortId" title="${uiLabelMap.OrderOrderQuoteWorkEffortId}"></field>
+        <field name="quantity" title="${uiLabelMap.CommonQuantity}"></field>
+        <field name="quoteUnitPrice" title="${uiLabelMap.OrderOrderQuoteUnitPrice}"></field>
+        <field name="estimatedDeliveryDate" title="${uiLabelMap.OrderOrderQuoteEstimatedDeliveryDate}"></field>
+        <field name="comments" title="${uiLabelMap.CommonComments}"></field>
+        <!--
+        <field name="isPromo" title="${uiLabelMap.OrderOrderIsPromo}">
+            <drop-down allow-empty="true">
+                <option key="N" description="${uiLabelMap.CommonN}"/>
+                <option key="Y" description="${uiLabelMap.CommonY}"/>
+            </drop-down>
+        </field>
+         -->
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupQuoteItem" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupQuoteItem">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="QuoteItem"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="QuoteItem" default-field-type="display"/>
+        <field name="quoteId" widget-style="buttontext">
+            <hyperlink description="${quoteId}" target="javascript:set_value('${quoteId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="quoteId"><hidden/></field>
+        <field name="quoteItemSeqId"><hidden/></field>
+        <field name="quoteItemSeqId" title="${uiLabelMap.OrderOrderQuoteItemSeqId}" widget-style="buttontext" use-when="${groovy:isPromo==null}">
+            <hyperlink description="${quoteItemSeqId}" target="javascript:set_value('${quoteItemSeqId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="quoteItemSeqId" title="${uiLabelMap.OrderOrderQuoteItemSeqId}" widget-style="buttontext" use-when="${groovy: 'N'.equals(isPromo)}">
+            <hyperlink description="${quoteItemSeqId}" target="javascript:set_value('${quoteItemSeqId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="quoteItemSeqId" title="${uiLabelMap.OrderOrderQuoteItemSeqId}" use-when="${groovy: 'Y'.equals(isPromo)}"><display/></field>
+        <field name="productId">
+            <display-entity entity-name="Product" key-field-name="productId" description="${productId} - ${internalName}"/>
+        </field>
+        <field name="workEffortId" title="${uiLabelMap.OrderOrderQuoteWorkEffortId}"></field>
+        <field name="quantity" title="${uiLabelMap.CommonQuantity}"></field>
+        <field name="quoteUnitPrice" title="${uiLabelMap.OrderOrderQuoteUnitPrice}"></field>
+        <field name="estimatedDeliveryDate" title="${uiLabelMap.OrderOrderQuoteEstimatedDeliveryDate}"></field>
+        <field name="productFeatureId"><hidden/></field>
+        <field name="skillTypeId"><hidden/></field>
+        <field name="deliverableTypeId"><hidden/></field>
+        <field name="comments"><hidden/></field>
+        <field name="uomId"><hidden/></field>
+        <!--<field name="custRequestId"><display description="${custRequestId} - ${custRequestItemSeqId}"/></field>-->
+        <field name="custRequestId" title="${uiLabelMap.CommonViewRequest}" widget-style="buttontext">
+            <display/>
+        </field>
+        <field name="custRequestItemSeqId"><hidden/></field>
+    </form>
+
+    <form name="LookupRequirement" target="LookupRequirement" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="Requirement" default-field-type="find"/>
+        <field name="requirementId"><text-find/></field>
+        <field name="requirementTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RequirementType"/>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.OrderRequirementStatusId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="REQUIREMENT_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productId">
+            <lookup  target-form-name="LookupProduct"/>
+        </field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><text-find/></field>
+        <field name="requirementStartDate" title="${uiLabelMap.OrderRequirementStartDate}"><date-find type="date"/></field>
+        <field name="requiredByDate" title="${uiLabelMap.OrderRequirementByDate}"><date-find type="date"/></field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupRequirement" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupRequirement">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="Requirement"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="Requirement" default-field-type="hidden"/>
+        <field name="requirementId" widget-style="buttontext">
+            <hyperlink target-type="plain" also-hidden="true" description="${requirementId}" target="javascript:set_value('${requirementId}')"/>
+        </field>
+        <field name="requirementTypeId">
+            <display-entity entity-name="RequirementType" also-hidden="true"/>
+        </field>
+        <field name="productId">
+            <display-entity entity-name="Product" key-field-name="productId" description="${productId} - ${internalName}"/>
+        </field>
+        <field name="requirementStartDate" title="${uiLabelMap.OrderRequirementStartDate}"><display/></field>
+        <field name="requiredByDate" title="${uiLabelMap.OrderRequirementByDate}"><display/></field>
+        <field name="quantity" title="${uiLabelMap.CommonQuantity}"><display/></field>
+    </form>
+
+    <form name="LookupShoppingList" target="LookupShoppingList" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="ShoppingList" default-field-type="find"/>
+        <field name="shoppingListId"><text-find/></field>
+        <field name="shoppingListTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ShoppingListType"/>
+            </drop-down>
+        </field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupShoppingList" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupShoppingList">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="ShoppingList"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="ShoppingList" default-field-type="hidden"/>
+        <field name="shoppingListId" widget-style="buttontext">
+            <hyperlink target-type="plain" also-hidden="true" description="${shoppingListId}" target="javascript:set_value('${shoppingListId}')"/>
+        </field>
+        <field name="shoppingListTypeId"><display-entity entity-name="ShoppingListType" also-hidden="true"/></field>
+    </form>
+</forms>

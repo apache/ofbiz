@@ -1,0 +1,43 @@
+{
+  "name": "kovarp-jquery-cookiebar",
+  "version": "1.2.1",
+  "description": "Simple jQuery plugin for add information bar about cookies using.",
+  "directories": {
+    "example": "example"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kovarp/jquery.cookieBar.git"
+  },
+  "keywords": [
+    "jquery",
+    "cookie",
+    "bar",
+    "eu",
+    "law",
+    "gdpr",
+    "alert",
+    "sass",
+    "scss"
+  ],
+  "author": "Pavel Kovář <pavel@pavelkovar.cz> (https://www.pavelkovar.cz/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kovarp/jquery.cookieBar/issues"
+  },
+  "homepage": "https://cookiebar.pavelkovar.cz/",
+  "dependencies": {
+    "jquery": "1.9.1 - 3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^8.3.0",
+    "grunt": "^1.0.2",
+    "grunt-contrib-cssmin": "^2.2.1",
+    "grunt-contrib-uglify": "^3.3.0",
+    "grunt-contrib-watch": "^1.0.1",
+    "grunt-postcss": "^0.9.0",
+    "grunt-sass": "^2.1.0",
+    "jit-grunt": "^0.10.0",
+    "postcss-flexbugs-fixes": "^3.3.0"
+  }
+}

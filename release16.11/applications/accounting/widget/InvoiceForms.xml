@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <!-- Invoice forms -->
+    <form name="FindInvoices" type="single" target="findInvoices" title="Find and list invoices"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="invoiceId"><text-find ignore-case="true"/></field>
+        <field name="description"><text-find ignore-case="true"/></field>
+        <field position="1" name="invoiceTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="InvoiceType"/>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="2">
+            <check all-checked="false">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                </entity-options>
+            </check>
+        </field>
+        <field position="1" name="partyIdFrom"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="2" name="partyIdTo" parameter-name="partyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="billingAccountId"><lookup target-form-name="LookupBillingAccount"/></field>
+        <field name="invoiceDate"><date-find type="date"/></field>
+        <field name="referenceNumber"><text-find/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListInvoices" type="list" separate-columns="true" title="Invoice List" list-name="listIt" target="" default-entity-name="Invoice" paginate-target="findInvoices"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InvoiceAndType"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <row-actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <set field="amountToApply" value="${groovy:org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(delegator,invoiceId)
+                .multiply(org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="total" value="${groovy:org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(delegator,invoiceId)
+                .multiply(org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+        </row-actions>
+
+        <field name="invoiceId" widget-style="buttontext" sort-field="true">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceTypeId" sort-field="true"><display-entity entity-name="InvoiceType"/></field>
+        <field name="invoiceDate" sort-field="true"><display type="date"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" sort-field="true"><display/></field>
+        <field name="partyIdFrom" title="${uiLabelMap.AccountingFromParty}" sort-field="true">
+            <hyperlink description="${partyNameResultFrom.fullName} [${partyIdFrom}]" target="/partymgr/control/PartyFinancialHistory" target-type="inter-app">
+                <parameter param-name="partyId" from-field="partyIdFrom"/>
+            </hyperlink>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.AccountingToParty}" parameter-name="partyId">
+            <hyperlink description="${partyNameResultTo.fullName} [${partyId}]" target="/partymgr/control/PartyFinancialHistory" target-type="inter-app">
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+
+    <form name="InvoiceHeader" type="single" title="Invoice header information" default-map-name="invoice"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <set field="total" value="${groovy:return(org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice));}"/>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="invoice.partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoice.invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="invoice.partyId"/>
+                <field-map field-name="compareDate" from-field="invoice.invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+        </actions>
+        <field name="invoiceId"><hidden/></field>
+        <field position="1" name="invoiceTypeId"><display-entity entity-name="InvoiceType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="2"><display-entity entity-name="StatusItem"/></field>
+        <field position="1" name="description"><display/></field>
+        <field position="2" name="invoiceMessage"><display/></field>
+        <field position="1" name="partyIdFrom">
+            <hyperlink description="${partyNameResultFrom.fullName} [${invoice.partyIdFrom}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="invoice.partyIdFrom"/>
+            </hyperlink>
+        </field>
+        <field position="2" name="partyIdTo" entry-name="partyId">
+            <hyperlink description="${partyNameResultTo.fullName} [${invoice.partyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="invoice.partyId"/>
+            </hyperlink>
+        </field>
+        <field position="1" name="roleTypeId"><display/></field>
+        <field position="2" name="billingAccountId"><display/></field>
+        <field position="1" name="invoiceDate"><display description="${groovy:if(invoice.get(&quot;invoiceDate&quot;)!=null)return(invoice.getString(&quot;invoiceDate&quot;).substring(0,10));}"/></field>
+        <field position="2" name="dueDate"><display description="${groovy:if(invoice.get(&quot;dueDate&quot;)!=null)return(invoice.getString(&quot;dueDate&quot;).substring(0,10));}"/></field>
+        <field position="1" name="total"><display description="${total}" type="currency" currency="${invoice.currencyUomId}"/></field>
+        <field position="2" name="paidDate"><display description="${groovy:if(invoice.get(&quot;paidDate&quot;)!=null)return(invoice.getString(&quot;paidDate&quot;).substring(0,10));}"/></field>
+        <field position="1" name="referenceNumber" title="${uiLabelMap.FormFieldTitle_referenceNum}"><display/></field>
+        <field name="currencyUomId"><hidden/></field>
+    </form>
+
+<form name="InvoiceItems" list-name="invItemAndOrdItems" target="" title="" type="list" separate-columns="true" paginate-target="invoiceOverview"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <set field="quantity" value="${groovy: quantity ?: 1}" type="BigDecimal"/>
+            <set field="total" value="${groovy: quantity * amount ?: 0}" type="BigDecimal"/>
+        </row-actions>
+        <auto-fields-entity entity-name="InvoiceItem" default-field-type="display"/>
+        <field name="invoiceId"><hidden/></field>
+        <field name="invoiceItemSeqId"><display/></field>
+        <field name="invoiceItemTypeId"><display-entity entity-name="InvoiceItemType"/></field>
+        <field name="orderId" widget-style="linktext">
+            <hyperlink description="${orderId}" target="/ordermgr/control/orderview" target-type="inter-app">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="orderItemSeqId" widget-area-style="align-text"><display/></field>
+        <field name="inventoryItemId" widget-area-style="align-text"><display/></field>
+        <field name="quantity" widget-area-style="align-text"><display/></field>
+        <field name="amount" title="${uiLabelMap.AccountingUnitPrice}" widget-area-style="align-text"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+        <field name="total"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+        <field name="productId" widget-style="linktext">
+            <hyperlink description="${productId}" target="/catalog/control/EditProduct" target-type="inter-app">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="overrideGlAccountId" widget-area-style="align-text">
+            <hyperlink description="${overrideGlAccountId}" target="GlAccountNavigate">
+                <parameter param-name="glAccountId" from-field="overrideGlAccountId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="InvoiceRoles" type="list" use-row-submit="true" title="" list-name="invoiceRoles" paginate-target="invoiceRoles"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <!--auto-fields-entity entity-name="InvoiceRole" default-field-type="display"/-->
+        <field name="invoiceId"><hidden/></field>
+        <field name="partyId" widget-style="buttontext">
+            <hyperlink description="${partyId}" target-type="inter-app" target="/partymgr/control/viewprofile">
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="name" entry-name="partyId">
+            <display-entity also-hidden="false" entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${firstName} ${lastName}"/>
+        </field>
+        <field name="roleTypeId">
+            <display-entity also-hidden="false" entity-name="RoleType"/>
+        </field>
+        <field name="percentage"><display/></field>
+        <field name="datetimePerformed"><display/></field>
+    </form>
+
+    <form name="ListInvoiceApplications" type="list"  list-name="invoiceApplications" default-entity-name="InvoiceItem" use-row-submit="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+        target="updatePaymentApplication" title="Apply payments to invoices" separate-columns="false">
+        <field name="invoiceItemSeqId"><display/></field>
+        <field name="productId"><display/></field>
+        <field name="description" encode-output="false"><display/></field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+        <field name="invoiceId"><hidden/></field>
+        <field name="paymentId" widget-style="linktext">
+            <hyperlink description="${paymentId}" target="paymentOverview">
+                <parameter param-name="paymentId"/>
+            </hyperlink>
+        </field>
+        <field name="billingAccountId"><hidden/></field>
+        <field name="paymentApplicationId"><hidden/></field>
+        <field name="amountApplied" widget-area-style="align-text"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+    </form>
+    <form name="AcctgTransAndEntries" type="list" title="Accounting Transactions" list-name="acctgTransAndEntries"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="AcctgTransAndEntries" default-field-type="display"/>
+        <field name="invoiceId"><hidden/></field>
+        <field name="paymentId"><hyperlink description="${paymentId}" target="paymentOverview?paymentId=${paymentId}"/></field>
+        <field name="amount"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="origAmount"><display type="currency" currency="${origCurrencyUomId}"/></field>
+        <field name="acctgTransId"><hyperlink description="${acctgTransId}" target="EditAcctgTrans?acctgTransId=${acctgTransId}&amp;organizationPartyId=${organizationPartyId}"/></field>
+        <field name="acctgTransTypeId"><display-entity entity-name="AcctgTransType"/></field>
+        <field name="glJournalId"><display-entity entity-name="GlJournal" description="${glJournalName}"/></field>
+        <field name="glAccountTypeId" title="${uiLabelMap.FormFieldTitle_glAccountType}"><display-entity entity-name="GlAccountType"/></field>
+        <field name="glAccountClassId" title="${uiLabelMap.AccountingGlAccountClass}"><display-entity entity-name="GlAccountClass"/></field>
+        <field name="partyId" title="${uiLabelMap.PartyParty}"><display-entity entity-name="PartyNameView" description="${lastName} ${groupName}"/></field>
+        <field name="reconcileStatusId"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="origCurrencyUomId"><ignored/></field>
+        <field name="currencyUomId"><ignored/></field>
+        <field name="shipmentId"><ignored/></field>
+        <field name="receiptId"><ignored/></field>
+        <field name="inventoryItemId"><ignored/></field>
+        <field name="workEffortId"><ignored/></field>
+        <field name="physicalInventoryId"><ignored/></field>
+        <field name="transDescription"><ignored/></field>
+        <sort-order>
+            <sort-field name="acctgTransId"/>
+            <sort-field name="acctgTransEntrySeqId"/>
+        </sort-order>
+    </form>
+
+    <form name="NewSalesInvoice" type="single" target="createInvoice" title="Edit Invoice Header" default-map-name="invoice"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-condition entity-name="InvoiceType" list="invoiceTypeList">
+                <condition-list combine="or">
+                    <condition-expr field-name="parentTypeId" value="SALES_INVOICE"/>
+                    <condition-expr field-name="invoiceTypeId" value="SALES_INVOICE"/>
+                </condition-list>
+                <order-by field-name="description"/>
+            </entity-condition>
+        </actions>
+        <field name="statusId"><hidden value="INVOICE_IN_PROCESS"/></field>
+        <field name="currencyUomId"><hidden value="${defaultOrganizationPartyCurrencyUomId}"/></field>
+        <field position="2" name="invoiceTypeId">
+            <drop-down no-current-selected-key="SALES_INVOICE">
+                <list-options key-name="invoiceTypeId" list-name="invoiceTypeList"/>
+            </drop-down>
+        </field>
+        <field position="1" name="organizationPartyId" parameter-name="partyIdFrom">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyId}">
+                <entity-options description="${groupName}" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="2" name="partyIdTo" parameter-name="partyId" required-field="true"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="1" name="createButton" widget-style="smallSubmit" title="${uiLabelMap.CommonCreate}">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="NewPurchaseInvoice" type="single" target="createInvoice" title="Edit Invoice Header" default-map-name="invoice"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-condition entity-name="InvoiceType" list="invoiceTypeList">
+                <condition-list combine="or">
+                    <condition-expr field-name="parentTypeId" value="PURCHASE_INVOICE"/>
+                    <condition-expr field-name="invoiceTypeId" value="PURCHASE_INVOICE"/>
+                </condition-list>
+                <order-by field-name="description"/>
+            </entity-condition>
+        </actions>
+        <field name="statusId"><hidden value="INVOICE_IN_PROCESS"/></field>
+        <field name="currencyUomId"><hidden value="${defaultOrganizationPartyCurrencyUomId}"/></field>
+        <field position="2" name="invoiceTypeId">
+            <drop-down no-current-selected-key="PURCHASE_INVOICE">
+                <list-options key-name="invoiceTypeId" list-name="invoiceTypeList"/>
+            </drop-down>
+        </field>
+        <field position="1" name="organizationPartyId" parameter-name="partyId">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyId}">
+                <entity-options description="${groupName}" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="2" name="partyIdFrom" required-field="true"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="1" name="createButton" widget-style="smallSubmit" title="${uiLabelMap.CommonCreate}">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="EditInvoice" type="single" target="updateInvoice" title="Edit Invoice Header" default-map-name="invoice"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="invoice==null" target="createInvoice"/>
+        <field name="invoiceId"><hidden/></field>
+        <field position="1" name="invoiceDate"><date-time/></field>
+        <field position="2" name="dueDate"><date-time/></field>
+        <field position="1" name="invoiceTypeId" use-when="invoice!=null"><display-entity entity-name="InvoiceType"/></field>
+        <field position="1" name="invoiceTypeId" use-when="invoice==null">
+            <drop-down allow-empty="false" no-current-selected-key="SALES_INVOICE">
+                <entity-options entity-name="InvoiceType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" use-when="invoice==null"><hidden value="INVOICE_IN_PROCESS"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="2" use-when="invoice!=null"><display-entity entity-name="StatusItem"/></field>
+        <field position="1" name="description"><text size="100"/></field>
+        <field position="1" name="partyIdFrom" use-when="${groovy:invoiceType.getString(&quot;parentTypeId&quot;).equals(&quot;SALES_INVOICE&quot;) || invoiceType.getString(&quot;invoiceTypeId&quot;).equals(&quot;SALES_INVOICE&quot;)}"><display description="${invoice.partyIdFrom}"/></field>
+        <field position="1" name="partyIdFrom" use-when="${groovy:invoiceType.getString(&quot;parentTypeId&quot;).equals(&quot;PURCHASE_INVOICE&quot;) || invoiceType.getString(&quot;invoiceTypeId&quot;).equals(&quot;PURCHASE_INVOICE&quot;)}"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="2" name="partyIdTo" entry-name="partyId" parameter-name="partyId" use-when="${groovy:invoiceType.getString(&quot;parentTypeId&quot;).equals(&quot;PURCHASE_INVOICE&quot;) || invoiceType.getString(&quot;invoiceTypeId&quot;).equals(&quot;PURCHASE_INVOICE&quot;)}"><display description="${invoice.partyId}"/></field>
+        <field position="2" name="partyIdTo" entry-name="partyId" parameter-name="partyId" use-when="${groovy:invoiceType.getString(&quot;parentTypeId&quot;).equals(&quot;SALES_INVOICE&quot;) || invoiceType.getString(&quot;invoiceTypeId&quot;).equals(&quot;SALES_INVOICE&quot;)}"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="1" name="roleTypeId" use-when="invoice!=null&amp;&amp;invoice.getString(&quot;invoiceTypeId&quot;).equals(&quot;SALES_INVOICE&quot;)">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RoleType">
+                    <entity-constraint name="parentTypeId" operator="equals" value="CUSTOMER"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+                <entity-options entity-name="RoleType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="1" name="roleTypeId" use-when="invoice!=null&amp;&amp;invoice.getString(&quot;invoiceTypeId&quot;).equals(&quot;PURCHASE_INVOICE&quot;)">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RoleType">
+                    <entity-constraint name="parentTypeId" operator="equals" value="VENDOR"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+                <entity-options entity-name="RoleType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="1" name="billingAccountId"><lookup target-form-name="LookupBillingAccount"/></field>
+        <field position="1" name="currencyUomId">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="2" name="recurrenceInfoId"><text size="10"/></field>
+        <field position="1" name="invoiceMessage"><text size="100"/></field>
+        <field position="1" name="referenceNumber"><text/></field>
+        <!--field position="2" name="invoiceAmount" use-when="invoiceId!=null"><display/></field-->
+        <field position="1" name="updateButton" widget-style="smallSubmit" use-when="invoice!=null&amp;&amp;invoice.getString(&quot;statusId&quot;).equals(&quot;INVOICE_IN_PROCESS&quot;)">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+   <form name="EditInvoiceItems" type="multi"  list-name="invoiceItems" default-entity-name="InvoiceItem" target="updateInvoiceItem?invoiceId=${invoiceId}&amp;viewSize=${viewSize}&amp;viewIndex=${viewIndex}" title="Edit Invoice Items" paginate-target="listInvoiceItems"
+       odd-row-style="alternate-row" default-table-style="basic-table hover-bar" separate-columns="true">
+       <row-actions>
+           <set field="total" value="${groovy: (quantity ?: 1) * (amount ?: 0)}" type="BigDecimal"/>
+       </row-actions>
+       <field name="viewSize"><hidden value="${viewSize}"/></field>
+       <field name="viewIndex"><hidden value="${viewIndex}"/></field>
+       <field name="invoiceId"><hidden/></field>
+       <field name="uomId"><hidden/></field>
+       <field name="taxableFlag"><hidden/></field>
+       <field name="invoiceItemSeqId" widget-style="buttontext">
+           <hyperlink target="listInvoiceItems"  description="${invoiceItemSeqId}">
+                <parameter param-name="invoiceId"/>
+                <parameter param-name="invoiceItemSeqId"/>
+            </hyperlink>
+        </field>
+       <field name="quantity"><text size="10"/></field>
+       <field name="invoiceItemTypeId">
+           <drop-down allow-empty="false">
+               <list-options list-name="invoiceItemTypes" key-name="invoiceItemTypeId"/>
+           </drop-down>
+       </field>
+       <field name="productId"><lookup target-form-name="LookupProduct" size="20"/></field>
+       <field name="description"><text size="50"/></field>
+       <field name="overrideGlAccountId">
+           <drop-down allow-empty="true">
+               <list-options list-name="glAccountOrganizationAndClassList" key-name="glAccountId" description="${glAccountId} ${accountName}"/>
+           </drop-down>
+       </field>
+       <field name="amount" title="${uiLabelMap.AccountingUnitPrice}"><text size="10"/></field>
+       <field name="total" widget-area-style="align-text"><display type="currency" currency="${invoice.currencyUomId}"/></field>  <!-- this should not look like something you can modify, hence display -->
+       <field name="updateButton" title="${uiLabelMap.CommonUpdate}" widget-style="buttontext" ><submit button-type="text-link"/></field>
+       <field name="removeButton" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeInvoiceItem">
+                <parameter param-name="invoiceId"/>
+                <parameter param-name="invoiceItemSeqId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
+            </hyperlink>
+       </field>
+    </form>
+
+    <form name="EditInvoiceItem" type="single" target="createInvoiceItem" title="" default-map-name="invoiceItem" default-entity-name="InvoiceItem"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="invoiceId"><hidden/></field>
+        <field position="1" name="invoiceItemTypeId">
+            <drop-down allow-empty="false">
+                <list-options list-name="invoiceItemTypes" key-name="invoiceItemTypeId"/>
+            </drop-down>
+        </field>
+        <field position="1" name="description"><text size="80"/></field>
+        <field position="1" name="overrideGlAccountId">
+            <drop-down allow-empty="true">
+                <list-options list-name="glAccountOrganizationAndClassList" key-name="glAccountId" description="${glAccountId} ${accountName}"/>
+            </drop-down>
+        </field>
+        <field position="2" name="inventoryItemId"><text/></field>
+        <field position="1" name="productId">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field position="2" name="productFeatureId">
+            <lookup target-form-name="LookupProductFeature"/>
+        </field>
+        <field position="1" name="quantity"><text size="10"/></field>
+        <field position="2" name="uomId">
+            <drop-down allow-empty="true">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="not-equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="1" name="amount" title="${uiLabelMap.AccountingUnitPrice}"><text size="10"/></field>
+        <field position="2" name="taxableFlag">
+        <drop-down allow-empty="false" current="selected">
+            <option key="Y" description="${uiLabelMap.CommonYes}"/>
+            <option key="N" description="${uiLabelMap.CommonNo}"/>
+        </drop-down>
+        </field>
+        <field name="addButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit" use-when="invoiceItem==null">
+            <submit button-type="button"/>
+        </field>
+        <field name="updateButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit" use-when="invoiceItem!=null">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="ListInvoiceStatus" list-name="invoiceStatus" target="" title="" type="list" paginate-target="ListInvoiceStatus"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="invoiceId"><hidden/></field>
+        <field name="statusDate"><display description="${groovy:statusDate.toString().substring(0,10)}"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="changeByUserLoginId"><display /></field>
+    </form>
+
+    <form name="ListInvoiceTerms" list-name="invoiceTerms" target="" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="InvoiceTerm" default-field-type="display"/>
+        <field name="invoiceId"><hidden/></field>
+        <field name="invoiceTermId"><display/></field>
+        <field name="termTypeId">
+            <display-entity entity-name="TermType"/>
+        </field>
+        <field name="termDays" widget-area-style="align-right" title-area-style="align-right">
+            <display/>
+        </field>
+        <field name="uomId" title="${uiLabelMap.Uom}">
+            <display-entity entity-name="Uom"/>
+        </field>
+    </form>
+    
+    <form name="EditInvoiceTerm" type="single" target="createInvoiceTerm" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="InvoiceTerm"/>
+        <field name="invoiceId"><hidden/></field>
+        <field name="termTypeId">
+            <drop-down>
+                <entity-options entity-name="TermType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="description"><textarea/></field>
+        <field name="uomId" title="${uiLabelMap.Uom}">
+            <drop-down allow-empty="true">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="EditInvoiceApplications" type="list"  list-name="invoiceApplications" default-entity-name="InvoiceItem" use-row-submit="true" target="updateInvoiceApplication" title="Apply payments to invoices" separate-columns="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="statusId"><hidden/></field>
+        <field name="paymentApplicationId"><hidden/></field>
+        <field name="invoiceItemSeqId"><display/></field>
+        <field name="productId"><display/></field>
+        <field name="description"><display/></field>
+        <field name="total"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+        <field name="invoiceId"><hidden/></field>
+        <field name="paymentId"><lookup target-form-name="LookupPayment"/></field>
+        <field name="billingAccountId"><hidden/></field>
+        <field name="amountToApply"><text size="10" disabled="true"/></field>
+        <field name="updateButton" title="${uiLabelMap.CommonUpdate}" widget-style="buttontext"><submit button-type="text-link"/></field>
+        <field name="removeButton" title=" " widget-style="buttontext" use-when="paymentApplicationId!=null">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeInvoiceApplication">
+                <parameter param-name="paymentApplicationId"/>
+                <parameter param-name="invoiceId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddPayment" type="single" target="updateInvoiceApplication" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="invoiceId"><hidden/></field>
+        <field name="paymentId"><lookup target-form-name="LookupPayment"/></field>
+        <field name="amountToApply" parameter-name="amountApplied"><text size="10"/></field>
+        <field name="invoiceProcessing" use-when="&quot;${uiConfigMap.invoiceProcessing}&quot;.equals(&quot;Y&quot;)"><check/></field>
+        <field name="applyButton" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="ListPaymentsNotApplied" type="list" list-name="payments" target="updateInvoiceApplication" title=""
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="invoiceId"><hidden/></field>
+        <field name="paymentId" widget-style="buttontext">
+            <hyperlink description="[${paymentId}]" target="paymentOverview">
+                <parameter param-name="paymentId"/>
+            </hyperlink>
+        </field>
+        <field name="amount"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="effectiveDate"><display type="date"/></field>
+        <field name="amountApplied" parameter-name="dummy"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" parameter-name="amountApplied"><text size="10"/></field>
+        <field name="applyButton" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="ListPaymentsNotAppliedForeignCurrency" extends="ListPaymentsNotApplied" list-name="paymentsActualCurrency"/>
+
+    <form name="ListInvoiceRoles" type="list" use-row-submit="true" title="" list-name="invoiceRoles" paginate-target="invoiceRoles"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <!--auto-fields-entity entity-name="InvoiceRole" default-field-type="display"/-->
+        <field name="invoiceId"><hidden/></field>
+        <field name="partyId" widget-style="buttontext">
+            <hyperlink description="${partyId}" target-type="inter-app" target="/partymgr/control/viewprofile">
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="name" entry-name="partyId">
+            <display-entity also-hidden="false" entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${firstName} ${lastName}"/>
+        </field>
+        <field name="roleTypeId">
+            <display-entity also-hidden="false" entity-name="RoleType"/>
+        </field>
+        <field name="percentage"><display/></field>
+        <field name="datetimePerformed"><display/></field>
+        <field name="removeButton" widget-style="buttontext">
+           <hyperlink description="${uiLabelMap.CommonRemove}" target="removeInvoiceRole">
+                <parameter param-name="invoiceId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
+            </hyperlink>
+        </field>
+    </form>
+    
+    <form name="EditInvoiceRole" type="single" target="createInvoiceRole" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="InvoiceRole"/>
+        <field name="invoiceId"><hidden/></field>
+        <field name="partyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="RoleType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="SendPerEmail" type="single" target="executeSendPerEmail" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <service service-name="getPartyEmail" result-map="mapFrom">
+                <field-map field-name="partyId" value="${invoice.partyIdFrom}"/>
+            </service>
+            <service service-name="getPartyEmail" result-map="mapTo">
+                <field-map field-name="partyId" value="${invoice.partyId}"/>
+            </service>
+        </actions>
+        <field name="invoiceId"><hidden/></field>
+        <field name="emailAddressFrom" entry-name="mapFrom.emailAddress" parameter-name="sendFrom" use-when="&quot;${invoice.invoiceTypeId}&quot;.equals(&quot;SALES_INVOICE&quot;)"><text/></field>
+        <field name="emailAddressFrom" entry-name="mapTo.emailAddress" parameter-name="sendFrom" use-when="&quot;${invoice.invoiceTypeId}&quot;.equals(&quot;PURCHASE_INVOICE&quot;)"><text/></field>
+        <field name="emailAddressTo" entry-name="mapTo.emailAddress" parameter-name="sendTo" use-when="&quot;${invoice.invoiceTypeId}&quot;.equals(&quot;SALES_INVOICE&quot;)"><text/></field>
+        <field name="emailAddressTo" entry-name="mapFrom.emailAddress" parameter-name="sendTo" use-when="&quot;${invoice.invoiceTypeId}&quot;.equals(&quot;PURCHASE_INVOICE&quot;)"><text/></field>
+        <field name="emailAddressCc" entry-name="ccEmailAddress" parameter-name="sendCc"><text/></field>
+        <field name="subject"><text default-value="Please find attached invoice."/></field>
+        <field name="otherCurrency" entry-name="parameters.other" parameter-name="other"><check/></field>
+        <field name="bodyText"><textarea/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="EditTimeEntries" type="list" list-name="timeEntries"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-service service-name="updateTimeEntry" default-field-type="display"/>
+
+        <field name="invoiceId"><hidden/></field>
+
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="unlinkInvoiceFromTimeEntry" also-hidden="false">
+                <parameter param-name="timeEntryId"/>
+                <parameter param-name="invoiceId"/>
+                <parameter param-name="viewIndex"/>
+                <parameter param-name="viewSize"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="ListTimeEntries" type="list" list-name="timeEntries"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <entity-one entity-name="Timesheet" value-field="timesheet">
+                <field-map field-name="timesheetId" from-field="timesheetId"/>
+            </entity-one>
+        </row-actions>
+        <field name="invoiceId"><hidden/></field>
+        <field name="invoiceItemSeqId"><display/></field>
+        <field name="timeEntryId"><display/></field>
+        <field name="timesheetId" entry-name="timesheet.timesheetId">
+            <hyperlink description="${timesheetId}" target="/workeffort/control/EditTimesheet" target-type="inter-app">
+                <parameter param-name="timesheetId"/>
+            </hyperlink>
+        </field>
+        <field name="partyId" entry-name="partyId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${firstName} ${middleName} ${lastName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app"  description=" [${partyId}]">
+                    <parameter param-name="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="timesheetPartyId" entry-name="timesheet.partyId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${firstName} ${middleName} ${lastName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description=" [${timesheet.partyId}]">
+                    <parameter param-name="partyId" from-field="timesheet.partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="hours"><display/></field>
+        <field name="rateTypeId"><display-entity entity-name="RateType"/></field>
+        <field name="workEffortId">
+            <display-entity entity-name="WorkEffort" description="${workEffortName} [${workEffortId}]">
+                <sub-hyperlink description=" [${workEffortId}]" target="/workeffort/control/WorkEffortSummary" target-type="inter-app">
+                    <parameter param-name="workEffortId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="fromDate"><display type="date"/></field>
+        <field name="thruDate"><display type="date"/></field>
+        <field name="comments"><display/></field>
+    </form>
+    <form name="LookupInvoicesStatus" type="single" target="BillingAccountInvoices" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="billingAccountId"><hidden/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListInvoicePaymentInfo" type="list" list-name="invoicePaymentInfoList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="getInvoicePaymentInfoList" result-map-list="invoicePaymentInfoList">
+                <field-map field-name="invoiceId" from-field="parameters.invoiceId"/>
+            </service>
+        </actions>
+        <field name="invoiceId"><hidden/></field>
+        <field name="termTypeId">
+            <display-entity entity-name="TermType"/>
+        </field>
+        <field name="dueDate"><display/></field>
+        <field name="amount"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+        <field name="paidAmount"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+        <field name="outstandingAmount"><display type="currency" currency="${invoice.currencyUomId}"/></field>
+    </form>
+
+    <form name="ListCustomerInvoices" extends="ListInvoices" list-name="invoices"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="partyIdFrom"><ignored/></field>
+        <field name="partyIdTo"><ignored/></field>
+    </form>
+    
+    <form name="ListSupplierInvoices" extends="ListInvoices" list-name="invoiceslistexternal"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="partyIdFrom"><ignored/></field>
+        <field name="partyIdTo"><ignored/></field>
+    </form>
+</forms>

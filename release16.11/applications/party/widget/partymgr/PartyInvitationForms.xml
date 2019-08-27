@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindPartyInvitations" type="single" default-map-name="partyInvitations" target="partyInvitation"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field position="1" name="partyInvitationId"><text-find ignore-case="true"/></field>
+        <field position="2" name="partyIdFrom" title="${uiLabelMap.PartyPartyFrom}"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="1" name="partyId" title="${uiLabelMap.PartyPartyId}"><lookup target-form-name="LookupPartyName"/></field>
+        <field position="2" name="toName"><text-find ignore-case="true"/></field>
+        <field position="1" name="emailAddress"><text-find ignore-case="true"/></field>
+        <field position="2" name="datefrom" title="${uiLabelMap.CommonFromDate}"><date-time/></field>
+        <field name="statusId" position="1">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="PARTY_INV_STATUS"/>
+                    <entity-order-by field-name="statusId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="2" name="dateThru" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="performSearch"><hidden value="Y"/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListPartyInvitations" type="list" list-name="listIt" default-entity-name="PartyInvitation"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="parameters.lastInviteDate_fld0_value" from-field="parameters.datefrom"/>
+            <set field="parameters.lastInviteDate_fld0_op" value="greaterThanEqualTo"/>
+            <set field="parameters.lastInviteDate" from-field="parameters.dateThru"/>
+            <set field="parameters.lastInviteDate_op" value="lessThanEqualTo"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PartyInvitation"/>
+                <field-map field-name="orderBy" value="partyInvitationId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="partyInvitationId" widget-style="buttontext">
+            <hyperlink description="${partyInvitationId}" target="editPartyInvitation" also-hidden="false">
+                <parameter param-name="partyInvitationId"/>
+            </hyperlink>
+        </field>
+        <field name="partyIdFrom" title="${uiLabelMap.PartyPartyFrom}"><display/></field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><display/></field>
+        <field name="toName" title="${uiLabelMap.PartyToName}"><display/></field>
+        <field name="emailAddress" title="${uiLabelMap.PartyEmailAddress}"><display/></field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="lastInviteDate"><display/></field>
+        <field name="remove" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePartyInvitation">
+                <parameter param-name="partyInvitationId" from-field="partyInvitationId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditPartyInvitation" type="single" target="updatePartyInvitation"  default-map-name="partyInvitation"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="partyInvitation==null" target="createPartyInvitation"/>
+        <auto-fields-service service-name="updatePartyInvitation"/>
+        <field name="partyInvitationId"><hidden/></field>
+        <field name="partyIdFrom" title="${uiLabelMap.PartyPartyFrom}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="statusId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="PARTY_INV_STATUS"/>
+                    <entity-order-by field-name="statusId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" use-when="partyInvitation==null" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+        <field name="submitButton" use-when="partyInvitation!=null" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListPartyInvitationGroupAssocs" type="list" list-name="partyInvitationGroupAssoc"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="PartyInvitationGroupAssoc">
+                <condition-expr field-name="partyInvitationId" from-field="parameters.partyInvitationId"/>
+                <order-by field-name="partyInvitationId"/>
+            </entity-condition>
+        </actions>
+        <field name="partyInvitationId" widget-style="buttontext">
+            <hyperlink description="${partyInvitationId}" target="editPartyInvitation" also-hidden="false">
+                <parameter param-name="partyInvitationId"/>
+            </hyperlink>
+        </field>
+        <field name="partyId" widget-style="buttontext" entry-name="partyIdTo">
+            <display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${partyIdTo}" link-style="buttontext">
+                    <parameter param-name="partyId" from-field="partyIdTo"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="remove" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePartyInvitationGroupAssoc">
+                <parameter param-name="partyInvitationId"/>
+                <parameter param-name="partyIdTo"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddPartyInvitationGroupAssoc" type="single" target="createPartyInvitationGroupAssoc" default-map-name="partyInvitationGroupAssoc"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createPartyInvitationGroupAssoc"/>
+        <field name="partyInvitationId"><hidden/> </field>
+        <field name="partyIdTo">
+            <drop-down allow-empty="true">
+                <entity-options description="${partyId}" entity-name="Party" key-field-name="partyId">
+                    <entity-constraint name="partyTypeId" operator="equals" value="PARTY_GROUP"/>
+                    <entity-order-by field-name="partyId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListPartyInvitationRoleAssocs" type="list" list-name="partyInvitationRoleAssoc"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="PartyInvitationRoleAssoc">
+                <condition-expr field-name="partyInvitationId" from-field="parameters.partyInvitationId"/>
+                <order-by field-name="partyInvitationId"/>
+            </entity-condition>
+        </actions>
+        <field name="partyInvitationId" widget-style="buttontext">
+            <hyperlink description="${partyInvitationId}" target="editPartyInvitation" also-hidden="false">
+                <parameter param-name="partyInvitationId"/>
+            </hyperlink>
+        </field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}"><display-entity entity-name="RoleType"/></field>
+        <field name="remove" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePartyInvitationRoleAssoc">
+                <parameter param-name="partyInvitationId"/>
+                <parameter param-name="roleTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddPartyInvitationRoleAssoc" type="single" target="createPartyInvitationRoleAssoc" title="" default-map-name="partyInvitationGroupAssoc"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createPartyInvitationRoleAssoc"/>
+        <field name="partyInvitationId"><hidden/> </field>
+        <field name="roleTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RoleType" key-field-name="roleTypeId">
+                    <entity-order-by field-name="roleTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+    </form>
+</forms>

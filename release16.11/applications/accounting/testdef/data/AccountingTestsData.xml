@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL01"
+        inventoryItemId="TEST_9000" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="MAT_A_COST" ownerPartyId="Company" currencyUomId="USD" unitCost="9"/>
+    <InventoryItemDetail inventoryItemId="TEST_9000" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="4" quantityOnHandDiff="4"/>
+    <InventoryItem facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL01"
+        inventoryItemId="TEST_9001" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="MAT_B_COST" ownerPartyId="Company" currencyUomId="USD" unitCost="7"/>
+    <InventoryItemDetail inventoryItemId="TEST_9001" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="6" quantityOnHandDiff="6"/>
+
+    <!-- For Testing service createPartyAcctgPreference -->
+    <Party partyId="DEMO_COMPANY" partyTypeId="PARTY_GROUP"/>
+    <PartyRole partyId="DEMO_COMPANY" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <PaymentMethod fromDate="2001-05-13 00:00:00.0" partyId="DEMO_COMPANY" paymentMethodId="9020" paymentMethodTypeId="CREDIT_CARD"/>
+    <!-- For Testing service updatePartyAcctgPreference / getPartyAccountingPreferences-->
+    <Party partyId="DEMO_COMPANY1" partyTypeId="PARTY_GROUP"/>
+    <PartyRole partyId="DEMO_COMPANY1" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <PartyAcctgPreference partyId="DEMO_COMPANY1"/>
+    <!-- For Testing service updateFXConversion-->
+    <UomConversionDated uomId="EUR" uomIdTo="USD" fromDate="2001-01-01 00:00:00.0" conversionFactor="1.5"/>
+    <!-- For Testing service createGlAccountTypeDefault / addInvoiceItemTypeGlAssignment-->
+    <GlAccount glAccountId="999999"/>
+    <!-- For Testing service removeGlAccountTypeDefault-->
+    <GlAccountTypeDefault glAccountId="999999" glAccountTypeId="ACCOUNTS_PAYABLE" organizationPartyId="DEMO_COMPANY1"/>
+    <!-- For Testing service removeInvoiceItemTypeGlAssignment-->
+    <InvoiceItemTypeGlAccount glAccountId="999999" invoiceItemTypeId="PINV_SALES_TAX" organizationPartyId="DEMO_COMPANY1"/>
+
+    <!-- For Testing service removePaymentTypeGlAssignment-->
+    <PaymentGlAccountTypeMap paymentTypeId="COMMISSION_PAYMENT" glAccountTypeId="COMMISSIONS_PAYABLE" organizationPartyId="DEMO_COMPANY1"/>
+    <!-- For Testing service removePaymentMethodTypeGlAssignment-->
+    <PaymentMethodTypeGlAccount paymentMethodTypeId="CASH" glAccountId="999999" organizationPartyId="DEMO_COMPANY1"/>
+
+    <!-- For Testing service cancelAgreement -->
+    <PartyRole partyId="DEMO_COMPANY" roleTypeId="SUPPLIER"/>
+    <PartyRole partyId="DEMO_COMPANY1" roleTypeId="DISTRIBUTOR"/>
+    <Agreement agreementId="1000" agreementTypeId="COMMISSION_AGREEMENT" description="Commission Agreement" partyIdFrom="DEMO_COMPANY" partyIdTo="DEMO_COMPANY1" roleTypeIdFrom="SUPPLIER" roleTypeIdTo="DISTRIBUTOR" fromDate="2016-09-29 00:00:00"/>
+    <!-- For Testing service copyAgreement -->
+    <Product productId="TestProduct2" productName="Test Product 2" internalName="Test Product 2" description="Test Product For Testing getCommissionForProduct services"/>
+    <Agreement agreementId="1010" agreementTypeId="COMMISSION_AGREEMENT" description="Commission Agreement" partyIdFrom="DEMO_COMPANY" partyIdTo="DEMO_COMPANY1" roleTypeIdFrom="SUPPLIER" roleTypeIdTo="DISTRIBUTOR" fromDate="2016-09-29 00:00:00"/>
+    <AgreementItem agreementId="1010" agreementItemSeqId="0001" currencyUomId="USD" agreementItemTypeId="AGREEMENT_COMMISSION" agreementText="Commission in USD"/>
+    <AgreementProductAppl agreementId="1010" agreementItemSeqId="0001" productId="TestProduct2"/>
+    <AgreementTerm agreementTermId="1010" termTypeId="FIN_COMM_VARIABLE" agreementId="1010" agreementItemSeqId="0001" productId="TestProduct2" invoiceItemTypeId="COMM_INV_ITEM" fromDate="2016-09-29 00:00:00" thruDate="2017-09-29 00:00:00" termValue="10" termDays="30" minQuantity="1" maxQuantity="100" description="Agreement Term for Test Product 2 Commission"/>
+    <!-- For Testing service updateBudgetStatus -->
+    <Budget budgetId="9999" budgetTypeId="CAPITAL_BUDGET" comments="This is the capital budget"/>
+    <BudgetStatus budgetId="9999" statusId="BG_CREATED" statusDate="2016-09-29 00:00:00"/>
+    <!-- For Testing service updateProductAverageCostOnReceiveInventory -->
+    <Product productId="TestProduct3" productName="Test Product 3" internalName="Test Product 3" description="Test Product For Testing updateProductAverageCostOnReceiveInventory services"/>
+    <Facility facilityId="DemoFacility1" facilityTypeId="WAREHOUSE" facilityName="Demo Facility" />
+    <Party partyId="DEMO_COMPANY2" partyTypeId="PARTY_GROUP"/>
+    <PartyRole partyId="DEMO_COMPANY2" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <InventoryItem facilityId="DemoFacility1" inventoryItemId="9999" inventoryItemTypeId="NON_SERIAL_INV_ITEM" productId="TestProduct3" ownerPartyId="DEMO_COMPANY2" currencyUomId="USD" unitCost="9"/>
+    <PartyAcctgPreference partyId="DEMO_COMPANY2" cogsMethodId="COGS_LIFO"/>
+    <!-- For Testing service updateFinAccount -->
+    <FinAccount finAccountId="1001" finAccountTypeId="DEPOSIT_ACCOUNT" finAccountName="Deposit Account" finAccountCode="1001" currencyUomId="USD" organizationPartyId="DEMO_COMPANY" fromDate="2016-11-03 00:00:00" actualBalance="2000.00" availableBalance="1500.00"/>
+    <!-- For Testing service deleteFinAccount -->
+    <FinAccount finAccountId="1002" finAccountTypeId="CREDIT_CARD_ACCOUNT" finAccountName="Credit Cart Account" finAccountCode="1002" currencyUomId="USD" organizationPartyId="DEMO_COMPANY" fromDate="2016-11-03 00:00:00" actualBalance="2000.00" availableBalance="1500.00"/>
+    <!-- For Testing service createFinAccountStatus -->
+    <FinAccount finAccountId="1003" finAccountTypeId="DEPOSIT_ACCOUNT" finAccountName="Deposit Account" finAccountCode="1001" currencyUomId="USD" organizationPartyId="DEMO_COMPANY" fromDate="2016-11-03 00:00:00" actualBalance="2000.00" availableBalance="1500.00"/>
+    <!-- For Testing service updateFinAccountRole -->
+    <FinAccount finAccountId="1004" finAccountTypeId="DEPOSIT_ACCOUNT" finAccountName="Deposit Account" finAccountCode="1001" currencyUomId="USD" organizationPartyId="DEMO_COMPANY" fromDate="2016-11-03 00:00:00" actualBalance="2000.00" availableBalance="1500.00"/>
+    <FinAccountRole finAccountId="1004" partyId="DEMO_COMPANY" roleTypeId="SUPPLIER" fromDate="2016-11-03 00:00:00"/>
+    <!-- For Testing service setFinAccountTransStatus -->
+    <FinAccount finAccountId="1005" finAccountTypeId="DEPOSIT_ACCOUNT" finAccountName="Deposit Account" finAccountCode="1001" currencyUomId="USD" organizationPartyId="DEMO_COMPANY" fromDate="2016-11-03 00:00:00" actualBalance="2000.00" availableBalance="1500.00"/>
+    <FinAccountTrans finAccountTransId="1010" finAccountTransTypeId="ADJUSTMENT" finAccountId="1005" statusId="FINACT_TRNS_CREATED" />
+
+    <!-- For Testing service cancelFixedAssetStdCost -->
+    <FixedAsset fixedAssetId="1000" fixedAssetTypeId="REAL_ESTATE" partyId="DEMO_COMPANY" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <FixedAssetStdCost fixedAssetId="1000" fixedAssetStdCostTypeId="SETUP_COST" fromDate="2016-11-03 00:00:00" amountUomId="USD" amount="1000.00"/>
+    <!-- For Testing service copyInvoice -->
+    <Invoice invoiceId="1000" invoiceTypeId="PURCHASE_INVOICE" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <Invoice invoiceId="1001" invoiceTypeId="PURCHASE_INVOICE" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <InvoiceItem invoiceId="1001" invoiceItemSeqId="00001" invoiceItemTypeId="PINV_FXASTPRD_ITEM"/>
+    <Invoice invoiceId="1002" invoiceTypeId="PURCHASE_INVOICE" statusId="INVOICE_IN_PROCESS" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <!-- For Testing service setInvoiceStatus -->
+    <Invoice invoiceId="1002" invoiceTypeId="PURCHASE_INVOICE" statusId="INVOICE_IN_PROCESS" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <Invoice invoiceId="1003" invoiceTypeId="PURCHASE_INVOICE" statusId="INVOICE_IN_PROCESS" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <Invoice invoiceId="1004" invoiceTypeId="PURCHASE_INVOICE" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <Invoice invoiceId="1005" invoiceTypeId="PURCHASE_INVOICE" statusId="INVOICE_IN_PROCESS" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <Invoice invoiceId="1006" invoiceTypeId="PURCHASE_INVOICE" statusId="INVOICE_IN_PROCESS" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+    <InvoiceItem invoiceId="1006" invoiceItemSeqId="00001" invoiceItemTypeId="PINV_FXASTPRD_ITEM"/>
+    <Invoice invoiceId="1007" invoiceTypeId="PURCHASE_INVOICE" statusId="INVOICE_IN_PROCESS" partyIdFrom="DEMO_COMPANY" partyId="DEMO_COMPANY1" invoiceDate="2016-11-03 00:00:00"/>
+</entity-engine-xml>

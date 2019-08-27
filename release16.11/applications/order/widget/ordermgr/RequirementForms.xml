@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindRequirements" type="single" target="FindRequirements" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="requirementId"><text-find/></field>
+        <field name="requirementTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RequirementType"/>
+            </drop-down>
+        </field>
+        <field name="statusId">
+            <check all-checked="false">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="REQUIREMENT_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </check>
+        </field>
+        <field name="facilityId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" description="${facilityId}"/>
+            </drop-down>
+        </field>
+        <field name="productId">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="description"><text-find/></field>
+        <field name="requirementStartDate" title="${uiLabelMap.OrderRequirementStartDate}"><date-find type="date"/></field>
+        <field name="requiredByDate" title="${uiLabelMap.OrderRequirementByDate}"><date-find type="date"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="ListRequirements" type="list" target="" title="" list-name="listIt" paginate-target="FindRequirements"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" value="Requirement"/>
+                <field-map field-name="orderBy" value="statusId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <row-actions>
+            <set field="lookupProductId" value="${groovy: productId == null? '_NA_' : productId}" type="String"/>
+            <set field="lookupFacilityId" value="${groovy: facilityId == null? '_NA_' : facilityId}" type="String"/>
+            <service service-name="getInventoryAvailableByFacility" result-map="resultQoh">
+                <field-map field-name="productId" from-field="lookupProductId"/>
+                <field-map field-name="facilityId" from-field="lookupFacilityId"/>
+            </service>
+            <service service-name="getProductInventoryAvailable" result-map="resultQohTotal">
+                <field-map field-name="productId" from-field="lookupProductId"/>
+            </service>
+            <set field="facilityQuantityOnHandTotal" from-field="resultQoh.quantityOnHandTotal"/>
+            <set field="quantityOnHandTotal" from-field="resultQohTotal.quantityOnHandTotal"/>
+        </row-actions>
+        <field name="requirementId" widget-style="buttontext">
+            <hyperlink target-type="inter-app" description="${requirementId}" target="/ordermgr/control/EditRequirement">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="requirementTypeId">
+            <display-entity entity-name="RequirementType"/>
+        </field>
+        <field name="facilityId"><display/></field>
+        <field name="productId">
+            <display-entity entity-name="Product" key-field-name="productId" description="${productId} - ${internalName}"/>
+        </field>
+        <field name="requirementStartDate"><display/></field>
+        <field name="requiredByDate"><display/></field>
+        <field name="quantity" title="${uiLabelMap.CommonQuantity}"><display/></field>
+        <field name="facilityQuantityOnHandTotal"><display/></field>
+        <field name="quantityOnHandTotal"><display/></field>
+        <field name="requestsLink" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.OrderRequests}" target="ListRequirementCustRequests">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+        <field name="ordersLink" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonOrders}" target="ListRequirementOrders">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" widget-style="buttontext" title=" ">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteRequirement">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditRequirement" type="single" target="updateRequirement" title="" default-map-name="requirement"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="requirement==null" target="createRequirement"/>
+        <auto-fields-service service-name="updateRequirement" default-field-type="edit"/>
+        <field name="requirementId"><hidden/></field>
+        <field name="requirementTypeId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="RequirementType"/>
+            </drop-down>
+        </field>
+        <field name="statusId">
+            <drop-down allow-empty="false" no-current-selected-key="REQ_CREATED">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" value="REQUIREMENT_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productId"><lookup target-form-name="LookupProduct"/></field>
+        <field name="facilityId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Facility" description="${description} [${facilityId}]"/>
+            </drop-down>
+        </field>
+        <field name="fixedAssetId"><lookup target-form-name="LookupFixedAsset"/></field>
+        <field name="custRequestId" map-name="parameters"><text/></field>
+        <field name="custRequestItemSeqId" map-name="parameters"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="ListRequirementCustRequests" type="list" title="" list-name="requirementCustRequests" paginate-target="ListRequirementCustRequests"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="RequirementCustRequest" default-field-type="display"/>
+        <field name="requirementId"><hidden/></field>
+        <field name="custRequestId" widget-style="buttontext">
+            <hyperlink description="${custRequestId}" target="request">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="custRequestItemSeqId"/>
+            </hyperlink>
+        </field>
+        <field name="custRequestItemSeqId" widget-style="buttontext">
+            <hyperlink description="${custRequestItemSeqId}" target="requestitem">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="custRequestItemSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <!-- lists the orders associated with a requirement -->
+    <form name="ListRequirementOrders" type="list" title="" list-name="orderRequirements" paginate-target="ListRequirementOrders"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="OrderRequirementCommitment" default-field-type="display"/>
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink description="${orderId}" target-type="inter-app" target="/ordermgr/control/orderview">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <!-- lists the roles associated with a requirement -->
+    <form name="ListRequirementRoles" type="list" title="" list-name="requirementRoles" paginate-target="ListRequirementRoles"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="RequirementRole" default-field-type="display"/>
+        <field name="requirementId"><hidden/></field>
+        <field name="editLink" widget-style="buttontext" title="${uiLabelMap.CommonEdit}">
+            <hyperlink description="${uiLabelMap.CommonEdit}" target="EditRequirementRole">
+                <parameter param-name="requirementId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+        <field name="removeLink" widget-style="buttontext" title="${uiLabelMap.CommonRemove}">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeRequirementRole">
+                <parameter param-name="requirementId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditRequirementRole" type="single" target="updateRequirementRole" title="" default-map-name="requirementRole"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="requirementRole==null" target="createRequirementRole"/>
+        <field name="requirementId"><hidden/></field>
+        <field name="partyId" use-when="requirementRole!=null"><display/></field>
+        <field name="partyId" use-when="requirementRole==null"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId" use-when="requirementRole!=null"><display-entity entity-name="RoleType"/></field>
+        <field name="roleTypeId" use-when="requirementRole==null">
+            <drop-down allow-empty="false" no-current-selected-key="SUPPLIER">
+                <entity-options entity-name="RoleType"/>
+            </drop-down>
+        </field>
+        <field name="fromDate" use-when="requirementRole!=null"><display/></field>
+        <field name="fromDate" use-when="requirementRole==null"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="FindNotApprovedRequirements" type="single" target="ApproveRequirements" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="requirementId"><text-find/></field>
+        <field name="requirementTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RequirementType"/>
+            </drop-down>
+        </field>
+        <field name="facilityId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" description="${facilityId}"/>
+            </drop-down>
+        </field>
+        <field name="productId" title="${uiLabelMap.ProductProductId}">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><text-find/></field>
+        <field name="requirementStartDate"><date-find type="date"/></field>
+        <field name="requiredByDate"><date-find type="date"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="ApproveRequirements" type="multi" use-row-submit="true" target="approveRequirements" title="" list-name="requirements"
+        paginate-target="ApproveRequirements" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="requirementId" widget-style="buttontext">
+            <hyperlink description="${requirementId}" target="EditRequirement" also-hidden="true">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+        <field name="requirementTypeId">
+            <display-entity entity-name="RequirementType" also-hidden="true"/>
+        </field>
+        <field name="facilityId"><display/></field>
+        <field name="productId" title="${uiLabelMap.ProductProductId}">
+            <display-entity entity-name="Product" key-field-name="productId" description="${productId} - ${internalName}"/>
+        </field>
+        <field name="requirementStartDate"><display/></field>
+        <field name="requiredByDate"><display/></field>
+        <field name="quantity" title="${uiLabelMap.CommonQuantity}"><display/></field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><check/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
+          <submit/>
+        </field>
+    </form>
+    <form name="FindApprovedProductRequirements" type="single" target="ApprovedProductRequirements" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="showList"><hidden value="Y"/></field>
+        <field name="requirementId"><text-find/></field>
+        <field name="billToCustomerPartyId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PartyRole" key-field-name="partyId" description="${partyId}">
+                    <entity-constraint name="roleTypeId" operator="equals" value="INTERNAL_ORGANIZATIO"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyId" title="${uiLabelMap.ProductSupplier}" position="1">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PartyRoleAndPartyDetail" key-field-name="partyId" description="${groupName} [${partyId}]">
+                    <entity-constraint name="roleTypeId"  value="SUPPLIER" operator="equals"/>
+                    <entity-order-by field-name="partyId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="supplierCurrencyUomId" entry-name="parameters.supplierCurrencyUomId" position="2"><display/></field>
+        <field name="unassignedRequirements"><check/></field>
+        <field name="facilityId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" description="${facilityId}"/>
+            </drop-down>
+        </field>
+        <field name="productId" title="${uiLabelMap.ProductProductId}"><lookup target-form-name="LookupProduct"/></field>
+        <field name="requirementByDate"><date-find type="date"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ApprovedProductRequirementsList" type="list" title="" list-name="requirementsForSupplier" paginate-target="RequirementsForSupplier"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="prepareFind" result-map="resultConditions">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" value="Requirement"/>
+            </service>
+            <service service-name="getRequirementsForSupplier" result-map="result" result-map-list="requirementsForSupplier">
+                <!--<field-map field-name="orderByList" from-field="resultConditions.orderByList"/>-->
+                <field-map field-name="requirementConditions" from-field="resultConditions.entityConditionList"/>
+                <field-map field-name="partyId" from-field="parameters.partyId"/>
+                <field-map field-name="unassignedRequirements" from-field="parameters.unassignedRequirements"/>
+            </service>
+        </actions>
+        <field name="requirementId" widget-style="buttontext">
+            <hyperlink description="${requirementId}" target="EditRequirement" also-hidden="true">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" widget-style="buttontext">
+            <hyperlink description="${productId}" target="/catalog/control/EditProductInventoryItems" target-window="top" also-hidden="true" target-type="inter-app">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="internalName" entry-name="productId">
+            <display-entity entity-name="Product" key-field-name="productId" description="${internalName}"/>
+        </field>
+        <field name="facilityId"><display/></field>
+        <field name="partyId" title="${uiLabelMap.ProductSupplier}">
+            <display-entity entity-name="PartyNameView" description="${LastName} ${firstName} ${middleName} ${groupName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile?partyId=${partyId}" description="[${partyId}]" target-type="inter-app"/>
+            </display-entity>
+        </field>
+        <field name="supplierProductId" title="${uiLabelMap.ProductSupplierProductId}">
+            <hyperlink description="${supplierProductId}" target="/catalog/control/EditProductSuppliers?productId=${productId}" target-type="inter-app"/>
+        </field>
+        <field name="idValue" title="${uiLabelMap.ProductUPCA}"><display/></field>
+        <field name="minimumOrderQuantity" widget-area-style="align-text"><display/></field>
+        <field name="lastPrice" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="requiredByDate"><display/></field>
+        <field name="quantity" widget-area-style="align-text"><display/></field>
+        <field name="comments"><display/></field>
+    </form>
+    <form name="ApprovedProductRequirements" type="multi" use-row-submit="true" target="quickPurchaseOrderEntry" title="" list-name="requirementsForSupplier"
+        paginate-target="RequirementsForSupplier" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="orderId" id-name="orderId"><hidden/></field>
+        <field name="billToCustomerPartyId"><hidden value="${parameters.billToCustomerPartyId}"/></field>
+        <field name="supplierPartyId"><hidden value="${parameters.partyId}"/></field>
+        <field name="requirementId" widget-style="buttontext">
+            <hyperlink description="${requirementId}" target="EditRequirement" also-hidden="true">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" widget-style="buttontext">
+            <hyperlink description="${productId}" target="/catalog/control/EditProductInventoryItems" target-window="top" also-hidden="true" target-type="inter-app">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="facilityId"><hidden value="${parameters.facilityId}"/></field>
+        <field name="internalName" entry-name="productId">
+            <display-entity entity-name="Product" key-field-name="productId" description="${internalName}"/>
+        </field>
+        <field name="partyId" title="${uiLabelMap.ProductSupplier}">
+            <display-entity entity-name="PartyNameView" description="${lastName} ${firstName} ${groupName}"/>
+        </field>
+        <field name="supplierCurrencyUomId" entry-name="parameters.supplierCurrencyUomId"><display/></field>
+        <field name="supplierProductId" title="${uiLabelMap.ProductSupplierProductId}"><display/></field>
+        <field name="idValue" title="${uiLabelMap.ProductUPCA}"><display/></field>
+        <field name="minimumOrderQuantity" title="${uiLabelMap.FormFieldTitle_minimumOrderQuantity}" widget-area-style="align-text"><display/></field>
+        <field name="lastPrice" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="requiredByDate"><display/></field>
+        <field name="atp" title="${uiLabelMap.ProductAtp}" widget-area-style="align-text"><display/></field>
+        <field name="qoh" title="${uiLabelMap.ProductQoh}" widget-area-style="align-text"><display/></field>
+        <field name="qtySold" title="${uiLabelMap.OrderQuantitySold}" widget-area-style="align-text"><display/></field>
+        <field name="quantity"><text size="4"/></field>
+        <field name="comments"><display/></field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><check/></field>
+    </form>
+    <form name="ApprovedProductRequirementsSubmit" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="orderId" id-name="orderId_o_0"><text/></field>
+        <field name="submitButton" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.OrderInputQuickPurchaseOrder}" target="javascript:document.ApprovedProductRequirements.orderId_o_0.value=document.ApprovedProductRequirementsSubmit.orderId_o_0.value;document.ApprovedProductRequirements.submit()" also-hidden="false" target-type="plain"/>
+        </field>
+    </form>
+    <form name="ApprovedProductRequirementsSummary" type="single" default-map-name="quantityReport" target="ApprovedProductRequirements"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="distinctProductCount" title="${uiLabelMap.OrderRequirementNumberOfProducts}"><display/></field>
+        <field name="quantityTotal"><display/></field>
+        <field name="amountTotal"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    <form name="ApprovedProductRequirementsByVendor" type="list" use-row-submit="true" list-name="requirements" target="ApprovedProductRequirements" separate-columns="true"
+        paginate-target="ApprovedProductRequirementsByVendor" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <row-actions>
+            <entity-one entity-name="Party" value-field="supplierParty">
+                <field-map field-name="partyId" from-field="partyId"/>
+            </entity-one>
+            <set field="supplierCurrencyUomId" from-field="supplierParty.preferredCurrencyUomId"/>
+        </row-actions>
+        <field name="partyId">
+            <display description="${groovy:org.apache.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, false);}"/>
+        </field>
+        <field name="supplierCurrencyUomId"><display/></field>
+        <field name="productId" title="${uiLabelMap.OrderVendorRequirementCount}" widget-area-style="align-text"><display also-hidden="false"/></field>
+        <field name="billToCustomerPartyId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PartyRoleAndPartyDetail" key-field-name="partyId" description="${firstName} ${lastName} ${groupName} (${partyId})">
+                    <entity-constraint name="roleTypeId" operator="equals" value="INTERNAL_ORGANIZATIO"/>
+                    <entity-order-by field-name="firstName"/>
+                    <entity-order-by field-name="lastName"/>
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="prepareFind"><hidden value="Y"/></field>
+        <field name="facilityId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName} (${facilityId})">
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="prepare" title="${uiLabelMap.OrderPrepareOrder}" widget-style="buttontext">
+            <submit button-type="button"/>
+        </field>
+    </form>
+</forms>

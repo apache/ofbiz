@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Accounting Services: Financial Account</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Financial Account -->
+    <service name="createFinAccount" engine="simple" default-entity-name="FinAccount"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="createFinAccount">
+        <description>Create a new Financial Account.  If no finAccountId is provided, an auto-sequenced one will be used.</description>
+        <auto-attributes mode="INOUT" optional="true" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk">
+            <exclude field-name="actualBalance"/>
+            <exclude field-name="availableBalance"/>
+        </auto-attributes>
+    </service>
+    <service name="updateFinAccount" engine="simple" default-entity-name="FinAccount"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="updateFinAccount">
+        <description>Update a Financial Account</description>
+        <auto-attributes mode="INOUT" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk">
+            <exclude field-name="actualBalance"/>
+            <exclude field-name="availableBalance"/>
+        </auto-attributes>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldReplenishPaymentId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldReplenishLevel" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="replenishPaymentId" type="String" mode="OUT" optional="true"/>
+        <attribute name="replenishLevel" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+    <service name="deleteFinAccount" default-entity-name="FinAccount" engine="entity-auto" invoke="delete">
+        <description>Delete a Financial Account</description>
+        <auto-attributes mode="IN" optional="false" include="pk"/>
+    </service>
+    <service name="updateFinAccountBalancesFromTrans" engine="simple"
+        location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="updateFinAccountBalancesFromTrans">
+        <description>Update FinAccount.actualBalance and FinAccount.availableBalance based on a new FinAccountTrans; meant to be called as an EECA as it is for data maintenance</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="updateFinAccountBalancesFromAuth" engine="simple"
+        location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="updateFinAccountBalancesFromAuth">
+        <description>Update FinAccount.availableBalance based on a new FinAccountAuth; meant to be called as an EECA as it is for data maintenance</description>
+        <attribute name="finAccountAuthId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="createFinAccountStatus" default-entity-name="FinAccountStatus" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FinAccountStatus</description>
+        <auto-attributes include="all" mode="IN" optional="false">
+            <exclude field-name="statusEndDate"/>
+            <exclude field-name="changeByUserLoginId"/>
+        </auto-attributes>
+        <override name="statusDate" optional="true" mode="IN"/>
+    </service>
+
+    <!-- Financial Account Transaction -->
+    <service name="createFinAccountTrans" engine="simple" default-entity-name="FinAccountTrans"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="createFinAccountTrans">
+        <description>Create a new Financial Account Transaction.  Will use current timestamp for entryDate and trasanctionDate if none is provided.</description>
+        <auto-attributes mode="OUT" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk">
+            <exclude field-name="performedByPartyId"/>
+        </auto-attributes>
+        <attribute name="glAccountId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="postFinAccountTransToGl" engine="simple"
+        location="component://accounting/minilang/finaccount/FinAccountGlPostServices.xml" invoke="postFinAccountTransToGl">
+        <description>Post a Financial Account Transaction to the General Ledger; meant to be called as an SECA</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+        <attribute name="glAccountId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createFinAccountRole" engine="simple" default-entity-name="FinAccountRole"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="createFinAccountRole">
+        <description>Create a new Financial Account Role</description>
+        <auto-attributes mode="IN" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateFinAccountRole" default-entity-name="FinAccountRole" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FinAccountRole</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFinAccountRole" default-entity-name="FinAccountRole" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FinAccountRole</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createFinAccountAuth" engine="simple" default-entity-name="FinAccountAuth"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="createFinAccountAuth">
+        <description>Lower level service for creating authorization against a fin account.  Will use current time for authorizationDate and thruDate if not supplied.</description>
+        <auto-attributes mode="OUT" optional="false" include="pk"/>
+        <auto-attributes mode="IN" optional="true" include="nonpk"/>
+    </service>
+    <service name="expireFinAccountAuth" engine="simple" default-entity-name="FinAccountAuth"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="expireFinAccountAuth">
+        <!-- NOTE: never set require-new-transaction on this service, needs to be called with other services in same transaction to protect operations such as the payment capture one -->
+        <description>Expires a fin account authorization.  Will use current time if no time is supplied in parameter</description>
+        <attribute name="finAccountAuthId" type="String" mode="IN" optional="false"/>
+        <attribute name="expireDateTime" type="Timestamp" mode="IN" optional="true"/>
+    </service>
+
+    <service name="setFinAccountTransStatus" engine="simple"
+        location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="setFinAccountTransStatus">
+        <description>Set financial account transaction status</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="true"/>
+        <attribute name="statusId" type="String" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="updatePaymentOnFinAccTransStatusSetToCancel" engine="simple" location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="updatePaymentOnFinAccTransStatusSetToCancel">
+        <description>Update payment when FinAccountTrans status is set to Cancle, remove finAccountTransId form Payment entity.</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="true"/>
+    </service>
+    <!-- these services use the product store's fin account settings -->
+    <service name="createFinAccountForStore" engine="java" default-entity-name="FinAccount"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountServices" invoke="createFinAccountForStore">
+        <description>Creates a new FinAccount, using defaults from the ProductStoreFinActSetting for expiration date and to generate an automatic account code.
+            Note this would override any user values for from, thru, and acount code</description>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute type="String" mode="IN" name="productStoreId" optional="false"/>
+        <attribute type="String" mode="OUT" name="finAccountId" optional="true"/>
+        <attribute type="String" mode="OUT" name="finAccountCode" optional="true"/>
+        <attribute type="String" mode="OUT" name="finAccountPin" optional="true"/>
+        <override name="finAccountTypeId" mode="IN" optional="false"/> <!-- Required to find the store's settings for this fin account type -->
+     </service>
+
+    <!-- financial account transactions -->
+    <service name="finAccountDeposit" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountDeposit" auth="true">
+        <description>Deposit Funds into a Financial Account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="isRefund" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="reasonEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"/>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="finAccountWithdraw" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountWithdraw" auth="true">
+        <!-- NOTE: never set require-new-transaction on this service, needs to be called with other services in same transaction to protect operations such as the payment capture one -->
+        <description>Deposit Funds into a Financial Account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="requireBalance" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="reasonEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"/>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="finAccountRefund" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountServices" invoke="refundFinAccount" auth="true">
+        <description>Refunds the deposits to a financial account back to the source</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="finAccountReplenish" engine="java" max-retry="3"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountReplenish" auth="true">
+        <description>Auto-replenish a financial account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="checkFinAccountBalance" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountServices" invoke="checkFinAccountBalance" auth="true">
+        <description>Checks the balance of the financial account</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="availableBalance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="statusId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="checkFinAccountStatus" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountServices" invoke="checkFinAccountStatus" auth="true">
+        <description>Checks the status of the financial account; may set statusId to FNACT_MANFROZEN or FNACT_ACTIVE</description>
+        <attribute name="finAccountAuthId" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="getFinAccountTransListAndTotals" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="getFinAccountTransListAndTotals">
+        <description>Financial Account Transaction List and Totals</description>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="finAccountTransTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="statusId" type="String" mode="IN" optional="true"/>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="true"/>
+        <attribute name="fromTransactionDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="thruTransactionDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="fromEntryDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="thruEntryDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="openingBalance" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="finAccountTransList" type="List" mode="OUT" optional="true"/>
+        <attribute name="searchedNumberOfRecords" type="Integer" mode="OUT" optional="true"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="createdGrandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="totalCreatedTransactions" type="Long" mode="OUT" optional="true"/>
+        <attribute name="approvedGrandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="totalApprovedTransactions" type="Long" mode="OUT" optional="true"/>
+        <attribute name="createdApprovedGrandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="totalCreatedApprovedTransactions" type="Long" mode="OUT" optional="true"/>
+        <attribute name="glReconciliationApprovedGrandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+    <service name="getFinAccountTransRunningTotalAndBalances" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="getFinAccountTransRunningTotalAndBalances">
+        <description>Financial Account Running Total</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="openingBalance" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="reconciledBalance" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="runningTotal" type="BigDecimal" mode="INOUT" optional="true"/>
+        <attribute name="numberOfTransactions" type="Long" mode="INOUT" optional="true"/>
+        <attribute name="finAccountTransRunningTotal" type="String" mode="OUT" optional="true"/>
+        <attribute name="endingBalance" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="reconcileFinAccountTrans" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="reconcileFinAccountTrans">
+        <description>Reconcile Financial Accounting Financial Transactions</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="glAccountId" type="String" mode="IN" optional="true"/>
+        <attribute name="debitCreditFlag" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="reconcileAdjustmentFinAcctgTrans" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="reconcileAdjustmentFinAcctgTrans">
+        <description>Reconcile Financial Accounting Financial Transactions</description>
+        <attribute name="finAccountTrans" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="reconcileDepositFinAcctgTrans" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="reconcileDepositFinAcctgTrans">
+        <description>Reconcile Financial Accounting Financial Transactions</description>
+        <attribute name="finAccountTrans" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+    </service>
+    <service name="reconcileWithdrawalFinAcctgTrans" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="reconcileWithdrawalFinAcctgTrans">
+        <description>Reconcile Financial Accounting Financial Transactions</description>
+        <attribute name="finAccountTrans" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+    </service>    
+    <service name="getReconciliationClosingBalance" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="getReconciliationClosingBalance">
+        <description>Service to Get Reconciliation closing balance.</description>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="false"/>
+        <attribute name="closingBalance" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- service credit account w/ transaction -->
+    <service name="createServiceCredit" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountServices" invoke="createAccountAndCredit" auth="true">
+        <attribute name="finAccountId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="finAccountName" type="String" mode="IN" optional="true"/>
+        <attribute name="reasonEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="comments" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountTypeId" type="String" mode="IN" default-value="SVCCRED_ACCOUNT"/>
+    </service>
+
+    <!-- financial account w/ transaction -->
+    <service name="createFinAccountAndCredit" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountServices" invoke="createAccountAndCredit" auth="true">
+        <attribute name="finAccountId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="finAccountName" type="String" mode="IN" optional="true"/>
+        <attribute name="reasonEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="comments" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="replenishPaymentId" type="String" mode="IN" optional="true"/>
+        <attribute name="replenishLevel" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountTypeId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <!-- balance account created from product purchase -->
+    <service name="createPartyFinAccountFromPurchase" engine="java"
+            location="org.apache.ofbiz.accounting.finaccount.FinAccountProductServices" invoke="createPartyFinAccountFromPurchase" auth="true">
+        <implements service="itemFulfillmentInterface"/>
+        <attribute name="finAccountId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- financial account as payment method services -->
+    <service name="ofbFaAuthorize" engine="java"
+             location="org.apache.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountPreAuth" auth="true">
+        <description>Authorize a potential transaction against a financial account</description>
+        <implements service="paymentProcessInterface"/>
+        <attribute name="finAccountCode" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountPin" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="ofbFaCapture" engine="java"
+             location="org.apache.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountCapture" auth="true">
+        <description>Capture funds from a pre-authroized financial account transaction</description>
+        <implements service="ccCaptureInterface"/>
+    </service>
+    <service name="ofbFaRelease" engine="java"
+             location="org.apache.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountReleaseAuth" auth="true">
+        <description>Release authorizations back to a financial account.</description>
+        <implements service="paymentReleaseInterface"/>
+    </service>
+    <service name="ofbFaRefund" engine="java"
+             location="org.apache.ofbiz.accounting.finaccount.FinAccountPaymentServices" invoke="finAccountRefund" auth="true">
+        <description>Return funds back to a financial account.</description>
+        <implements service="paymentRefundInterface"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <!-- Gift Certificate -->
+    <service name="createGiftCertificate" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="createGiftCertificate" auth="true">
+        <description>Generate a Gift Certificate number/pin and store as a FinAccount</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="initialAmount" type="BigDecimal" mode="INOUT" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="cardNumber" type="String" mode="OUT" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="responseCode" type="String" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="addFundsToGiftCertificate" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="addFundsToGiftCertificate" auth="true">
+        <description>Add funds to a Gift Certificate</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="responseCode" type="String" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="redeemGiftCertificate" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="redeemGiftCertificate" auth="true">
+        <description>Deduct funds from a Gift Certificate</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="previousBalance" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="processResult" type="Boolean" mode="OUT" optional="false"/>
+        <attribute name="responseCode" type="String" mode="OUT" optional="false"/>
+        <attribute name="referenceNum" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="checkGiftCertificateBalance" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="checkGiftCertificateBalance" auth="true">
+        <description>Obtain the balanace of a Gift Certificate</description>
+        <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="currency" type="String" mode="IN" optional="true"/>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="createGcFulFillmentRecord" engine="java" require-new-transaction="true" use-transaction="true"
+            location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="createFulfillmentRecord" auth="true">
+        <description>Creates the fulfillment log</description>
+        <attribute name="typeEnumId" type="String" mode="IN" optional="false"/>
+        <attribute name="merchantId" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="surveyResponseId" type="String" mode="IN" optional="true"/>
+        <attribute name="cardNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="pinNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="amount" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="responseCode" type="String" mode="IN" optional="true"/>
+        <attribute name="referenceNum" type="String" mode="IN" optional="true"/>
+        <attribute name="authCode" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="refundGcPurchase" engine="java" require-new-transaction="true" use-transaction="true"
+            location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="refundGcPurchase" auth="true">
+        <description>Creates return for reload on failure</description>
+        <attribute name="orderItem" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="false"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Gift Certificate Payment Process -->
+    <service name="ofbGcProcessor" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateProcessor" auth="true">
+        <description>Process a sale using FinAccount Gift Certificate</description>
+        <implements service="giftCardProcessInterface"/>
+    </service>
+    <service name="ofbGcAuthorize" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateAuthorize" auth="true">
+        <description>Authorize a potential transaction against a Gift Certificate</description>
+        <implements service="giftCardProcessInterface"/>
+    </service>
+    <service name="ofbGcRelease" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateRelease" auth="true">
+        <description>Release authorizations back to a Gift Certificate.  No amount is added back, but an authorization is cancelled.</description>
+        <implements service="paymentReleaseInterface"/>
+    </service>
+    <service name="ofbGcRefund" engine="java"
+             location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateRefund" auth="true">
+        <description>Return funds back to a Gift Certificate.  Amounts are added back to the gift certificate.</description>
+        <implements service="paymentRefundInterface"/>
+    </service>
+
+    <!-- Gift Certificate Fulfillment Services -->
+    <service name="ofbGcPurchase" engine="java"
+            location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificatePurchase" auth="true">
+        <description>Automatic CG Purchase Fulfillment Service</description>
+        <implements service="itemFulfillmentInterface"/>
+    </service>
+    <service name="ofbGcReload" engine="java"
+            location="org.apache.ofbiz.accounting.payment.GiftCertificateServices" invoke="giftCertificateReload" auth="true">
+        <description>Automatic GC Reload Service</description>
+        <implements service="itemFulfillmentInterface"/>
+    </service>
+
+    <service name="depositWithdrawPayments" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="depositWithdrawPayments">
+        <description>Deposit withdraw payments</description>
+        <attribute name="paymentIds" type="List" mode="IN" optional="false"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="groupInOneTransaction" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentGroupTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentGroupName" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountTransId" type="String" mode="OUT" optional="true"/>
+        <attribute name="paymentGroupId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="expirePaymentAssociationsOnFinAccountTransCancel" engine="simple" location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="expirePaymentAssociationsOnFinAccountTransCancel">
+        <description>expire payment associations with paymentGroup on finAccountTrans cancel</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="createPaymentAndFinAccountTrans" engine="simple" 
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="createPaymentAndFinAccountTrans" auth="true">
+        <description>create new payment and associate with respective financial account in FinAccountTrans Entity.</description>
+        <implements service="createPayment"/>
+        <attribute name="isDepositWithDrawPayment" type="String" mode="IN" optional="true"/>
+        <attribute name="finAccountTransTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="paymentGroupTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentMethodId" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="getTransactionTotalByGlReconcileId" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="getTransactionTotalByGlReconcileId">
+        <description>Transaction Total By GlReconcile Id</description>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="false"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="assignGlRecToFinAccTrans" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="assignGlRecToFinAccTrans">
+        <description>Assignment of Gl Reconciliation to Fin Account Trans</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="removeFinAccountTransFromReconciliation" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="removeFinAccountTransFromReconciliation">
+        <description>Remove finaAccountTrans association with gl reconciliation</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="isGlReconciliationReconciled" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="isGlReconciliationReconciled">
+        <description>Check GlReconciliation is Reconciled or not</description>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="false"/>
+        <attribute name="isReconciled" type="Boolean" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="cancelBankReconciliation" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="cancelBankReconciliation">
+        <description>Cancel bank reconciliation.</description>
+        <attribute name="glReconciliationId" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="getAssociatedAcctgTransEntriesWithFinAccountTrans" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="getAssociatedAcctgTransEntriesWithFinAccountTrans">
+        <description>Get associated acctgTransEntries with finAccountTrans</description>
+        <attribute name="finAccountTransId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransAndEntries" type="List" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="autoFinAccountReconciliation" engine="simple"
+            location="component://accounting/minilang/finaccount/FinAccountServices.xml" invoke="autoFinAccountReconciliation" auth="true">
+        <description>Auto Reconciled FinAccountTrans entries</description>
+    </service>
+
+    <!-- FinAccountAttribute services -->
+    <service name="createFinAccountAttribute" default-entity-name="FinAccountAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FinAccountAttribute</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateFinAccountAttribute" default-entity-name="FinAccountAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FinAccountAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFinAccountAttribute" default-entity-name="FinAccountAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FinAccountAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FinAccountTransAttribute services -->
+    <service name="createFinAccountTransAttribute" default-entity-name="FinAccountTransAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FinAccountTransAttribute</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateFinAccountTransAttribute" default-entity-name="FinAccountTransAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FinAccountTransAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFinAccountTransAttribute" default-entity-name="FinAccountTransAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FinAccountTransAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FinAccountTransType services -->
+    <service name="createFinAccountTransType" default-entity-name="FinAccountTransType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FinAccountTransType record</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateFinAccountTransType" default-entity-name="FinAccountTransType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FinAccountTransType record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFinAccountTransType" default-entity-name="FinAccountTransType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FinAccountTransType record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FinAccountTransTypeAttr services -->
+    <service name="createFinAccountTransTypeAttr" default-entity-name="FinAccountTransTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FinAccountTransTypeAttr</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateFinAccountTransTypeAttr" default-entity-name="FinAccountTransTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FinAccountTransType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFinAccountTransTypeAttr" default-entity-name="FinAccountTransTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FinAccountTransTypeAttr</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FinAccountType services -->
+    <service name="createFinAccountType" default-entity-name="FinAccountType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FinAccountType</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateFinAccountType" default-entity-name="FinAccountType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FinAccountType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFinAccountType" default-entity-name="FinAccountType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FinAccountType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FinAccountTypeAttr services -->
+    <service name="createFinAccountTypeAttr" default-entity-name="FinAccountTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FinAccountTypeAttr</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateFinAccountTypeAttr" default-entity-name="FinAccountTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FinAccountTypeAttr</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFinAccountTypeAttr" default-entity-name="FinAccountTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FinAccountTypeAttr</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

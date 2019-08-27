@@ -1,0 +1,1455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://ofbiz.apache.org/Widget-Menu" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Menu http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <menu name="AccountingAppBar" title="${uiLabelMap.AccountingManager}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="invoices" title="${uiLabelMap.AccountingInvoicesMenu}"><link target="findInvoices"/></menu-item>
+        <menu-item name="payments" title="${uiLabelMap.AccountingPaymentsMenu}"><link target="findPayments"/></menu-item>
+        <menu-item name="PaymentGroup" title="${uiLabelMap.AccountingPaymentGroup}"><link target="FindPaymentGroup"/></menu-item>
+        <menu-item name="transaction" title="${uiLabelMap.AccountingTransactions}">
+            <condition>
+                <or>
+                    <if-has-permission permission="MANUAL" action="_PAYMENT"/>
+                    <if-has-permission permission="ACCOUNTING" action="_CREATE"/>
+                </or>
+            </condition>
+            <link target="FindGatewayResponses"/>
+        </menu-item>
+        <menu-item name="PaymentGatewayConfig" title="${uiLabelMap.AccountingPaymentGatewayConfig}">
+            <condition>
+                <or>
+                    <if-has-permission permission="PAYPROC" action="_ADMIN"/>
+                    <if-has-permission permission="ACCOUNTING" action="_ADMIN"/>
+                </or>
+            </condition>
+            <link target="FindPaymentGatewayConfig"/>
+        </menu-item>
+        <menu-item name="billingaccount" title="${uiLabelMap.AccountingBillingMenu}"><link target="FindBillingAccount"/></menu-item>
+        <menu-item name="FindFinAccount" title="${uiLabelMap.AccountingFinAccount}"><link target="FinAccountMain"/></menu-item>
+        <menu-item name="TaxAuthorities" title="${uiLabelMap.AccountingTaxAuthorities}"><link target="FindTaxAuthority"/></menu-item>
+        <menu-item name="agreements" title="${uiLabelMap.AccountingAgreements}"><link target="FindAgreement"/></menu-item>
+        <menu-item name="ListFixedAssets" title="${uiLabelMap.AccountingFixedAssets}"><link target="ListFixedAssets"/></menu-item>
+        <menu-item name="ListBudgets" title="${uiLabelMap.AccountingBudgets}"><link target="ListBudgets"/></menu-item>
+        <menu-item name="GlobalGLSettings" title="${uiLabelMap.AccountingGlobalGLSettings}"><link target="globalGLSettings"/></menu-item>
+        <menu-item name="companies" title="${uiLabelMap.AccountingOrgGlSettings}"><link target="ListCompanies"/></menu-item>
+    </menu>
+
+    <menu name="InvoiceTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="find" title="${uiLabelMap.CommonFind}">
+            <link target="findInvoices"/>
+        </menu-item>
+        <menu-item name="invoiceOverview" title="${uiLabelMap.AccountingInvoiceOverview}">
+            <condition>
+                <not><if-empty field="invoice.invoiceId"/></not>
+            </condition>
+            <link target="invoiceOverview">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="editInvoice" title="${uiLabelMap.AccountingInvoiceHeader}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="editInvoice">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="listInvoiceItems" title="${uiLabelMap.AccountingInvoiceItems}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="listInvoiceItems">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="EditInvoiceTimeEntries" title="${uiLabelMap.AccountingInvoiceTimeEntries}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="editInvoiceTimeEntries">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="invoiceRoles" title="${uiLabelMap.AccountingInvoiceRoles}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="invoiceRoles">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="invoiceTerms" title="${uiLabelMap.PartyTerms}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="invoiceTerms">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="editInvoiceApplications" title="${uiLabelMap.AccountingApplications}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_SENT"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_APPROVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="editInvoiceApplications">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="sendPerEmail" title="${uiLabelMap.CommonSendPerEmail}">
+            <condition>
+                <not><if-empty field="invoice.invoiceId"/></not>
+            </condition>
+            <link target="sendPerEmail">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="commissionRun" title="${uiLabelMap.AccountingCommissionRun}">
+            <link target="CommissionRun"/>
+        </menu-item>
+        
+    </menu>
+    
+    <menu name="InvoiceSubTabBar" menu-container-style="button-bar button-style-2" default-selected-style="selected">
+        <menu-item name="createNew" title="${uiLabelMap.AccountingCreateNewInvoice}" widget-style="buttontext create">
+            <link target="newInvoice"/>
+        </menu-item>
+        <menu-item name="copyInvoice" title="${uiLabelMap.CommonCopy}">
+            <condition>
+                <not><if-empty field="invoice.invoiceId"/></not>
+            </condition>
+            <link target="copyInvoice">
+                <parameter param-name="invoiceIdToCopyFrom" from-field="invoiceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="pdf" title="${uiLabelMap.AccountingInvoicePDF}">
+            <condition>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+            </condition>
+            <link target="invoice.pdf" target-window="_BLANK">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="pdfDfltCur" title="${uiLabelMap.AccountingInvoicePDFDefaultCur}(${defaultOrganizationPartyCurrencyUomId})">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <if-compare-field field="invoice.currencyUomId" operator="not-equals" to-field="defaultOrganizationPartyCurrencyUomId"/>
+                </and>
+            </condition>
+            <link target="invoice.pdf" target-window="_BLANK">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="currency" from-field="defaultOrganizationPartyCurrencyUomId"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToApproved" title="${uiLabelMap.AccountingInvoiceStatusToApproved}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_SENT"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setInvoiceStatus">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_APPROVED"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToReceived" title="${uiLabelMap.AccountingInvoiceStatusToReceived}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                    <or>
+                        <if-compare field="invoice.invoiceTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                        <if-compare field="invoice.invoiceTypeId" operator="equals" value="CUST_RTN_INVOICE"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setInvoiceStatus">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_RECEIVED"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToSent" title="${uiLabelMap.AccountingInvoiceStatusToSent}">
+            <condition>
+                <or>
+                    <and>
+                        <not><if-empty field="invoice.invoiceId"/></not>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.invoiceTypeId" operator="equals" value="SALES_INVOICE"/>
+                    </and>
+                    <and>
+                        <not><if-empty field="invoice.invoiceId"/></not>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_APPROVED"/>
+                        <if-compare field="invoice.invoiceTypeId" operator="equals" value="SALES_INVOICE"/>
+                    </and>
+                </or>
+            </condition>
+            <link target="setInvoiceStatus">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_SENT"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToReady" title="${uiLabelMap.AccountingInvoiceStatusToReady}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_SENT"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_APPROVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setInvoiceStatus">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_READY"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToPaid" title="${uiLabelMap.AccountingInvoiceStatusToPaid}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_READY"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setInvoiceStatus">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_PAID"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToWriteoff" title="${uiLabelMap.AccountingInvoiceStatusToWriteoff}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_READY"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setInvoiceStatus" request-confirmation="true" confirmation-message="You want to writeoff this invoice number ${invoice.invoiceId}?">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_WRITEOFF"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToInProcess" title="${uiLabelMap.AccountingInvoiceStatusToInProcess}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_SENT"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setInvoiceStatus">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_IN_PROCESS"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToCancelled" title="${uiLabelMap.AccountingInvoiceStatusToCancelled}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_SENT"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_RECEIVED"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_READY"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setInvoiceStatus" request-confirmation="true" confirmation-message="${uiLabelMap.AccountingConfirmationCancelOrder}">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="statusId" value="INVOICE_CANCELLED"/>
+            </link>
+        </menu-item>
+        <menu-item name="saveInvoiceAsTemplate" title="${uiLabelMap.AccountingInvoiceSaveAsTemplate}">
+            <condition>
+                <and>
+                   <not><if-empty field="invoice.invoiceId"/></not>
+                   <or>
+                       <if-compare field="invoice.invoiceTypeId" operator="equals" value="SALES_INVOICE"/>
+                       <if-compare field="invoice.invoiceTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                   </or>
+                </and>
+            </condition>
+            <link target="copyInvoiceToTemplate">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+                <parameter param-name="invoiceTypeId" from-field="invoice.invoiceTypeId"/>
+            </link>
+        </menu-item>
+        <menu-item name="addtax" title="${uiLabelMap.AccountingAddTax}">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+                </and>
+            </condition>
+            <link target="addtax">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="acctgTransEntriesPdf" title="Acctg Trans Entries PDF">
+            <condition>
+                <and>
+                    <not><if-empty field="invoice.invoiceId"/></not>
+                    <or>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_READY"/>
+                        <if-compare field="invoice.statusId" operator="equals" value="INVOICE_PAID"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="InvoiceAcctgTransEntriesPdf">
+                <parameter param-name="invoiceId" from-field="invoice.invoiceId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="PaymentTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="findPayment" title="${uiLabelMap.CommonFind}" >
+            <link target="findPayments"/>
+        </menu-item>
+        <menu-item name="paymentOverview" title="${uiLabelMap.AccountingPaymentTabOverview}">
+            <condition>
+                <not><if-empty field="payment.paymentId"/></not>
+            </condition>
+            <link target="paymentOverview">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="editPayment" title="${uiLabelMap.AccountingPaymentTabHeader}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <if-compare field="payment.statusId" operator="equals" value="PMNT_NOT_PAID"/>
+                </and>
+            </condition>
+            <link target="editPayment">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="editPaymentApplications" title="${uiLabelMap.AccountingPaymentTabApplications}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <or>
+                        <if-compare field="payment.statusId" operator="equals" value="PMNT_NOT_PAID"/>
+                        <if-compare field="payment.statusId" operator="equals" value="PMNT_RECEIVED"/>
+                        <if-compare field="payment.statusId" operator="equals" value="PMNT_SENT"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="editPaymentApplications">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="PaymentSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          menu-container-style="button-bar button-style-2">
+        <actions>
+            <set field="isDisbursement" value="${groovy:if(context.payment != null) return org.apache.ofbiz.accounting.util.UtilAccounting.isDisbursement(context.payment)}"/>
+        </actions>
+        <menu-item name="createNew" title="${uiLabelMap.CommonCreateNew}" widget-style="buttontext create" >
+            <condition>
+                <not><if-empty field="payment.paymentId"/></not>
+            </condition>
+            <link target="newPayment"/>
+        </menu-item>
+        <menu-item name="statusToSend" title="${uiLabelMap.AccountingPaymentTabStatusToSent}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <if-compare field="isDisbursement" operator="equals" value="true"/>
+                    <if-compare field="payment.statusId" operator="equals" value="PMNT_NOT_PAID"/>
+                </and>
+            </condition>
+            <link target="setPaymentStatus">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+                <parameter param-name="statusId" value="PMNT_SENT"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToReceived" title="${uiLabelMap.AccountingPaymentTabStatusToReceived}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <if-compare field="isDisbursement" operator="equals" value="false"/>
+                    <if-compare field="payment.statusId" operator="equals" value="PMNT_NOT_PAID"/>
+                </and>
+            </condition>
+            <link target="setPaymentStatus">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+                <parameter param-name="statusId" value="PMNT_RECEIVED"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToCancelled" title="${uiLabelMap.AccountingPaymentTabStatusToCancelled}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <if-compare field="payment.statusId" operator="equals" value="PMNT_NOT_PAID"/>
+                </and>
+            </condition>
+            <link target="setPaymentStatus" request-confirmation="true" confirmation-message="You want to cancel this payment number ${payment.paymentId}?">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+                <parameter param-name="statusId" value="PMNT_CANCELLED"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToConfirmed" title="${uiLabelMap.AccountingPaymentTabStatusToConfirmed}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <or>
+                        <if-compare field="payment.statusId" operator="equals" value="PMNT_RECEIVED"/>
+                        <if-compare field="payment.statusId" operator="equals" value="PMNT_SENT"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="setPaymentStatus">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+                <parameter param-name="statusId" value="PMNT_CONFIRMED"/>
+            </link>
+        </menu-item>
+        <menu-item name="printAsCheck" title="${uiLabelMap.AccountingPrintAsCheck}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <if-compare field="payment.statusId" operator="equals" value="PMNT_NOT_PAID"/>
+                </and>
+            </condition>
+            <link target="printChecks.pdf" target-window="_BLANK">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToVoidPayment" title="${uiLabelMap.AccountingPaymentTabStatusToVoid}">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <and>
+                        <if-compare field="payment.statusId" operator="not-equals" value="PMNT_CONFIRMED"/>
+                        <if-compare field="payment.statusId" operator="not-equals" value="PMNT_VOID"/>
+                    </and>
+                </and>
+            </condition>
+            <link target="voidPayment">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="acctgTransEntriesPDF" title="Acctg Trans Entries PDF">
+            <condition>
+                <and>
+                    <not><if-empty field="payment.paymentId"/></not>
+                    <or>
+                        <if-compare field="payment.statusId" operator="equals" value="PMNT_RECEIVED"/>
+                        <if-compare field="payment.statusId" operator="equals" value="PMNT_SENT"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="PaymentAcctgTransEntriesPdf" link-type="anchor">
+                <parameter param-name="paymentId" from-field="payment.paymentId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="PaymentGroupTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="PaymentGroupOverview" title="${uiLabelMap.AccountingPaymentTabOverview}">
+            <link target="PaymentGroupOverview">
+                <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditPaymentGroup" title="${uiLabelMap.CommonGroup}">
+            <condition><not><if-empty field="paymentGroup.paymentGroupId"/></not></condition>
+            <link target="EditPaymentGroup">
+                <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditPaymentGroupMember" title="${uiLabelMap.AccountingGroupMembers}">
+            <condition><not><if-empty field="paymentGroup.paymentGroupId"/></not></condition>
+            <link target="EditPaymentGroupMember">
+                <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </link>
+        </menu-item>
+    </menu>
+    
+    <menu name="PaymentGroupSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+            menu-container-style="button-bar button-style-2">
+        <menu-item name="createNew" title="${uiLabelMap.AccountingCreateNewPaymentGroup}" widget-style="buttontext create">
+            <condition>
+                <not><if-empty field="paymentGroup"/></not>
+            </condition>
+            <link target="EditPaymentGroup"/>
+        </menu-item>
+        <menu-item name="depositSlip" title="${uiLabelMap.AccountingDepositSlip}">
+            <condition>
+                <and>
+                    <if-compare field="display" operator="equals" value="true"/>
+                    <if-compare field="paymentGroup.paymentGroupTypeId" operator="equals" value="BATCH_PAYMENT"/>
+                    <not><if-empty field="paymentGroupMembers"/></not>
+                </and>
+            </condition>
+            <link target="DepositSlip.pdf" target-window="_BLANK">
+                <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="printCheck" title="${uiLabelMap.AccountingPrintChecks}">
+            <condition>
+                <and>
+                    <if-compare field="display" operator="equals" value="true"/>
+                    <if-compare field="paymentGroup.paymentGroupTypeId" operator="equals" value="CHECK_RUN"/>
+                    <not><if-empty field="paymentGroupMembers"/></not>
+                </and>
+            </condition>
+            <link target="printChecks.pdf" target-window="_BLANK">
+                <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="cancelpaymentGroup" title="${uiLabelMap.AccountingCancelBatchPayments}">
+            <condition>
+                <and>
+                    <not><if-empty field="paymentGroupMembers"/></not>
+                    <not><if-empty field="paymentGroup"/></not>
+                    <if-empty field="glReconciliationId"/>
+                    <if-compare field="paymentGroup.paymentGroupTypeId" operator="equals" value="BATCH_PAYMENT"/>
+                </and>
+            </condition>
+            <link target="cancelPaymentGroup">
+                <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="cancelCheckRunPayments" title="${uiLabelMap.AccountingCancelCheckRun}">
+            <condition>
+                <and>
+                    <not><if-empty field="paymentGroupMembers"/></not>
+                    <not><if-empty field="paymentGroup"/></not>
+                    <if-compare field="paymentGroup.paymentGroupTypeId" operator="equals" value="CHECK_RUN"/>
+                </and>
+            </condition>
+            <link target="cancelCheckRunPayments">
+                <parameter param-name="paymentGroupId" from-field="paymentGroup.paymentGroupId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="FixedAssetMaintTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItemFixedAssetMaint" default-menu-item-name="EditFixedAssetMaint">
+        <menu-item name="EditFixedAssetMaint" title="${uiLabelMap.AccountingFixedAssetMaint}">
+            <link target="EditFixedAssetMaint">
+                <parameter param-name="fixedAssetId" from-field="fixedAssetMaint.fixedAssetId"/>
+                <parameter param-name="maintHistSeqId" from-field="fixedAssetMaint.maintHistSeqId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetMeters" title="${uiLabelMap.AccountingFixedAssetMeters}">
+            <link target="EditFixedAssetMeters">
+                <parameter param-name="fixedAssetId"/>
+                <parameter param-name="maintHistSeqId"/>
+                <parameter param-name="productMeterTypeId" from-field="fixedAssetMaint.intervalMeterTypeId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetMaintOrders" title="${uiLabelMap.AccountingFixedAssetMaintOrders}">
+            <link target="EditFixedAssetMaintOrders">
+                <parameter param-name="fixedAssetId" from-field="fixedAssetMaint.fixedAssetId"/>
+                <parameter param-name="maintHistSeqId" from-field="fixedAssetMaint.maintHistSeqId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="FixedAssetTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditFixedAsset">
+        <menu-item name="EditFixedAsset" title="${uiLabelMap.AccountingFixedAsset}">
+            <link target="EditFixedAsset">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FixedAssetChildren" title="${uiLabelMap.CommonEntityChildren}">
+            <link target="FixedAssetChildren">
+                <parameter param-name="fixedAssetId"/>
+                <parameter param-name="trail" from-field="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListFixedAssetProducts" title="${uiLabelMap.AccountingFixedAssetProducts}">
+            <link target="ListFixedAssetProducts">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListFixedAssetCalendar" title="${uiLabelMap.AccountingFixedAssetCalendar}">
+            <link target="calendar">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetStdCosts" title="${uiLabelMap.AccountingFixedAssetStdCosts}">
+            <link target="EditFixedAssetStdCosts">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetIdents" title="${uiLabelMap.AccountingFixedAssetIdents}">
+            <link target="EditFixedAssetIdents">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetRegistrations" title="${uiLabelMap.AccountingFixedAssetRegistrations}">
+            <link target="EditFixedAssetRegistrations">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetMeters" title="${uiLabelMap.AccountingFixedAssetMeters}">
+            <link target="EditFixedAssetMeters">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListFixedAssetMaints" title="${uiLabelMap.AccountingFixedAssetMaints}">
+            <link target="ListFixedAssetMaints">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditPartyFixedAssetAssignments" title="${uiLabelMap.AccountingPartyFixedAssetAssignments}">
+            <link target="EditPartyFixedAssetAssignments">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FixedAssetDepreciation" title="${uiLabelMap.AccountingFixedAssetDepreciation}">
+            <link target="showFixedAssetDepreciation">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FixedAssetGeoLocation" title="${uiLabelMap.CommonGeoLocation}">
+            <link target="FixedAssetGeoLocation">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="BudgetTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditBudget">
+        <menu-item name="ListBudgets" title="${uiLabelMap.AccountingBudgetFind}">
+            <link target="ListBudgets"/>
+        </menu-item>
+        <menu-item name="BudgetOverview" title="${uiLabelMap.AccountingBudgetOverview}">
+            <link target="BudgetOverview">
+                <parameter param-name="budgetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditBudget" title="${uiLabelMap.AccountingBudgetHeader}">
+            <condition>
+                <and>
+                    <not><if-empty field="budgetId"/></not>
+                    <or>
+                        <if-compare field="statusId" operator="equals" value="BG_CREATED"/>
+                        <if-compare field="statusId" operator="equals" value="BG_REVIEWED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="EditBudget">
+                <parameter param-name="budgetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="BudgetItem" title="${uiLabelMap.AccountingBudgetItems}">
+            <condition>
+                <and>
+                    <not><if-empty field="budgetId"/></not>
+                    <or>
+                        <if-compare field="statusId" operator="equals" value="BG_CREATED"/>
+                        <if-compare field="statusId" operator="equals" value="BG_REVIEWED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="EditBudgetItems">
+                <parameter param-name="budgetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="BudgetRoles" title="${uiLabelMap.AccountingBudgetRoles}">
+            <condition>
+                <and>
+                    <not><if-empty field="budgetId"/></not>
+                    <or>
+                        <if-compare field="statusId" operator="equals" value="BG_CREATED"/>
+                        <if-compare field="statusId" operator="equals" value="BG_REVIEWED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="BudgetRoles">
+                <parameter param-name="budgetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="BudgetReviews" title="${uiLabelMap.AccountingBudgetReviews}">
+            <condition>
+                <and>
+                    <not><if-empty field="budgetId"/></not>
+                    <if-compare field="statusId" operator="not-equals" value="BG_REJECTED"/>
+                </and>
+            </condition>
+            <link target="BudgetReviews">
+                <parameter param-name="budgetId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="BudgetSubTabBar" menu-container-style="button-bar button-style-2" default-selected-style="selected">
+        <menu-item name="statusToApproved" title="${uiLabelMap.AccountingBudgetStatusToApproved}">
+            <condition>
+                <and>
+                    <not><if-empty field="budgetId"/></not>
+                    <or>
+                        <if-compare field="statusId" operator="equals" value="BG_CREATED"/>
+                        <if-compare field="statusId" operator="equals" value="BG_REVIEWED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="updateBudgetStatus">
+                <parameter param-name="budgetId" from-field="budgetId"/>
+                <parameter param-name="statusId" value="BG_APPROVED"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToReview" title="${uiLabelMap.AccountingBudgetStatusToReviewed}">
+            <condition>
+                <and>
+                    <not><if-empty field="budgetId"/></not>
+                    <if-compare field="statusId" operator="equals" value="BG_CREATED"/>
+                </and>
+            </condition>
+            <link target="updateBudgetStatus">
+                <parameter param-name="budgetId" from-field="budgetId"/>
+                <parameter param-name="statusId" value="BG_REVIEWED"/>
+            </link>
+        </menu-item>
+        <menu-item name="statusToReject" title="${uiLabelMap.AccountingBudgetStatusToRejected}">
+            <condition>
+                <and>
+                    <not><if-empty field="budgetId"/></not>
+                    <or>
+                        <if-compare field="statusId" operator="equals" value="BG_CREATED"/>
+                        <if-compare field="statusId" operator="equals" value="BG_REVIEWED"/>
+                        <if-compare field="statusId" operator="equals" value="BG_APPROVED"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="updateBudgetStatus">
+                <parameter param-name="budgetId" from-field="budgetId"/>
+                <parameter param-name="statusId" value="BG_REJECTED"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="PartyGlShortCuts">
+        <menu-item name="CreateSalesAcctgTrans">
+            <link target="CreateAcctgTransAndEntries" text="${uiLabelMap.AccountingCreateSalesAcctgTrans}" style="buttontext">
+                <parameter param-name="organizationPartyId"/>
+                <parameter param-name="debitGlAccountClassId" value="CURRENT_ASSET"/>
+                <parameter param-name="creditGlAccountClassId" value="REVENUE"/>
+                <parameter param-name="acctgTransTypeId" value="SALES"/>
+            </link>
+        </menu-item>
+        <menu-item name="CreatePaymentAcctgTrans">
+            <link target="CreateAcctgTransAndEntries" text="${uiLabelMap.AccountingCreatePaymentAcctgTrans}" style="buttontext">
+                <parameter param-name="organizationPartyId"/>
+                <parameter param-name="debitGlAccountClassId" value="CASH_EQUIVALENT"/>
+                <parameter param-name="creditGlAccountClassId" value="CURRENT_LIABILITY"/>
+                <parameter param-name="acctgTransTypeId" value="PAYMENT_ACCTG_TRANS"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyGlUnpostedAcctgTrans">
+            <link text="${uiLabelMap.PageTitleUnpostedTransactions}" style="buttontext" target="ListUnpostedAcctgTrans">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyGlTrianBalance">
+            <link target="TrialBalance" text="${uiLabelMap.AccountingTrialBalance}" style="buttontext">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyIncomeStatement">
+            <link target="IncomeStatement" text="${uiLabelMap.AccountingIncomeStatement}" style="buttontext">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyBalanceSheet">
+            <link target="BalanceSheet" text="${uiLabelMap.AccountingBalanceSheet}" style="buttontext">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="EditGlAcctgTransSubTabBar" menu-container-style="button-bar button-style-2" default-selected-style="selected">
+        <menu-item name="DuplicateAccountingTransaction">
+            <link text="${uiLabelMap.AccountingDuplicateAccountingTransaction}" style="buttontext" target="copyAcctgTransAndEntries">
+                <parameter param-name="revert" value="N"/>
+                <parameter param-name="fromAcctgTransId" from-field="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="RevertAccountingTransaction">
+            <link text="${uiLabelMap.AccountingRevertAccountingTransaction}" style="buttontext" target="copyAcctgTransAndEntries">
+                <parameter param-name="revert" value="Y"/>
+                <parameter param-name="fromAcctgTransId" from-field="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="acctgTransDetailReportPdf">
+            <link text="${uiLabelMap.CommonPdf}" style="buttontext" target="acctgTransDetailReportPdf.pdf" target-window="_BLANK">
+                <parameter param-name="acctgTransId"/>
+            </link>
+        </menu-item>
+        <menu-item name="CompleteAcctgTransFields">
+            <condition>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+            </condition>
+            <link text="${uiLabelMap.AccountingCompleteAcctgTransFields}" style="buttontext" target="completeAcctgTransEntries">
+                <parameter param-name="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="VerifyTransaction">
+            <condition>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+            </condition>
+            <link text="${uiLabelMap.AccountingVerifyTransaction}" style="buttontext" target="postAcctgTrans">
+                <parameter param-name="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+                <parameter param-name="verifyOnly" value="Y"/>
+            </link>
+        </menu-item>
+        <menu-item name="PostTransaction">
+            <condition>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+            </condition>
+            <link text="${uiLabelMap.AccountingPostTransaction}" style="buttontext" target="postAcctgTrans">
+                <parameter param-name="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="PartyTopTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItemTop" default-menu-item-name="PartyAccountsSummary">
+        <menu-item name="Admin" title="${uiLabelMap.AccountingSetup}">
+            <condition>
+                <if-service-permission service-name="acctgPrefPermissionCheck" main-action="UPDATE"/>
+            </condition>
+            <link target="AdminMain">
+                <parameter param-name="organizationPartyId" from-field="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyAccounts" title="${uiLabelMap.AccountingAccounting}">
+            <condition>
+                <if-service-permission service-name="basicGeneralLedgerPermissionCheck" main-action="VIEW"/>
+            </condition>
+            <link target="PartyAccountsSummary">
+                <parameter param-name="organizationPartyId" from-field="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="OrganizationAccountingTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="PartyAccountsSummary">
+        <menu-item name="PartyAccountsSummary" title="${uiLabelMap.AcctgPartyGlJournalSummary}">
+            <link target="PartyAccountsSummary">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AccountReconciliation" title="${uiLabelMap.AccountingAcctRecon}">
+            <link target="findGlAccountReconciliation">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AccountReconciliations" title="${uiLabelMap.AccountingAcctRecons}">
+            <link target="findGlAccountReconciliations">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindAcctgTrans" title="${uiLabelMap.AccountingAcctgTrans}">
+            <link target="FindAcctgTrans">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindAcctgTransEntries" title="${uiLabelMap.AccountingAcctgTransEntries}">
+            <link target="FindAcctgTransEntries">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="OrganizationAccountingReports" title="${uiLabelMap.AccountingReports}">
+            <link target="TrialBalance">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ChecksTabButton" title="${uiLabelMap.AccountingChecks}">
+            <link target="listChecksToPrint">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="OrganizationAccountingReportsTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItem2" default-menu-item-name="TrialBalance">
+        <menu-item name="TrialBalance" title="${uiLabelMap.AccountingTrialBalance}">
+            <link target="TrialBalance">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="TransactionTotals" title="${uiLabelMap.AccountingTransactionTotals}">
+            <link target="TransactionTotals">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="IncomeStatement" title="${uiLabelMap.AccountingIncomeStatement}">
+            <link target="IncomeStatement">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="CashFlowStatement" title="${uiLabelMap.AccountingCashFlowStatement}">
+            <link target="CashFlowStatement">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="BalanceSheet" title="${uiLabelMap.AccountingBalanceSheet}">
+            <link target="BalanceSheet">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ComparativeIncomeStatement" title="${uiLabelMap.AccountingComparativeIncomeStatement}">
+            <link target="ComparativeIncomeStatement">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ComparativeCashFlowStatement" title="${uiLabelMap.AccountingComparativeCashFlowStatement}">
+            <link target="ComparativeCashFlowStatement">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ComparativeBalanceSheet" title="${uiLabelMap.AccountingComparativeBalanceSheet}">
+            <link target="ComparativeBalanceSheet">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountTrialBalance" title="${uiLabelMap.AccountingGlAccountTrialBalance}">
+            <link target="GlAccountTrialBalance">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="InventoryValuation" title="${uiLabelMap.AccountingInventoryValuation}">
+            <link target="InventoryValuation">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountBalanceByCostCenter" title="${uiLabelMap.FormFieldTitle_costCenters}">
+            <link target="GlAccountBalanceByCostCenter">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="PartyAdminTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="PartyAcctgPreference">
+        <menu-item name="PartyAcctgPreference" title="${uiLabelMap.AccountingPreference}">
+            <link target="PartyAcctgPreference">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListGlAccountOrganization" title="${uiLabelMap.AccountingChartOfAcctsMenu}">
+            <link target="ListGlAccountOrganization">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="SetupGlJournals" title="${uiLabelMap.AccountingGlJournals}">
+            <link target="SetupGlJournals">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountAssignment" title="${uiLabelMap.AccountingGlAccountDefault}">
+            <link target="GlAccountAssignment">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="TimePeriods" title="${uiLabelMap.AccountingTimePeriod}">
+            <link target="TimePeriods">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="PartyAdminAssignTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItem2" default-menu-item-name="GlAccountSalInvoice">
+        <menu-item name="GlAccountTypeDefaults" title="${uiLabelMap.AccountingGlAccountTypeDefaults}">
+            <link target="GlAccountTypeDefaults">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ProductGlAccounts" title="${uiLabelMap.AccountingProductGlAccount}">
+            <link target="editProductGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ProductCategoryGlAccounts" title="${uiLabelMap.AccountingProductCategoryGlAccount}">
+            <link target="editProductCategoryGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FinAccountTypeGlAccounts" title="${uiLabelMap.AccountingFinAccountTypeGlAccount}">
+            <link target="editFinAccountTypeGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountSalInvoice" title="${uiLabelMap.AccountingInvoiceSales}">
+            <link target="GlAccountSalInvoice">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountPurInvoice" title="${uiLabelMap.AccountingInvoicePurchase}">
+            <link target="GlAccountPurInvoice">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountTypePaymentType" title="${uiLabelMap.AccountingPaymentType}/${uiLabelMap.FormFieldTitle_glAccountTypeId}">
+            <link target="GlAccountTypePaymentType">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountNrPaymentMethod" title="${uiLabelMap.AccountingPaymentMethodId}/${uiLabelMap.AccountingGlAccountId}">
+            <link target="GlAccountNrPaymentMethod">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="VarianceReasonGlAccounts" title="${uiLabelMap.AccountingVarianceReasonGlAccounts}">
+            <link target="editVarianceReasonGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="CreditCardTypeGlAccount" title="${uiLabelMap.AccountingCreditCardTypeGlAccount}">
+            <link target="editCreditCardTypeGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="TaxAuthorityGlAccounts" title="${uiLabelMap.AccountingTaxAuthorityGlAccounts}">
+            <link target="editOrganizationTaxAuthorityGlAccount">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyGlAccounts" title="${uiLabelMap.AccountingPartyGlAccounts}">
+            <link target="editPartyGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FixedAssetTypeGlAccounts" title="${uiLabelMap.AccountingFixedAssetTypeGlAccounts}">
+            <link target="FixedAssetTypeGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="PartyAccountingChecksTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItem2" default-menu-item-name="GlAccountSalInvoice">
+        <menu-item name="PrintChecksTabButton" title="${uiLabelMap.AccountingPrintChecks}">
+            <link target="listChecksToPrint">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="SendChecksTabButton" title="${uiLabelMap.AccountingSendChecks}">
+            <link target="listChecksToSend">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="GlobalGLSettingMenus" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="chartofaccounts">
+        <menu-item name="Chartofaccounts" title="${uiLabelMap.AccountingChartOfAcctsMenu}">
+            <link target="FindGlobalGlAccount"/>
+        </menu-item>
+        <menu-item name="EditCustomTimePeriod" title="${uiLabelMap.AccountingEditCustomTimePeriods}">
+            <condition><if-has-permission permission="PERIOD_MAINT"/></condition>
+            <link target="EditCustomTimePeriod"/>
+        </menu-item>
+        <menu-item name="Costs" title="${uiLabelMap.ManufacturingCostCalcs}">
+            <link target="EditCostCalcs"/>
+        </menu-item>
+        <menu-item name="PaymentMethodTypes" title="${uiLabelMap.CommonPaymentMethodType}">
+            <link target="editPaymentMethodType"/>
+        </menu-item>
+        <menu-item name="InvoiceItemTypes" title="${uiLabelMap.AccountingInvoiceItemType}">
+            <link target="editInvoiceItemType"/>
+        </menu-item>
+        <menu-item name="ViewRateAmounts" title="${uiLabelMap.AccountingRates}">
+            <link target="viewRateAmounts"/>
+        </menu-item>
+        <menu-item name="ViewFXConversions" title="${uiLabelMap.AccountingFX}">
+            <condition>
+                <if-service-permission service-name="acctgFxPermissionCheck" main-action="UPDATE"/>
+            </condition>
+            <link target="viewFXConversions">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindGlAccountCategory" title="${uiLabelMap.FormFieldTitle_glAccountCategory}">
+            <link target="FindGlAccountCategory"/>
+        </menu-item>
+        <menu-item name="CostCenters" title="${uiLabelMap.FormFieldTitle_costCenters}">
+            <link target="CostCenters"/>
+        </menu-item>
+    </menu>
+    
+    <menu name="AgreementTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="AgreementMain" title="${uiLabelMap.AccountingAgreement}">
+            <link target="EditAgreement">
+                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AgreementTerms" title="${uiLabelMap.AccountingAgreementTerms}">
+            <link target="EditAgreementTerms">
+                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AgreementItems" title="${uiLabelMap.AccountingAgreementItems}">
+            <link target="ListAgreementItems">
+                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AgreementWorkEffortApplics" title="${uiLabelMap.AccountingAgreementWorkEffortApplics}">
+            <link target="EditAgreementWorkEffortApplics">
+                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AgreementRoles" title="${uiLabelMap.AccountingAgreementRoles}">
+            <link target="EditAgreementRoles">
+                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AgreementContents" title="${uiLabelMap.AccountingAgreementContents}">
+            <link target="EditAgreementContents">
+                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="AgreementItemTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="buttonBarItem">
+        <menu-item name="EditAgreementItem" title="${uiLabelMap.AccountingAgreementItem}">
+            <link target="EditAgreementItem">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListAgreementPromoAppls" title="${uiLabelMap.AccountingAgreementPromoAppls}">
+            <link target="ListAgreementPromoAppls">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListAgreementItemTerms" title="${uiLabelMap.AccountingAgreementItemTerms}">
+            <link target="ListAgreementItemTerms">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="ListAgreementItemSupplierProducts" title="${uiLabelMap.ProductProducts}">
+            <condition>
+                <if-compare field="agreement.agreementTypeId" operator="equals" value="PURCHASE_AGREEMENT"/>
+            </condition>
+            <link target="ListAgreementItemSupplierProducts">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="ListAgreementItemProducts" title="${uiLabelMap.ProductProducts}">
+            <condition>
+                <if-compare field="agreement.agreementTypeId" operator="not-equals" value="PURCHASE_AGREEMENT"/>
+            </condition>
+            <link target="ListAgreementItemProducts">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="ListAgreementItemParties" title="${uiLabelMap.Party}">
+            <link target="ListAgreementItemParties">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListAgreementGeographicalApplic" title="${uiLabelMap.CommonGeo}">
+            <link target="ListAgreementGeographicalApplic">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="ListAgreementItemFacility" title="${uiLabelMap.ProductFacilities}">
+            <condition>
+                <if-compare field="agreement.agreementTypeId" operator="not-equals" value="PURCHASE_AGREEMENT"/>
+            </condition>
+            <link target="ListAgreementItemFacilities">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="BillingAccountTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="FindBillingAccount" title="${uiLabelMap.CommonFind}">
+            <link target="FindBillingAccount"/>
+        </menu-item>
+        <menu-item name="EditBillingAccount" title="${uiLabelMap.AccountingAccount}">
+            <link target="EditBillingAccount">
+                <parameter param-name="billingAccountId" from-field="billingAccount.billingAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditBillingAccountRoles" title="${uiLabelMap.PartyRoles}">
+            <link target="EditBillingAccountRoles">
+                <parameter param-name="billingAccountId" from-field="billingAccount.billingAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditBillingAccountTerms" title="${uiLabelMap.PartyTerms}">
+            <link target="EditBillingAccountTerms">
+                <parameter param-name="billingAccountId" from-field="billingAccount.billingAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="BillingAccountInvoices" title="${uiLabelMap.AccountingInvoices}">
+            <link target="BillingAccountInvoices">
+                <parameter param-name="billingAccountId" from-field="billingAccount.billingAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="BillingAccountPayments" title="${uiLabelMap.CommonPayments}">
+            <link target="BillingAccountPayments">
+                <parameter param-name="billingAccountId" from-field="billingAccount.billingAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="BillingAccountOrders" title="${uiLabelMap.AccountingOrders}">
+            <link target="BillingAccountOrders">
+                <parameter param-name="billingAccountId" from-field="billingAccount.billingAccountId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="GlAccountTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="FindGlobalGlAccount" title="${uiLabelMap.AcctgChartOfAcctsTabMenu}">
+            <link target="FindGlobalGlAccount"/>
+        </menu-item>
+        <menu-item name="GlAccountNavigate" title="${uiLabelMap.AcctgNavigateAccts}">
+            <link target="GlAccountNavigate"/>
+        </menu-item>
+        <menu-item name="AssignGlAccount" title="${uiLabelMap.AcctgAssignGlAccount}">
+            <link target="AssignGlAccount"/>
+        </menu-item>
+    </menu>
+
+    <menu name="GlSettingTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItem2">
+        <menu-item name="GlAccountNavigate" title="${uiLabelMap.AcctgNavigateAccts}">
+            <link target="GlAccountNavigate">
+                <parameter param-name="trail" value="null"/>
+            </link>
+        </menu-item>
+        <menu-item name="AssignGlAccount" title="${uiLabelMap.AcctgAssignGlAccount}">
+            <link target="AssignGlAccount"/>
+        </menu-item>
+    </menu>
+
+    <menu name="TransactionsTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="authorizetransactiontab" title="${uiLabelMap.AccountingAuthorize}">
+            <link target="AuthorizeTransaction"/>
+        </menu-item>
+        <menu-item name="capturetransactiontab" title="${uiLabelMap.AccountingCapture}">
+            <link target="CaptureTransaction"/>
+        </menu-item>
+        <menu-item name="gatewayresponsestab" title="${uiLabelMap.AccountingGatewayResponses}">
+            <link target="FindGatewayResponses"/>
+        </menu-item>
+        <menu-item name="manualtransactiontab" title="${uiLabelMap.AccountingManualTransaction}">
+            <link target="ManualTransaction"/>
+        </menu-item>
+    </menu>
+    
+    <menu name="PaymentGatewayConfigTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="paymentGatewayConfigTab" title="${uiLabelMap.AccountingPaymentGatewayConfig}">
+            <link target="FindPaymentGatewayConfig"/>
+        </menu-item>
+        <menu-item name="paymentGatewayConfigTypesTab" title="${uiLabelMap.AccountingPaymentGatewayConfigTypes}">
+            <link target="FindPaymentGatewayConfigTypes"/>
+        </menu-item>
+    </menu>
+    <menu name="GlAccountCategoryTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" 
+          selected-menuitem-context-field-name="tabButtonItem2">
+        <menu-item name="EditGlAccountCategory" title="${uiLabelMap.FormFieldTitle_glAccountCategory}">
+            <link target="EditGlAccountCategory">
+                <parameter param-name="glAccountCategoryId"/>
+                <parameter param-name="glAccountCategoryTypeId"/>                
+            </link>
+        </menu-item>
+        <menu-item name="EditGlAccountCategoryMember" title="${uiLabelMap.FormFieldTitle_glAccountCategoryMember}">
+            <link target="EditGlAccountCategoryMember">
+                <parameter param-name="glAccountCategoryId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="FinAccountTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditFinAccount">
+        <menu-item name="EditFinAccount" title="${uiLabelMap.AccountingFinAccount}">
+            <link target="EditFinAccount">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFinAccountRoles" title="${uiLabelMap.PartyRoles}">
+            <link target="EditFinAccountRoles">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FinAccountTrans" title="${uiLabelMap.AccountingFinAccountTransations}">
+            <link target="FindFinAccountTrans">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFinAccountAuths" title="${uiLabelMap.AccountingFinAccountAuth}">
+            <condition>
+                <if-compare field="finAccount.finAccountTypeId" operator="not-equals" value="BANK_ACCOUNT"/>
+            </condition>
+            <link target="EditFinAccountAuths">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="depositWithdraw" title="${uiLabelMap.AccountingDepositWithdraw}">
+            <link target="FindPaymentsForDepositOrWithdraw">
+                <parameter param-name="finAccountId"/>
+                <parameter param-name="organizationPartyId" from-field="finAccount.ownerPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="findDepositSlips" title="${uiLabelMap.AccountingDepositSlips}">
+            <link target="FindDepositSlips">
+                <parameter param-name="finAccountId"/>
+                <parameter param-name="organizationPartyId" from-field="finAccount.ownerPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindFinAccountReconciliations" title="${uiLabelMap.AccountingReconciliation}">
+            <link target="FindFinAccountReconciliations">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="FinAccountSubTabBar" menu-container-style="button-bar button-style-2" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="createNew" title="${uiLabelMap.CommonCreateNew} ${uiLabelMap.AccountingFinAccount}">
+            <link target="EditFinAccount"/>
+        </menu-item>
+        <menu-item name="advancedFinAccountSearch" title="${uiLabelMap.CommonAdvancedSearch}">
+            <condition>
+                <if-compare field="displayAdvancedSearch" operator="not-equals" value="true"/>
+            </condition>
+            <link target="FindFinAccount">
+                <parameter param-name="displayAdvancedSearch" value="true"/>
+            </link>
+        </menu-item>
+        <menu-item name="quickFinAccountSearch" title="${uiLabelMap.AccountingQuickSearch}">
+            <condition>
+                <if-compare field="displayAdvancedSearch" operator="equals" value="true"/>
+            </condition>
+            <link target="FindFinAccount"/>
+        </menu-item>
+    </menu>
+    <menu name="FinAccountMainTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="finAccountMain" title="${uiLabelMap.CommonMain}">
+            <link target="FinAccountMain"/>
+        </menu-item>
+        <menu-item name="FindFinAccount" title="${uiLabelMap.PageTitleFindFinAccount}">
+            <link target="FindFinAccount"/>
+        </menu-item>
+    </menu>
+    <menu name="FinAccountReconciliationsTabBar" menu-container-style="button-bar button-style-2" >
+        <menu-item name="Find" title="${uiLabelMap.AccountingFindFinAccountReconciliations}">
+            <condition>
+                <and>
+                    <not><if-empty field="finAccountId"/></not>
+                    <not><if-empty field="glReconciliationId"/></not>
+                    <if-compare field="tabButtonItem2" operator="not-equals" value="Find"/>
+                </and>
+            </condition>
+            <link target="FindFinAccountReconciliations">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="NewFinAccountReconciliations" title="${uiLabelMap.AccountingCreateNewFinAccountReconciliations}">
+            <condition>
+                <and>
+                    <and>
+                        <if-compare field="finAccount.statusId" operator="not-equals" value="FNACT_MANFROZEN"/>
+                        <if-compare field="finAccount.statusId" operator="not-equals" value="FNACT_CANCELLED"/>                        
+                    </and>
+                    <or>
+                        <not><if-empty field="glReconciliationId"/></not>
+                        <if-compare field="tabButtonItem2" operator="equals" value="Find"/>
+                    </or>
+                </and>
+            </condition>
+            <link target="EditFinAccountReconciliations">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="NewAccountOrganization">
+        <menu-item name="addCompany"  title="${uiLabelMap.AccountingNewCompany}">
+            <condition>
+                <if-compare field="hasPrefPermission" operator="equals" value="true" type="Boolean"/>
+            </condition>
+            <link target="AddCompany" link-type="auto"/>
+        </menu-item>
+     </menu>
+</menus>

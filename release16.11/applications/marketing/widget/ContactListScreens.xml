@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+   <screen name="FindContactLists">
+       <section>
+           <actions>
+               <set field="titleProperty" value="MarketingContactListFindContactLists"/>
+               <set field="headerItem" value="ContactList"/>
+               <set field="tabButtonItem" value="ContactList"/>               
+               <set field="contactListTabButtonItem" value="ContactList"/>
+               <set field="labelTitleProperty" value="PageTitleFindContactLists"/>
+               <set field="donePage" from-field="parameters.DONE_PAGE" default-value="/marketing/control/FindContactList"/>
+           </actions>
+           <widgets>
+               <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                   <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link  text="${uiLabelMap.MarketingContactListCreate}" target="EditContactList" style="buttontext create">
+                                        <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                    </link>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form name="FindContactLists" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListContactLists" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                   </decorator-section>
+               </decorator-screen>
+           </widgets>
+       </section>
+   </screen>
+
+   <screen name="EditContactList">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContactList"/>
+                <set field="contactListTabButtonItem" value="ContactList"/>
+                <set field="labelTitleProperty" value="PageTitleEditContactList"/>
+
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="/marketing/control/ListContactLists"/>
+                <set field="contactListId" from-field="parameters.contactListId"/>
+                <entity-one entity-name="ContactList" value-field="contactList"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="contactList"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleEditContactList}">
+                                    <container style="button-bar">
+                                        <link  text="${uiLabelMap.MarketingContactListCreate}" target="EditContactList" style="buttontext create">
+                                            <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                        </link>
+                                    </container>
+                                    <include-form name="EditContactList" location="component://marketing/widget/ContactListForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet title="${uiLabelMap.PageTitleAddContactList}">
+                                    <include-form name="EditContactList" location="component://marketing/widget/ContactListForms.xml"/>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+   <screen name="ListContactLists">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListContactList"/>
+                <set field="contactListTabButtonItem" value="ContactList"/>
+                <set field="labelTitleProperty" value="PageTitleListContactList"/>
+
+                <!-- parameters for pagination -->
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="/marketing/control/ListContactList"/>
+                <set field="contactListId" from-field="parameters.contactListId"/>
+                <set field="entityName" value="ContactList"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListContactList}">
+                            <container>
+                                <link text="${uiLabelMap.MarketingContactListCreate}" target="EditContactList" style="buttontext">
+                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                </link>
+                            </container>
+                            <include-form name="ListContactLists" location="component://marketing/widget/ContactListForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditContactListParty">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContactListParty"/>
+                <set field="contactListTabButtonItem" value="ContactListParty"/>
+                <set field="labelTitleProperty" value="PageTitleEditContactListParty"/>
+                
+                <set field="contactListId" from-field="parameters.contactListId"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="FindContactListParties?contactListId=${contactListId}"/>
+                
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <entity-one entity-name="ContactListParty" value-field="contactListParty"/>
+                <entity-condition entity-name="ContactListPartyAndStatus" list="contactListPartyStatusList">
+                    <condition-list combine="and">
+                        <condition-expr field-name="contactListId" from-field="contactListId"/>
+                        <condition-expr field-name="partyId" from-field="partyId"/>
+                        <condition-expr field-name="fromDate" from-field="fromDate"/>
+                    </condition-list>
+                    <order-by field-name="-statusDate"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditContactListParty}">
+                            <container style="button-bar">
+                                <link  text="${uiLabelMap.MarketingContactListPartyCreate}" target="EditContactListParty" style="buttontext create">
+                                    <parameter param-name="contactListId"/>
+                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                </link>
+                            </container>
+                            <include-form name="EditContactListParty" location="component://marketing/widget/ContactListForms.xml"/>
+                            <container><label style="h2" text="${uiLabelMap.CommonStatusHistory}"/></container>
+                            <iterate-section entry="contactListPartyStatus" list="contactListPartyStatusList">
+                                <section>
+                                    <widgets>
+                                        <container><label text="${contactListPartyStatus.statusDate} ${contactListPartyStatus.description} [by: ${contactListPartyStatus.setByUserLoginId}] [code: ${contactListPartyStatus.optInVerifyCode}]"/></container>
+                                    </widgets>
+                                </section>
+                            </iterate-section>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListContactListParties">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListContactListParty"/>
+                <set field="contactListTabButtonItem" value="ContactListParty"/>
+                <set field="labelTitleProperty" value="PageTitleListContactListParty"/>
+
+                <!-- parameters for pagination -->
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+                
+                <set field="contactListId" from-field="parameters.contactListId"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="FindContactListParties?contactListId=${contactListId}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListContactListParty}">
+                            <container>
+                                <link  text="${uiLabelMap.MarketingContactListPartyCreate}" target="EditContactListParty">
+                                    <parameter param-name="contactListId"/>
+                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                </link>
+                            </container>
+                            <include-form name="ListContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindContactListParties">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindContactListParty"/>
+                <set field="contactListTabButtonItem" value="ContactListParty"/>
+                <set field="labelTitleProperty" value="PageTitleFindContactListParty"/>
+
+                <set field="contactListId" from-field="parameters.contactListId"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="FindContactListParties?contactListId=${contactListId}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar">
+                                    <link  text="${uiLabelMap.MarketingContactListPartyCreate}" target="EditContactListParty" style="buttontext create">
+                                        <parameter param-name="contactListId"/>
+                                        <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                    </link>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form name="FindContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                   </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditContactListCommEvent">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContactListCommEvent"/>
+                <set field="contactListTabButtonItem" value="ContactListCommEvent"/>
+                <set field="labelTitleProperty" value="PageTitleEditContactListCommEvent"/>
+
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="FindContactListCommEvents?contactListId=${parameters.contactListId}"/>
+                <set field="contactListId" from-field="parameters.contactListId"/>
+                <set field="communicationEventId" from-field="parameters.communicationEventId"/>
+                <entity-one entity-name="ContactList" value-field="contactList"/>
+                <entity-and entity-name="CommunicationEventType" list="communicationEventTypes">
+                    <field-map field-name="contactMechTypeId" from-field="contactList.contactMechTypeId"/>
+                </entity-and>
+                <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
+
+                <entity-one entity-name="StatusItem" value-field="status"/>                
+
+                <!-- get the contact list owner's marketing email -->
+                <script location="component://marketing/groovyScripts/marketing/contact/GetContactListMarketingEmail.groovy"/>
+                <set field="contactMechIdFrom" value="${marketingEmail.contactMechId}"/>
+                <set field="partyIdFrom" value="${contactList.ownerPartyId}"/>               
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditContactList}">
+                            <include-menu location="component://marketing/widget/ContactListMenus.xml" name="ContactListCommBar"/>
+                            <container style="button-bar">
+                                <link  text="${uiLabelMap.MarketingContactListCommEventCreate}" target="EditContactListCommEvent" style="buttontext create">
+                                    <parameter param-name="contactListId"/>
+                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                </link>
+                            </container>
+                            <include-form name="EditContactListCommEvent" location="component://marketing/widget/ContactListForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListContactListCommEvents">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListContactListCommEvent"/>
+                <set field="contactListTabButtonItem" value="ContactListCommEvent"/>
+                <set field="labelTitleProperty" value="PageTitleListContactListCommEvent"/>
+
+                <!-- parameters for pagination -->
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="FindContactListCommEvents?contactListId=${parameters.contactListId}"/>
+                <set field="contactListId" from-field="parameters.contactListId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleListContactList} ${uiLabelMap.CommonFor} contactListId=${contactListId}">
+                            <container>
+                                <link  text="${uiLabelMap.MarketingContactListCommEventCreate}" target="EditContactListCommEvent">
+                                    <parameter param-name="contactListId"/>
+                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                </link>
+                            </container>
+                            <include-form name="ListContactListCommEvents" location="component://marketing/widget/ContactListForms.xml"/>
+                        </screenlet>
+                   </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindContactListCommEvents">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindContactListCommEvents"/>
+                <set field="contactListTabButtonItem" value="ContactListCommEvent"/>
+                <set field="labelTitleProperty" value="PageTitleFindContactListCommEvents"/>
+
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="FindContactListCommEvents?contactListId=${parameters.contactListId}"/>
+                <set field="contactListId" from-field="parameters.contactListId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleFindContactListCommEvents}">
+                            <container style="button-bar">
+                                <link  text="${uiLabelMap.MarketingContactListCommEventCreate}" target="EditContactListCommEvent" style="buttontext create">
+                                    <parameter param-name="contactListId"/>
+                                    <parameter param-name="DONE_PAGE" from-field="donePage"/>
+                                </link>
+                            </container>
+                            <include-form name="FindContactListCommEvents" location="component://marketing/widget/ContactListForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindImportContactListParties">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindImportContactListParties"/>
+                <set field="contactListTabButtonItem" value="ContactListImportParty"/>
+                <set field="labelTitleProperty" value="PageTitleFindImportContactListParties"/>
+
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="FindImportContactListParties?contactListId=${parameters.contactListId}"/>
+                <set field="contactListId" from-field="parameters.contactListId"/>
+                <entity-one entity-name="ContactList" value-field="contactList"/>
+                <set field="contactMechTypeId" from-field="contactList.contactMechTypeId"/>
+                <set field="selectedFields[+0]" value="partyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindImportContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListImportContactListParties" location="component://marketing/widget/ContactListForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupContactList">
+        <section>
+            <actions>
+                <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="PageTitleLookupContactList"/>
+                <set field="contactListTabButtonItem" value="ContactListCommEvent"/>
+                <set field="labelTitleProperty" value="PageTitleLookupContactList"/>
+                <set field="title" value="${uiLabelMap.PageTitleLookupContactList}"/>
+                <set field="entityName" value="ContactList"/>
+                <set field="searchFields" value="[contactListId, contactListName, description]"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="LookupContactList" location="component://marketing/widget/ContactListForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="ListLookupContactList" location="component://marketing/widget/ContactListForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="LookupPreferredContactMech">
+        <section>
+            <actions>
+                <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="PageTitlePreferredContactMech"/>
+                <set field="contactListTabButtonItem" value="ContactListCommEvent"/>
+                <set field="labelTitleProperty" value="PageTitlePreferredContactMech"/>
+                <set field="title" value="${uiLabelMap.PageTitlePreferredContactMech}"/>
+                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="/marketing/control/ListContactLists"/>
+                <set field="partyId" from-field="parameters.parm0"/>
+                <set field="entityName" value="PartyAndContactMech"/>
+                <set field="searchFields" value="[contactMechId, partyId, infoString, paToName, paAddress1]"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-results">
+                        <include-form name="ListPreferredContactMech" location="component://marketing/widget/ContactListForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+   <screen name="PreviewContactListCommEvent">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContactListCommEvent"/>
+                <set field="contactListTabButtonItem" value="ContactListCommEvent"/>                
+                <set field="labelTitleProperty" value="PageTitleEditContactListCommEvent"/>
+
+                <set field="communicationEventId" from-field="parameters.communicationEventId"/>
+                <set field="contactListId" from-field="parameters.contactListId"/>
+
+                <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
+                <entity-one entity-name="ContactList" value-field="contactList"/>
+                <entity-one entity-name="ContactMech" value-field="contactMech">
+                    <field-map field-name="contactMechId" from-field="communicationEvent.contactMechIdFrom"/>
+                </entity-one>
+
+                <set field="content" value="${groovy:org.apache.ofbiz.base.util.StringUtil.wrapString(communicationEvent.content)}"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+                        <html-template location="component://marketing/template/contact/ContactCommunicationPreview.ftl"/>
+                    </html>
+                </platform-specific>                
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="DefaultOptOutScreen">
+        <section>            
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="Opt-Out Results">
+                            <container>
+                                <label text="You have been successfully removed from the ${contactList.contactListName} mailing list!"/>                                            
+                            </container>                                        
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="OptOutResponse">
+        <section>
+            <actions>
+                <service service-name="optOutOfListFromCommEvent" result-map="optOutResult"/>                
+                <entity-one value-field="contactList" entity-name="ContactList">
+                    <field-map field-name="contactListId" from-field="optOutResult.contactListId"/>                    
+                </entity-one>
+                <set field="contactListId" from-field="contactList.contactListId"/>
+                <set field="screenName" from-field="contactList.optOutScreen" default-value="component://marketing/widget/ContactListScreens.xml#DefaultOptOutScreen"/>
+            </actions>
+            <widgets>
+                <include-screen name="${screenName}" share-scope="true"/>                
+            </widgets>
+        </section>
+    </screen>
+    <screen name="WebSiteContactList">
+        <section>
+            <actions>
+                <set field="titleProperty" value="MarketingWebSiteContactList"/>
+                <set field="contactListTabButtonItem" value="WebSiteContactList"/>
+                <entity-one value-field="contactList" entity-name="ContactList"/>
+                <entity-and entity-name="WebSiteContactList" list="webSiteContactLists">
+                    <field-map field-name="contactListId" from-field="contactList.contactListId"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonContactListDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.MarketingWebSiteContactListCreate}">
+                            <include-form name="CreateWebSiteContactList" location="component://marketing/widget/ContactListForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.MarketingWebSiteContactListView} of contactListId[${parameters.contactListId}]">
+                            <include-form name="ViewWebSiteContactList" location="component://marketing/widget/ContactListForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

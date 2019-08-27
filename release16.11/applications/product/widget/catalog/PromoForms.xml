@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="ListProductPromos" type="list" title="" list-name="productPromos"
+        paginate-target="FindProductPromo" odd-row-style="alternate-row" default-table-style="basic-table">
+        <field name="productPromoId" widget-style="buttontext">
+            <hyperlink description="${productPromoId}" target="EditProductPromo" also-hidden="false">
+                <parameter param-name="productPromoId"/>
+            </hyperlink>
+        </field>
+        <field name="promoName"><display/></field>
+        <field name="promoText" encode-output="false"><display/></field>
+        <field name="requireCode"><display/></field>
+        <field name="createdDate"><display/></field>
+    </form>
+    <form name="GoToProductPromoCode" type="single" target="EditProductPromoCode" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="productPromoCodeId"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonEdit}"><submit button-type="button"/></field>
+    </form>
+    <form name="EditProductPromo" type="single" target="updateProductPromo" title="" default-map-name="productPromo"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="productPromo==null" target="createProductPromo"/>
+        <auto-fields-service service-name="updateProductPromo" map-name=""/>
+
+        <field use-when="productPromo!=null" name="productPromoId" title="${uiLabelMap.ProductPromotion}" tooltip=""><display/></field>
+        <field use-when="productPromo==null&amp;&amp;productPromoId!=null" name="productPromoId" title="${uiLabelMap.ProductPromotion}" tooltip="${uiLabelMap.ProductCouldNotFindProductPromotion} [${productPromoId}]"><display/></field>
+        <!-- this to be taken care of with auto-fields-service as soon as it uses entity field info too -->
+        <field use-when="productPromo==null&amp;&amp;productPromoId==null" name="productPromoId" title="${uiLabelMap.ProductPromotion}"><ignored/></field>
+
+        <field name="promoText" title="${uiLabelMap.ProductPromoText}"><textarea cols="70" rows="5"/></field>
+        <field name="userEntered" title="${uiLabelMap.ProductPromoUserEntered}">
+            <drop-down allow-empty="false" no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="showToCustomer" title="${uiLabelMap.ProductPromoShowToCustomer}">
+            <drop-down allow-empty="false" no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="requireCode" title="${uiLabelMap.ProductPromotionReqCode}">
+            <drop-down allow-empty="false" no-current-selected-key="N"><option key="N" description="${uiLabelMap.CommonN}"/><option key="Y" description="${uiLabelMap.CommonY}"/></drop-down>
+        </field>
+        <field name="overrideOrgPartyId"><lookup target-form-name="LookupPartyName"/></field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+
+        <field use-when="productPromo!=null" name="lastUpdatedByText" title="${uiLabelMap.ProductLastModifiedBy}:">
+            <display description="[${productPromo.lastModifiedByUserLogin}] ${uiLabelMap.CommonOn} ${productPromo.lastModifiedDate}" also-hidden="false"/>
+        </field>
+        <field use-when="productPromo!=null" name="createdByText" title="${uiLabelMap.ProductLastCreatedBy}:">
+            <display description="[${productPromo.createdByUserLogin}] ${uiLabelMap.CommonOn} ${productPromo.createdDate}" also-hidden="false"/>
+        </field>
+    </form>
+    <form name="EditProductPromoCode" type="single" target="updateProductPromoCode" title="" default-map-name="productPromoCode"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="productPromoCode==null" target="createProductPromoCode"/>
+        <auto-fields-service service-name="updateProductPromoCode" map-name=""/>
+
+        <field name="productPromoId">
+            <drop-down>
+                <entity-options entity-name="ProductPromo" description="[${productPromoId}] ${promoName}">
+                    <entity-order-by field-name="productPromoId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field use-when="productPromoCode!=null" name="productPromoCodeId" tooltip=""><display/></field>
+        <field use-when="productPromoCode==null&amp;&amp;productPromoCodeId!=null" name="productPromoCodeId" tooltip="${uiLabelMap.ProductCouldNotFindProductPromoCode} [${productPromoCodeId}]"><display/></field>
+        <!-- this to be taken care of with auto-fields-service as soon as it uses entity field info too -->
+        <field use-when="productPromoCode==null&amp;&amp;productPromoCodeId==null" name="productPromoCodeId" tooltip="${uiLabelMap.ProductPromoCodeBlank}"><text/></field>
+
+        <field name="userEntered">
+            <drop-down allow-empty="false" no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="requireEmailOrParty">
+            <drop-down allow-empty="false" no-current-selected-key="N"><option key="N" description="${uiLabelMap.CommonN}"/><option key="Y" description="${uiLabelMap.CommonY}"/></drop-down>
+        </field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+
+        <field use-when="productPromoCode!=null" name="lastUpdatedByText" title="${uiLabelMap.ProductLastModifiedBy}:">
+            <display description="[${productPromoCode.lastModifiedByUserLogin}] ${uiLabelMap.CommonOn} ${productPromoCode.lastModifiedDate}" also-hidden="false"/>
+        </field>
+        <field use-when="productPromoCode!=null" name="createdByText" title="${uiLabelMap.CommonCreatedBy}:">
+            <display description="[${productPromoCode.createdByUserLogin}] ${uiLabelMap.CommonOn} ${productPromoCode.createdDate}" also-hidden="false"/>
+        </field>
+    </form>
+
+    <form name="ListProductPromoCodes" type="list" title="" list-name="productPromoCodes"
+        odd-row-style="alternate-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="ProductPromoCode" default-field-type="display"/>
+        <field name="productPromoId"><hidden/></field>
+        <field name="productPromoCodeId" widget-style="buttontext">
+            <hyperlink description="${productPromoCodeId}" target="EditProductPromoCode" also-hidden="false">
+                <parameter param-name="productPromoCodeId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteProductPromoCode" also-hidden="false">
+                <parameter param-name="productPromoCodeId"/>
+                <parameter param-name="productPromoId"/>
+            </hyperlink>
+        </field>
+    </form>
+    
+    <form name="EditProductPromoContentImage" type="upload" target="addImageContentForProductPromo" default-map-name="productPromoContent">
+        <field name="productPromoId"><hidden/></field>
+        <field use-when="productPromoContent != null" name="contentId"><display/></field>
+        <field name="productPromoContentTypeId"><hidden value="ORIGINAL_IMAGE_URL"/></field>
+        <field name="fromDate" use-when="productPromoContent == null" title="${uiLabelMap.CommonFromDate}"><date-time/></field>
+        <field name="fromDate" use-when="productPromoContent != null" title="${uiLabelMap.CommonFromDate}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="uploadedFile" title="${uiLabelMap.ProductFile}"><file/></field>
+        <field use-when="productPromoContent == null" name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field use-when="productPromoContent != null" name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListProductPromoContent" type="list" list-name="productPromoContents"
+            odd-row-style="alternate-row" default-table-style="basic-table">
+        <field name="editProductPromoContent" title="${uiLabelMap.ProductContent}" widget-style="buttontext">
+            <hyperlink description="${description} [${contentId}]" target="EditProductPromoContent" also-hidden="false">
+                <parameter param-name="productPromoId"/>
+                <parameter param-name="contentId"/>
+                <parameter param-name="productPromoContentTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+        <field name="productPromoContentTypeId" title="${uiLabelMap.ProductProductPromoContentType}">
+            <display-entity entity-name="ProductContentType" key-field-name="productContentTypeId" also-hidden="false"/>
+        </field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><display/></field>
+        <field name="editContent" title="${uiLabelMap.ProductEditContent}" widget-style="buttontext">
+            <hyperlink description="${contentId}" target="/content/control/EditContent" target-type="inter-app" also-hidden="false">
+                <parameter param-name="contentId"/>
+            </hyperlink>
+        </field>
+        <field name="removeContent" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="removeContentFromProductPromo" also-hidden="false">
+                <parameter param-name="productPromoId"/>
+                <parameter param-name="contentId"/>
+                <parameter param-name="productPromoContentTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+</forms>

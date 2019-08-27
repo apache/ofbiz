@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
+    <property key="check.error.prefix">
+        <value xml:lang="de">Fehler: </value>
+        <value xml:lang="en">Error: </value>
+        <value xml:lang="fr">Erreur : </value>
+        <value xml:lang="it">Errore: </value>
+        <value xml:lang="ja">エラー:</value>
+        <value xml:lang="nl">Fout: </value>
+        <value xml:lang="zh">错误：</value>
+        <value xml:lang="zh-TW">錯誤:</value>
+    </property>
+    <property key="check.error.suffix">
+        <value xml:lang="en"> </value>
+    </property>
+    <property key="check.message.prefix">
+        <value xml:lang="en"> </value>
+    </property>
+    <property key="check.message.suffix">
+        <value xml:lang="en"> </value>
+    </property>
+    <property key="service.default.message">
+        <value xml:lang="de">Aktion erfolgreich ausgeführt.</value>
+        <value xml:lang="en">The action was performed successfully.</value>
+        <value xml:lang="es">Se ha realizado la acción correctamente</value>
+        <value xml:lang="fr">Opération réussie.</value>
+        <value xml:lang="it">L'azione è stata eseguita con successo.</value>
+        <value xml:lang="ja">操作は成功しました。</value>
+        <value xml:lang="nl">De acties is met succes uitgevoerd.</value>
+        <value xml:lang="ro">Operatia a fost executata cu succes.</value>
+        <value xml:lang="ru">Действие выполнено успешно.</value>
+        <value xml:lang="th">การปฏิบัติหน้าที่เสร็จสมบูรณ์แล้ว</value>
+        <value xml:lang="zh">已成功执行本操作。</value>
+        <value xml:lang="zh-TW">已成功執行本操作.</value>
+    </property>
+    <property key="service.error.prefix">
+        <value xml:lang="de">Fehler: </value>
+        <value xml:lang="en">Error: </value>
+        <value xml:lang="fr">Erreur : </value>
+        <value xml:lang="it">Errore: </value>
+        <value xml:lang="ja">エラー:</value>
+        <value xml:lang="nl">Fout: </value>
+        <value xml:lang="zh">错误：</value>
+        <value xml:lang="zh-TW">錯誤:</value>
+    </property>
+    <property key="service.error.suffix">
+        <value xml:lang="en"> </value>
+    </property>
+    <property key="service.message.prefix">
+        <value xml:lang="en"> </value>
+    </property>
+    <property key="service.message.suffix">
+        <value xml:lang="en"> </value>
+    </property>
+    <property key="service.success.prefix">
+        <value xml:lang="en"> </value>
+    </property>
+    <property key="service.success.suffix">
+        <value xml:lang="en"> </value>
+    </property>
+</resource>

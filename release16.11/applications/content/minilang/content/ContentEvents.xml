@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <simple-method method-name="createContentAndPurpose" short-description="Create Content And Purpose" login-required="false">
+        <log level="info" message="in createContentAndPurpose."/>
+
+        <make-value entity-name="Content" value-field="currentContent"/>
+        <set-pk-fields map="parameters" value-field="currentContent"/>
+        <set-nonpk-fields map="parameters" value-field="currentContent"/>
+        <call-map-processor in-map-name="currentContent" out-map-name="currentContent">
+            <simple-map-processor name="newDateContent">
+                <process field="createdDate">
+                    <convert type="Timestamp">
+                        <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
+                    </convert>
+                </process>
+                <process field="lastModifiedDate">
+                    <convert type="Timestamp">
+                        <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
+                    </convert>
+                </process>
+            </simple-map-processor>
+        </call-map-processor>
+        <map-to-map map="currentContent" to-map="context"/>
+
+        <log level="info" message="currentContent: ${currentContent}"/>
+
+        <set field="context.contentPurposeTypeId" from-field="parameters.contentPurposeTypeId"/>
+        <string-to-list list="targetOperationList" string="CONTENT_CREATE"/>
+        <set field="context.targetOperationList" from-field="targetOperationList"/>
+        <session-to-field field="context.userLogin" session-name="userLogin"/>
+
+        <call-service in-map-name="context" service-name="createContent">
+            <result-to-field result-name="contentId" field="contentId"/>
+            <result-to-request request-name="contentId" result-name="contentId"/>
+        </call-service>
+        <if-empty field="contentId">
+            <add-error>
+                <fail-property resource="ContentUiLabels" property="ContentPermissionNotGranted"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+
+        <session-to-field session-name="currentEntityMap" field="entityMap"/>
+        <if-not-empty field="entityMap">
+            <set field="currentEntityMap" from-field="entityMap"/>
+        </if-not-empty>
+        <make-value entity-name="Content" value-field="contentPK"/>
+        <set field="contentPK.contentId" from-field="contentId"/>
+        <log level="info" message="contentPK: ${contentPK}"/>
+        <set field="currentEntityMap.Content" from-field="contentPK"/>
+        <log level="info" message="currentEntityMap: ${currentEntityMap}"/>
+        <field-to-session session-name="currentEntityMap" field="currentEntityMap"/>
+
+        <if-not-empty field="parameters.contentPurposeTypeId">
+            <log level="info" message="contentPurposeTypeId: ${parameters.contentPurposeTypeId}"/>
+            <make-value entity-name="ContentPurpose" value-field="newContentPurpose"/>
+            <set field="newContentPurpose.contentPurposeTypeId" from-field="parameters.contentPurposeTypeId"/>
+            <log level="info" message="contentId: ${contentId}"/>
+            <set field="newContentPurpose.contentId" from-field="contentId"/>
+            <create-value value-field="newContentPurpose"/>
+            <log level="info" message="newContentPurpose: ${newContentPurpose}"/>
+        </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="updateContent" short-description="Update Content" login-required="false">
+        <log level="info" message="/nin updateContent."/>
+        <log level="info" message="parameters: ${parameters}"/>
+
+        <make-value entity-name="Content" value-field="currentContent"/>
+        <set-pk-fields map="parameters" value-field="currentContent"/>
+        <set-nonpk-fields map="parameters" value-field="currentContent"/>
+        <call-map-processor in-map-name="currentContent" out-map-name="currentContent">
+            <simple-map-processor name="newDateContent">
+                <process field="createdDate">
+                    <convert type="Timestamp">
+                        <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
+                    </convert>
+                </process>
+                <process field="lastModifiedDate">
+                    <convert type="Timestamp">
+                        <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
+                    </convert>
+                </process>
+            </simple-map-processor>
+        </call-map-processor>
+        <log level="info" message="datesConverted: ${datesConverted}"/>
+        <map-to-map map="currentContent" to-map="context"/>
+        <get-related value-field="currentContent" relation-name="ContentPurpose" list="contentPurposeList"/>
+        <set field="context.contentPurposeList" from-field="contentPurposeList"/>
+        <string-to-list list="targetOperationList" string="CONTENT_UPDATE"/>
+        <set field="context.targetOperationList" from-field="targetOperationList"/>
+        <session-to-field field="context.userLogin" session-name="userLogin"/>
+        <call-service in-map-name="context" service-name="updateContent">
+            <result-to-field result-name="contentId" field="contentId"/>
+        </call-service>
+        <check-errors/>
+    </simple-method>
+
+    <simple-method method-name="addContentAssoc" short-description="Add Content Assoc" login-required="true" >
+        <log level="info" message="in addContentAssoc."/>
+        <log level="info" message="parameters: ${parameters}"/>
+
+        <!-- link article to publish point -->
+        <set field="context3.contentIdTo" from-field="parameters.contentIdTo"/>
+        <set field="context3.contentIdFrom" from-field="parameters.contentId"/>
+        <set field="context3.contentAssocTypeId" from-field="parameters.contentAssocTypeId"/>
+        <session-to-field field="context3.userLogin" session-name="userLogin"/>
+        <string-to-list list="contentPurposeList" string="_NA_"/>
+        <set field="context3.contentPurposeList" from-field="contentPurposeList"/>
+        <string-to-list list="targetOperationList" string="ASSOC_CONTENT"/>
+        <set field="context3.targetOperationList" from-field="targetOperationList"/>
+        <call-service in-map-name="context3" service-name="assocContent"></call-service>
+
+    </simple-method>
+    <simple-method method-name="createDocument" short-description="Create Document Tree">
+        <set field="content.contentName" from-field="parameters.contentName"/>
+        <set field="content.contentTypeId" from-field="parameters.contentTypeId"/>
+        <session-to-field field="content.userLogin" session-name="userLogin"/>
+        <call-service service-name="createContent" in-map-name="content">
+            <result-to-field result-name="contentId" field="contentAssoc.contentIdTo"/>
+        </call-service>
+        <set field="contentAssoc.contentId" from-field="parameters.contentId"/>
+        <set field="contentAssoc.contentAssocTypeId" from-field="parameters.contentAssocTypeId"/>
+        <session-to-field field="contentAssoc.userLogin" session-name="userLogin"/>
+        <call-service service-name="createContentAssoc" in-map-name="contentAssoc"/>
+    </simple-method>
+</simple-methods>

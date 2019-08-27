@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <!-- Temporal Expression forms -->
+    <form name="FindTemporalExpression" target="findTemporalExpression" type="single">
+        <actions>
+            <set field="expressionTypeList" value="${groovy:org.apache.ofbiz.service.calendar.ExpressionUiHelper.getExpressionTypeList(uiLabelMap);}" type="List"/>
+        </actions>
+        <field name="tempExprId" title="${uiLabelMap.TemporalExpressionId}"><text-find/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><text-find/></field>
+<!--        <field name="tempExprTypeId" title="${uiLabelMap.TemporalExpressionType}">
+            <drop-down allow-empty="true">
+                <list-options list-name="expressionTypeList" key-name="value" description="description"/>
+            </drop-down>
+        </field> -->
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="BasicExpressionList" type="list"
+         default-table-style="basic-table hover-bar" odd-row-style="alternate-row" header-row-style="header-row-2">
+        <field name="tempExprId" title="${uiLabelMap.TemporalExpressionId}" sort-field="true">
+            <hyperlink description="${tempExprId}" target="editTemporalExpression" also-hidden="false" target-type="plain">
+                <parameter param-name="tempExprId"/>
+            </hyperlink>
+        </field>
+        <field name="tempExprTypeId" title="${uiLabelMap.TemporalExpressionType}" sort-field="true"><display/></field>
+        <field name="description" sort-field="true"><display/></field>
+        <field name="date1" sort-field="true"><display/></field>
+        <field name="date2" sort-field="true"><display/></field>
+        <field name="integer1" sort-field="true"><display/></field>
+        <field name="integer2" sort-field="true"><display/></field>
+        <field name="string1" sort-field="true"><display/></field>
+        <field name="string2" sort-field="true"><display/></field>
+    </form>
+
+    <form name="ListTemporalExpressions" extends="BasicExpressionList" list-name="listIt" paginate="true">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="tempExprId"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="TemporalExpression"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+    </form>
+
+    <form name="ListChildExpressions" extends="BasicExpressionList" list-name="childExpressionList" paginate-target="editTemporalExpression?tempExprId=${tempExprId}">
+        <field name="exprAssocType"><display/></field>
+        <field name="deleteButton" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteTemporalExpressionAssoc" also-hidden="false">
+                <parameter param-name="tempExprId" from-field="parameters.tempExprId"/>
+                <parameter param-name="fromTempExprId"/>
+                <parameter param-name="toTempExprId" from-field="tempExprId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+</forms>

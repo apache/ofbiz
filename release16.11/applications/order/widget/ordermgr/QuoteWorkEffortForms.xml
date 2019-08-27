@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="ListQuoteWorkEfforts" separate-columns="true" title="" type="list"  target="ListQuoteWorkEfforts"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="QuoteWorkEffortView">
+                <field-map field-name="quoteId"/>
+            </entity-and>
+        </actions>
+        <field name="quoteId"><hidden/></field>
+        <field name="workEffortId" widget-style="buttontext">
+            <hyperlink description="${workEffortName} [${workEffortId}]" target="EditQuoteWorkEffort" also-hidden="false">
+                <parameter param-name="workEffortId"/>
+                <parameter param-name="quoteId"/>
+            </hyperlink>
+        </field>
+        <field name="workEffortTypeId"><display-entity entity-name="WorkEffortType"/></field>
+        <field name="statusItemDescription"><display/></field>
+        <field name="description"><display/></field>
+        <field name="workEffortPurposeTypeId"><display-entity entity-name="WorkEffortPurposeType"/></field>
+        <field name="actualStartDate"><display/></field>
+        <field name="actualEndDate"><display/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteQuoteWorkEffort" also-hidden="false">
+                <parameter param-name="workEffortId"/>
+                <parameter param-name="quoteId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="AddQuoteWorkEffort" extends="EditWorkEffort" extends-resource="component://workeffort/widget/WorkEffortForms.xml" target="/ordermgr/control/createQuoteWorkEffort" target-type="inter-app" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+
+        <field name="quoteId" map-name="parameters"><display/></field>
+        <field name="workEffortId" use-when="workEffort==null&amp;&amp;workEffortId!=null">
+            <lookup target-form-name="LookupWorkEffort"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext">
+            <submit button-type="text-link"/>
+        </field>
+        <sort-order>
+            <sort-field name="quoteId"/>
+            <banner left-text="${uiLabelMap.OrderOrderQuoteEnterWorkEffortId}"/>
+            <sort-field name="workEffortId"/>
+            <banner left-text="${uiLabelMap.OrderOrderQuoteEnterWorkEffortIdNew}"/>
+        </sort-order>
+    </form>
+
+    <form name="EditQuoteWorkEffort" target="updateQuoteWorkEffort" title="" type="single" extends="EditWorkEffort" extends-resource="component://workeffort/widget/WorkEffortForms.xml"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="quote.statusId"/>
+            </entity-one>
+        </actions>
+        <field name="quoteId" field-name="quoteId" map-name="parameters">
+            <hidden/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext">
+            <submit button-type="text-link"/>
+        </field>
+    </form>
+</forms>

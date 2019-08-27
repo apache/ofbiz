@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <!-- Column Included Screens -->
+    <screen name="choosecatalog">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/ChooseCatalog.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/ChooseCatalog.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="keywordsearchbox">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/KeywordSearchOptions.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/KeywordSearchBox.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="sidedeepcategory">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/SideDeepCategory.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/SideDeepCategory.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="productsummary">
+        <section>
+            <actions>
+                <set field="showPriceDetails" value="Y"/>
+                <set field="backendPath" value="Y"/>
+                <script location="component://order/groovyScripts/entry/catalog/ProductSummary.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/ProductSummary.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="breadcrumbs">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/SideDeepCategory.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/BreadCrumbs.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="compareproductslist">
+        <section>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/CompareProductsList.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <!-- =========== Top-Level and Stand-Alone Screens =========== -->
+
+    <!-- Category Screens -->
+    <screen name="category">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleCategoryPage"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-screen name="breadcrumbs"/>
+                        <include-screen name="category-include"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="category-include">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/Category.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <not><if-empty field="productCategory"/></not>
+                    </condition>
+                    <widgets>
+                        <include-screen name="${detailScreen}"/>
+                    </widgets>
+                    <fail-widgets>
+                        <label style="h2">${uiLabelMap.ProductCategoryNotFoundForCategoryID} ${productCategoryId}!</label>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="categorydetail">
+        <section>
+            <actions>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <script location="component://order/groovyScripts/entry/catalog/CategoryDetail.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/CategoryDetail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="product">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleProductPage"/>
+                <set field="configproductdetailScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#configproductdetail"/>
+                <script location="component://order/groovyScripts/entry/catalog/Product.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="product"/></not>
+                            </condition>
+                            <widgets>
+                                <include-screen name="${detailScreen}"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h2">${uiLabelMap.ProductProductNotFound} ${productId}!</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="productdetail">
+        <section>
+            <actions>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <set field="showPriceDetails" value="Y"/>
+                <!-- Warning: this groovy file in the order component is slightly different from that of the ecommerce one (the currency is taken from the cart) -->
+                <script location="component://order/groovyScripts/entry/catalog/ProductDetail.groovy"/>
+            </actions>
+            <widgets>
+                <include-screen name="breadcrumbs"/>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/EditProduct.ftl"/></html></platform-specific>
+                <!--<platform-specific><html><html-template location="component://order/template/product/productdetail.ftl"/></html></platform-specific>-->
+                <!-- Warning: this ftl file in the order component is slightly different from that of the ecommerce one (the edit product link is shown) -->
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/ProductDetail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="configproductdetail">
+        <section>
+            <actions>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <set field="inlineProductDetailScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#inlineProductDetail"/>
+                <script location="component://order/groovyScripts/entry/catalog/ProductDetail.groovy"/>
+                <!--<script location="component://ecommerce/groovyScripts/catalog/prepareconfigform.bsh"/>-->
+                <script location="component://order/groovyScripts/entry/catalog/PrepareConfigForm.groovy"/>
+            </actions>
+            <widgets>
+                <include-screen name="breadcrumbs"/>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/EditProduct.ftl"/></html></platform-specific>
+                <!--<platform-specific><html><html-template location="component://order/template/product/configproductdetail.ftl"/></html></platform-specific>-->
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/ConfigProductDetail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="inlineProductDetail">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/InlineProductDetail.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/InlineProductDetail.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="keywordsearch">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleSearchResults"/>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <script location="component://order/groovyScripts/entry/catalog/KeywordSearch.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://order/template/entry/catalog/KeywordSearch.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="advancedsearch">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleAdvancedSearch"/>
+                <set field="headerItem" value="Advanced Search"/>
+                <script location="component://order/groovyScripts/entry/catalog/AdvancedSearchOptions.groovy"/>
+
+                <entity-condition entity-name="PartyRoleAndPartyDetail" list="supplerPartyRoleAndPartyDetails">
+                    <condition-expr field-name="roleTypeId" value="SUPPLIER"/>
+                    <order-by field-name="groupName"/>
+                    <order-by field-name="lastName"/>
+                    <order-by field-name="firstName"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://order/template/entry/catalog/AdvancedSearch.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="quickadd">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleQuickAdd"/>
+                <set field="quickaddsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#quickaddsummary"/>
+                <script location="component://order/groovyScripts/entry/catalog/QuickAdd.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://order/template/entry/catalog/QuickAdd.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="quickaddsummary">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/ProductSummary.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/template/entry/catalog/QuickAddSummary.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="compareProducts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductCompareProducts"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" from-field="uiLabelMap.ProductCompareProducts"/>
+                <script location="component://order/groovyScripts/entry/catalog/CompareProducts.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPopUpDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://order/template/entry/catalog/CompareProducts.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ProductUomDropDownOnly">
+        <section>
+            <actions>
+                <script location="component://order/groovyScripts/entry/catalog/ProductUomDropDownOnly.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <not><if-empty field="product"/></not>
+                    </condition>
+                    <widgets>
+                        <platform-specific>
+                            <html><html-template location="component://order/template/entry/catalog/ProductUomDropDownOnly.ftl"/></html>
+                        </platform-specific>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+</screens>

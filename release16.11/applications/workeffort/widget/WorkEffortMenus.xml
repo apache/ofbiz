@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ofbiz.apache.org/Widget-Menu" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Menu http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <menu name="WorkEffortAppBar" title="${uiLabelMap.WorkEffortManager}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+        default-menu-item-name="task" >
+        <menu-item name="task" title="${uiLabelMap.WorkEffortTaskList}"><link target="mytasks"/></menu-item>
+        <menu-item name="calendar" title="${uiLabelMap.WorkEffortCalendar}"><link target="calendar"/></menu-item>
+        <menu-item name="mytime" title="${uiLabelMap.WorkEffortTimesheetMyTime}"><link target="MyTimesheets"/></menu-item>
+        <menu-item name="request" title="${uiLabelMap.WorkEffortRequestList}"><link target="requestlist"/></menu-item>
+        <menu-item name="workeffort" title="${uiLabelMap.WorkEffortWorkEffort}"><link target="FindWorkEffort"/></menu-item>
+        <menu-item name="timesheet" title="${uiLabelMap.WorkEffortTimesheet}"><link target="FindTimesheet"/></menu-item>
+        <menu-item name="userJobs" title="${uiLabelMap.WorkEffortJobList}"><link target="UserJobs"/></menu-item>
+        <menu-item name="WorkEffortICalendar" title="${uiLabelMap.WorkEffortICalendar}"><link target="FindICalendars"/></menu-item>
+    </menu>
+    <menu name="WorkEffortTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="WorkEffort">
+        <menu-item name="WorkEffortRelatedSummary" title="${uiLabelMap.WorkEffortSummary}">
+            <link target="WorkEffortSummary">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffort" title="${uiLabelMap.WorkEffortWorkEffort}">
+            <link target="EditWorkEffort">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortAssocs" title="${uiLabelMap.CommonEntityChildren}">
+            <link target="ChildWorkEfforts">
+                <parameter param-name="workEffortId"/>
+                <parameter param-name="trail" from-field="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortPartyAssigns" title="${uiLabelMap.WorkEffortParties}">
+            <link target="ListWorkEffortPartyAssigns">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortRates" title="${uiLabelMap.WorkEffortTimesheetRates}">
+            <link target="EditWorkEffortRates">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortCommEvents" title="${uiLabelMap.WorkEffortCommEvents}">
+            <link target="ListWorkEffortCommEvents">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortShopLists" title="${uiLabelMap.WorkEffortShopLists}">
+            <link target="ListWorkEffortShopLists">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortRequests" title="${uiLabelMap.WorkEffortRequests}">
+            <link target="ListWorkEffortRequests">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortRequirements" title="${uiLabelMap.WorkEffortRequirements}">
+            <link target="ListWorkEffortRequirements">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortQuotes" title="${uiLabelMap.WorkEffortQuotes}">
+            <link target="ListWorkEffortQuotes">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortOrderHeaders" title="${uiLabelMap.WorkEffortOrderHeaders}">
+            <link target="ListWorkEffortOrderHeaders">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortTimeEntries" title="${uiLabelMap.WorkEffortTimesheetTimeEntries}">
+            <link target="EditWorkEffortTimeEntries">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortNotes" title="${uiLabelMap.WorkEffortNotes}">
+            <link target="EditWorkEffortNotes">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortContents" title="${uiLabelMap.ContentContent}">
+            <link target="EditWorkEffortContents">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortGoodStandards" title="${uiLabelMap.ProductProduct}">
+            <link target="EditWorkEffortGoodStandards">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortReviews" title="${uiLabelMap.WorkEffortReviews}">
+            <link target="EditWorkEffortReviews">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortKeywords" title="${uiLabelMap.WorkEffortKeywords}">
+            <link target="EditWorkEffortKeywords">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortContactMechs" title="${uiLabelMap.WorkEffortContactMechs}">
+            <link target="EditWorkEffortContactMechs">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortAgreementAppls" title="${uiLabelMap.WorkEffortAgreementAppls}">
+            <link target="EditAgreementWorkEffortApplics">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortFixedAssetAssigns" title="${uiLabelMap.AccountingFixedAssets}">
+            <link target="ListWorkEffortFixedAssetAssigns">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortAttributes" title="${uiLabelMap.WorkEffortAttributes}">
+            <link target="ListWorkEffortAttributes">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortEventReminders" title="${uiLabelMap.WorkEffortEventReminders}">
+            <link target="listWorkEffortEventReminders">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="Day" extends="Calendar">
+        <menu-item name="next">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortNextDay}">
+                <parameter param-name="period" value="day"/>
+                <parameter param-name="startTime" value="${nextMillis}"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="toDay">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.CommonToday}">
+                <parameter param-name="period" value="day"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="prev">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortPreviousDay}">
+                <parameter param-name="period" value="day"/>
+                <parameter param-name="startTime" value="${prevMillis}"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="Week" extends="Calendar">
+        <menu-item name="next">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortNextWeek}">
+                <parameter param-name="period" value="week"/>
+                <parameter param-name="startTime" value="${nextMillis}"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="thisWeek">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortThisWeek}">
+                <parameter param-name="period" value="week"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="prev">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortPreviousWeek}">
+                <parameter param-name="period" value="week"/>
+                <parameter param-name="startTime" value="${prevMillis}"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="Month" extends="Calendar">
+        <menu-item name="next">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortNextMonth}">
+                <parameter param-name="period" value="month"/>
+                <parameter param-name="startTime" value="${nextMillis}"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="thisMonth">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortThisMonth}">
+                <parameter param-name="period" value="month"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="prev">
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortPreviousMonth}">
+                <parameter param-name="period" value="month"/>
+                <parameter param-name="startTime" value="${prevMillis}"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="Upcoming" extends="Calendar">
+    </menu>
+    <menu name="Calendar">
+        <menu-item name="upcoming">
+            <condition>
+                <and>
+                    <if-compare field="parameters.period" operator="not-equals" value="upcoming"/>
+                    <if-empty field="parameters.fixedAssetId"/>
+                </and>
+            </condition>
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortUpcomingEvents}">
+                <parameter param-name="period" value="upcoming"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="month">
+            <condition>
+                <if-compare field="parameters.period" operator="not-equals" value="month"/>
+            </condition>
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortMonthView}">
+                <parameter param-name="period" value="month"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="week">
+            <condition>
+                <and>
+                    <if-compare field="parameters.period" operator="not-equals" value="week"/>
+                    <not><if-empty field="parameters.period"/></not>
+                </and>
+            </condition>
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortWeekView}">
+                <parameter param-name="period" value="week"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="day">
+            <condition>
+                <if-compare field="parameters.period" operator="not-equals" value="day"/>
+            </condition>
+            <link target="${parameters._LAST_VIEW_NAME_}" text="${uiLabelMap.WorkEffortDayView}">
+                <parameter param-name="period" value="day"/>
+                <parameter param-name="partyId" from-field="parameters.partyId"/>
+                <parameter param-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                <parameter param-name="workEffortTypeId" from-field="parameters.workEffortTypeId"/>
+                <parameter param-name="calendarType" from-field="parameters.calendarType"/>
+                <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                <parameter param-name="hideEvents" from-field="parameters.hideEvents"/>
+            </link>
+        </menu-item>
+        <menu-item name="dummy" title="--------">
+            <condition>
+                <if-compare field="parameters.period" operator="not-equals" value="upcoming"/>
+            </condition>
+        </menu-item>
+    </menu>
+
+    <menu name="ICalendarTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="WorkEffort">
+        <menu-item name="WorkEffort" title="${uiLabelMap.WorkEffortICalendar}">
+            <link target="EditICalendar">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortAssocs" title="${uiLabelMap.CommonEntityChildren}">
+            <link target="ICalendarChildren">
+                <parameter param-name="workEffortId"/>
+                <parameter param-name="trail" from-field="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortPartyAssigns" title="${uiLabelMap.WorkEffortParties}">
+            <link target="ICalendarParties">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WorkEffortFixedAssetAssigns" title="${uiLabelMap.AccountingFixedAssets}">
+            <link target="ICalendarFixedAssets">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ICalendarData" title="${uiLabelMap.WorkEffortICalendarData}">
+            <link target="EditICalendarData">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ICalendarHelp" title="${uiLabelMap.CommonHelp}">
+            <link target="ICalendarHelp">
+                <parameter param-name="workEffortId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+</menus>

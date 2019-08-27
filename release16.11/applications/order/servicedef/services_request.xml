@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Order Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Customer Request Services -->
+    <service name="custRequestPermissionCheck" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="custRequestPermissionCheck">
+        <description>
+            Performs a security check for CustRequest. The user, if enters a request for someone else,
+            must have one of the base ORDERMGR_CRQ CRUD+ADMIN permissions.
+        </description>
+        <implements service="permissionInterface"/>
+        <attribute name="fromPartyId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="createCustRequest" engine="simple" default-entity-name="CustRequest"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequest" auth="true">
+        <description>Create a custRequest record and optionally create a custRequest item.</description>
+        <permission-service service-name="custRequestPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="all" mode="IN" entity-name="CustRequestItem" optional="true"/>
+        <attribute name="webSiteId" type="String" mode="IN" optional="true"/><!-- for notification services -->
+        <override name="custRequestName" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
+        <override name="story" allow-html="safe"/>
+    </service>
+    <service name="updateCustRequest" engine="simple" default-entity-name="CustRequest"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="updateCustRequest" auth="true">
+        <description>Update a custRequest record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT"/>
+        <attribute name="story" mode="IN" type="String" optional="true" allow-html="safe"/>
+        <attribute name="webSiteId" type="String" mode="IN" optional="true"/><!-- for notification services -->
+        <override name="custRequestName" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
+    </service>
+
+    <service name="deleteCustRequest" engine="simple" default-entity-name="CustRequest"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="deleteCustRequest" auth="true">
+        <description>Delete a custRequest record in draft status</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createCustRequestAttribute" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestAttribute" auth="true">
+        <description>Create CustRequestAttribute record</description>
+        <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
+        <attribute name="attrName" type="String" mode="IN" optional="false"/>
+        <attribute name="attrValue" type="String" mode="IN" optional="false"/>
+    </service>
+
+   <service name="updateCustRequestAttribute" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="updateCustRequestAttribute" auth="true">
+        <description>Update CustRequestAttribute record</description>
+        <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
+        <attribute name="attrName" type="String" mode="IN" optional="false"/>
+        <attribute name="attrValue" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createCustRequestItem" engine="simple" default-entity-name="CustRequestItem"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestItem" auth="true">
+        <description>Create a CustRequestItem record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="custRequestItemSeqId" optional="true"/>
+        <override name="story" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
+    </service>
+    <service name="updateCustRequestItem" engine="simple" default-entity-name="CustRequestItem"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="updateCustRequestItem" auth="true">
+        <description>Update a CustRequestItem record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="story" allow-html="safe"/>
+        <override name="description" allow-html="safe"/>
+    </service>
+    <service name="copyCustRequestItem" default-entity-name="CustRequestItem" engine="simple"
+                location="component://order/minilang/request/CustRequestServices.xml" invoke="copyCustRequestItem" auth="true">
+        <description>Copy a CustRequest</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="custRequestIdTo" type="String" mode="IN" optional="true"/>
+        <attribute name="custRequestItemSeqIdTo" type="String" mode="IN" optional="true"/>
+        <attribute name="copyLinkedQuotes" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createCustRequestParty" engine="simple" default-entity-name="CustRequestParty"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestParty" auth="true">
+        <description>Create a CustRequestParty record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="fromDate" mode="IN" type="Timestamp" optional="true"/>
+    </service>
+    <service name="updateCustRequestParty" engine="simple" default-entity-name="CustRequestParty"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="updateCustRequestParty" auth="true">
+        <description>Update CustRequestParty record</description>
+        <auto-attributes mode="IN" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteCustRequestParty" engine="simple" default-entity-name="CustRequestParty"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="deleteCustRequestParty" auth="true">
+        <description>Delete a CustRequestParty record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    <service name="expireCustRequestParty" engine="simple" default-entity-name="CustRequestParty"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="expireCustRequestParty" auth="true">
+        <description>Delete a CustRequestParty record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    <service name="createCustRequestNote" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestNote" auth="true">
+        <description>Create a note for a CustRequest</description>
+        <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
+        <attribute name="noteInfo" type="String" mode="IN" optional="false" allow-html="safe"/>
+        <attribute name="noteId" type="String" mode="OUT" optional="false"/>
+        <attribute name="fromPartyId" type="String" mode="OUT" optional="true"/><!-- party to be notified -->
+        <attribute name="custRequestName" type="String" mode="OUT" optional="true"/><!-- for notification services -->
+    </service>
+    <service name="updateCustRequestNote" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="updateCustRequestNote" auth="true">
+        <description>Update CustRequest Note</description>
+        <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
+        <attribute name="noteId" type="String" mode="IN" optional="false" allow-html="safe"/>
+        <attribute name="noteInfo" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="createCustRequestItemNote" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestItemNote" auth="true">
+        <description>Create a note for a CustRequestItem</description>
+        <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
+        <attribute name="custRequestItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="note" type="String" mode="IN" optional="false" allow-html="safe"/>
+        <attribute name="noteId" type="String" mode="OUT" optional="false"/>
+        <attribute name="partyId" type="String" mode="INOUT" optional="true"/><!-- party who created the note -->
+        <attribute name="fromPartyId" type="String" mode="OUT" optional="true"/><!-- party to be notified -->
+        <attribute name="custRequestName" type="String" mode="OUT" optional="true"/><!-- for notification services -->
+    </service>
+    <service name="createCustRequestFromCart" engine="simple" auth="true"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestFromCart">
+        <description>Creates a new request from a shopping cart</description>
+        <attribute name="cart" type="org.apache.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
+        <attribute name="custRequestName" type="String" mode="IN" optional="true"/>
+        <attribute name="custRequestId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="createCustRequestFromShoppingList" engine="simple" auth="true"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestFromShoppingList">
+        <description>Creates a new quote from a shopping list</description>
+        <attribute name="shoppingListId" type="String" mode="IN" optional="false"/>
+        <attribute name="custRequestId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- Services for finding Associated CustRequests -->
+    <service name="getCustRequestsByRole" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="getCustRequestsByRole" auth="true">
+        <description>Get CustRequests Associated By Role</description>
+        <attribute name="roleTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="custRequestAndRoles" type="java.util.List" mode="OUT" optional="false"/>
+    </service>
+    <service name="setCustRequestStatus" engine="simple"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="setCustRequestStatus" auth="true">
+        <description>Set the Customer Request  Status</description>
+        <attribute name="custRequestId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="statusId" type="String" mode="IN" optional="false"/>
+        <attribute name="reason" type="String" mode="IN" optional="true" allow-html="safe"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="fromPartyId" type="String" mode="OUT" optional="true"/><!-- for notification services -->
+        <attribute name="custRequestName" type="String" mode="OUT" optional="true"/><!-- for notification services -->
+        <attribute name="webSiteId" type="String" mode="IN" optional="true"/><!-- for notification services -->
+    </service>
+    <service name="createCustRequestFromCommEvent" engine="simple" default-entity-name="CommunicationEvent"
+            location="component://order/minilang/request/CustRequestServices.xml" invoke="createCustRequestFromCommEvent" auth="true">
+        <description>Create a Customer request from a commEvent(email)</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute name="custRequestId" mode="IN" type="String" optional="true"/>
+        <attribute name="custRequestId" mode="OUT" type="String" optional="false"/>
+        <attribute name="custRequestTypeId" mode="IN" type="String" optional="true"/>
+        <attribute name="custRequestName" mode="IN" type="String" optional="true" allow-html="safe"/>
+        <attribute name="story" mode="IN" type="String" optional="true" allow-html="safe"/>
+        <override name="content" allow-html="any"/>
+    </service>
+
+    <service name="createCustRequestStatus" engine="entity-auto" default-entity-name="CustRequestStatus" invoke="create" auth="true">
+        <description>Create a Cust Request Status Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="custRequestStatusId" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- custRequest content services -->
+    <service name="createCustRequestContent" engine="simple"
+        location="component://order/minilang/request/CustRequestServices.xml"
+        invoke="createCustRequestContent"
+        default-entity-name="CustRequestContent" auth="true">
+        <description>Create a Customer Request Content</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="deleteCustRequestContent" engine="simple"
+        location="component://order/minilang/request/CustRequestServices.xml"
+        invoke="deleteCustRequestContent"
+        default-entity-name="CustRequestContent" auth="true">
+        <description>Update a Customer Request Content</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="createCustRequestCategory" engine="entity-auto" invoke="create" default-entity-name="CustRequestCategory" auth="true">
+        <description>Create a CustRequestCategory record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateCustRequestCategory" engine="entity-auto" invoke="update" default-entity-name="CustRequestCategory" auth="true">
+        <description>Update a CustRequestCategory record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCustRequestCategory" engine="entity-auto" invoke="delete" default-entity-name="CustRequestCategory" auth="true">
+        <description>Delete a CustRequestCategory record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createCustRequestResolution" engine="entity-auto" invoke="create" default-entity-name="CustRequestResolution" auth="true">
+        <description>Create a CustRequestResolution record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateCustRequestResolution" engine="entity-auto" invoke="update" default-entity-name="CustRequestResolution" auth="true">
+        <description>Update a CustRequestResolution record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCustRequestResolution" engine="entity-auto" invoke="delete" default-entity-name="CustRequestResolution" auth="true">
+        <description>Delete a CustRequestResolution record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createCustRequestType" engine="entity-auto" invoke="create" default-entity-name="CustRequestType" auth="true">
+        <description>Create a CustRequestType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateCustRequestType" engine="entity-auto" invoke="update" default-entity-name="CustRequestType" auth="true">
+        <description>Update a CustRequestType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCustRequestType" engine="entity-auto" invoke="delete" default-entity-name="CustRequestType" auth="true">
+        <description>Delete a CustRequestType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createCustRequestTypeAttr" engine="entity-auto" invoke="create" default-entity-name="CustRequestTypeAttr" auth="true">
+        <description>Create a CustRequestTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateCustRequestTypeAttr" engine="entity-auto" invoke="update" default-entity-name="CustRequestTypeAttr" auth="true">
+        <description>Update a CustRequestTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCustRequestTypeAttr" engine="entity-auto" invoke="delete" default-entity-name="CustRequestTypeAttr" auth="true">
+        <description>Delete a CustRequestTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createRespondingParty" engine="entity-auto" invoke="create" default-entity-name="RespondingParty" auth="true">
+        <description>Create a RespondingParty record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateRespondingParty" engine="entity-auto" invoke="update" default-entity-name="RespondingParty" auth="true">
+        <description>Update a RespondingParty record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteRespondingParty" engine="entity-auto" invoke="delete" default-entity-name="RespondingParty" auth="true">
+        <description>Delete a RespondingParty record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+</services>
+

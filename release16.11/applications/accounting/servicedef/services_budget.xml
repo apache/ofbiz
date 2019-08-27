@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Accounting Services: Budget</description>
+    <vendor>Apache OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Budget  -->
+    <service name="createBudget" default-entity-name="Budget" engine="simple"
+                location="component://accounting/minilang/budget/BudgetServices.xml" invoke="createBudget" auth="true">
+        <description>Create a Budget</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBudget" default-entity-name="Budget" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createBudgetStatus" default-entity-name="BudgetStatus" engine="entity-auto" invoke="create" auth="true">
+        <description>Create Budget Status Record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBudgetStatus" default-entity-name="BudgetStatus" engine="simple"
+                location="component://accounting/minilang/budget/BudgetServices.xml" invoke="updateBudgetStatus">
+        <description>Update a Budget</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createBudgetItem" default-entity-name="BudgetItem" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Budget Item</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="budgetId" mode="IN" type="String" optional="false"/>
+        <attribute name="budgetItemSeqId" mode="OUT" type="String" optional="false"/>
+    </service>
+    <service name="updateBudgetItem" default-entity-name="BudgetItem" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Item</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeBudgetItem" default-entity-name="BudgetItem" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove an existing Budget Item Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+
+    <service name="createBudgetRole" default-entity-name="BudgetRole" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Role Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="removeBudgetRole" default-entity-name="BudgetRole" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove an existing Budget Role Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+
+    <service name="createBudgetReview" default-entity-name="BudgetReview" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Review Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="budgetReviewId" mode="OUT" type="String" optional="false"/>
+    </service>
+    <service name="removeBudgetReview" default-entity-name="BudgetReview" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove an existing Budget Review Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    <service name="createBudgetType" default-entity-name="BudgetType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Budget Type Record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBudgetType" default-entity-name="BudgetType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Type Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteBudgetType" default-entity-name="BudgetType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Budget Type Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createBudgetItemAttribute" default-entity-name="BudgetItemAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Item Attribute Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateBudgetItemAttribute" default-entity-name="BudgetItemAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Item Attribute Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteBudgetItemAttribute" default-entity-name="BudgetItemAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Budget Item Attribute Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+    <service name="createBudgetItemType" default-entity-name="BudgetItemType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Item Type Record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateBudgetItemType" default-entity-name="BudgetItemType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Item Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="removeBudgetItemType" default-entity-name="BudgetItemType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove an existing Budget Item Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+    <service name="createBudgetItemTypeAttr" default-entity-name="BudgetItemTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Item Type Attr Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateBudgetItemTypeAttr" default-entity-name="BudgetItemTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Item Type Attr Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteBudgetItemTypeAttr" default-entity-name="BudgetItemTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Budget Item Type Attr Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+    <service name="createBudgetReviewResultType" default-entity-name="BudgetReviewResultType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Review Result Type Record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateBudgetReviewResultType" default-entity-name="BudgetReviewResultType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Review Result Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteBudgetReviewResultType" default-entity-name="BudgetReviewResultType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Budget Review Result Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+    <service name="createBudgetRevision" default-entity-name="BudgetRevision" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Revision Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateBudgetRevision" default-entity-name="BudgetRevision" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Revision Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteBudgetRevision" default-entity-name="BudgetRevision" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Budget Revision Record. BudgetRevision entity contains historical data, hence this service ideally will not +	 be used.</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+    <service name="createBudgetScenario" default-entity-name="BudgetScenario" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Budget Scenario Record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBudgetScenario" default-entity-name="BudgetScenario" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Scenario Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteBudgetScenario" default-entity-name="BudgetScenario" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Budget Scenario Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    
+    <!-- BudgetRevisionImpact services -->
+    <service name="createBudgetRevisionImpact" default-entity-name="BudgetRevisionImpact" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a BudgetRevisionImpact</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="updateBudgetRevisionImpact" default-entity-name="BudgetRevisionImpact" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a BudgetRevisionImpact</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeBudgetRevisionImpact" default-entity-name="BudgetRevisionImpact" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a BudgetRevisionImpact</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="createBudgetScenarioRule" default-entity-name="BudgetScenarioRule" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Budget Scenario Rule Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    
+    <service name="updateBudgetScenarioRule" default-entity-name="BudgetScenarioRule" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Scenario Rule</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="deleteBudgetScenarioRule" default-entity-name="BudgetScenarioRule" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Budget Scenario Rule Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+
+    <!-- BudgetAttribute services -->
+    <service name="createBudgetAttribute" default-entity-name="BudgetAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new BudgetAttribute record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBudgetAttribute" default-entity-name="BudgetAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a BudgetAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeBudgetAttribute" default-entity-name="BudgetAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a BudgetAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createBudgetTypeAttr" default-entity-name="BudgetTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Budget Type Attr Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBudgetTypeAttr" default-entity-name="BudgetTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Type Attr Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteBudgetTypeAttr" default-entity-name="BudgetTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Budget Type Attr Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createBudgetScenarioApplication" default-entity-name="BudgetScenarioApplication" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Budget Scenario Application Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBudgetScenarioApplication" default-entity-name="BudgetScenarioApplication" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Budget Scenario Application Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteBudgetScenarioApplication" default-entity-name="BudgetScenarioApplication" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Budget Scenario Application Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+</services>

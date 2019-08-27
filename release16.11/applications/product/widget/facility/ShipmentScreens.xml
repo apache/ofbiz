@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="CommonShipmentMainDecorator">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductFindShipment"/>
+                <set field="headerItem" value="shipment"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="FACILITY" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.ProductFacilityViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindShipment">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductFindShipment"/>
+                <set field="headerItem" value="shipment"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentMainDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <link target="EditShipment" text="${uiLabelMap.ProductNewShipment}" style="buttontext"></link>
+                        <screenlet title="${uiLabelMap.ProductFindShipment}">
+                            <include-form name="FindShipment" location="component://product/widget/facility/ShipmentForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ProductShipmentsFound}">
+                            <include-form name="ListShipment" location="component://product/widget/facility/ShipmentForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonShipmentDecorator">
+        <section>
+            <actions>
+                <set field="shipmentId" from-field="parameters.shipmentId"/>
+                <entity-one entity-name="Shipment" value-field="shipment"/>
+                <set field="shipmentId" from-field="shipment.shipmentId" global="true"/>
+                <get-related-one value-field="shipment" to-value-field="facility" relation-name="DestinationFacility"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentMainDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="FACILITY" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://product/template/shipment/ShipmentTabBar.ftl"/></html>
+                                </platform-specific>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="shipment"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <label style="h1" text="${uiLabelMap.ProductShipmentId}: ${shipment.shipmentId}"/>
+                                        <container>
+                                            <link style="buttontext" text="${uiLabelMap.ProductGenerateShipmentManifestReport}" target="ShipmentManifest.pdf" target-window="_BLANK">
+                                                <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                            </link>
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <section>
+                                    <condition>
+                                        <and>
+                                            <not><if-empty field="shipment"/></not>
+                                            <not><if-empty field="facility"/></not>
+                                            <if-compare field="shipment.shipmentTypeId" operator="equals" value="PURCHASE_SHIPMENT"/>
+                                        </and>
+                                    </condition>
+                                    <widgets>
+                                        <container>
+                                            <link style="buttontext" text="${uiLabelMap.ProductReceiveInventory}" target="ReceiveInventory">
+                                                <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                                <parameter param-name="facilityId" from-field="facility.facilityId"/>
+                                                <parameter param-name="purchaseOrderId" from-field="shipment.primaryOrderId"/>
+                                                <parameter param-name="initialSelected" value="Y"/>
+                                            </link>
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <section>
+                                    <condition>
+                                        <and>
+                                            <not><if-empty field="shipment"/></not>
+                                            <not><if-empty field="facility"/></not>
+                                            <if-compare field="shipment.shipmentTypeId" operator="equals" value="PURCHASE_SHIPMENT"/>
+                                            <not><if-empty field="shipment.primaryOrderId"/></not>
+                                        </and>
+                                    </condition>
+                                    <widgets>
+                                        <container>
+                                            <link style="buttontext" text="${uiLabelMap.ProductReceiveInventoryAgainstPO}" target="ReceiveInventoryAgainstPurchaseOrder">
+                                                <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                                <parameter param-name="purchaseOrderId" from-field="shipment.primaryOrderId"/>
+                                            </link>
+                                        </container>
+                                    </widgets>
+                                </section>
+
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.ProductFacilityViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewShipment">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleViewShipment"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="ViewShipment"/>
+
+                <script location="component://product/groovyScripts/facility/shipment/ViewShipment.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentItems.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentPackages.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentRouteSegments.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <not>
+                            <if-empty field="shipment"/>
+                        </not>
+                    </condition>
+                    <widgets>
+                        <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                            <decorator-section name="body">
+                                <platform-specific>
+                                    <html><html-template location="component://product/template/shipment/ViewShipmentInfo.ftl"/></html>
+                                </platform-specific>
+                                <screenlet id="shipmentItemPanel" title="${uiLabelMap.PageTitleViewShipmentItemInfo}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/template/shipment/ViewShipmentItemInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
+                                <screenlet id="shipmentPackagePanel" title="${uiLabelMap.PageTitleViewShipmentPackageInfo}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/template/shipment/ViewShipmentPackageInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
+                                <screenlet id="shipmentRoutePanel" title="${uiLabelMap.PageTitleViewShipmentRouteInfo}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/template/shipment/ViewShipmentRouteInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
+                                <screenlet id="shipmentReceiptPanel" title="${uiLabelMap.PageTitleViewShipmentReceipts}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/template/shipment/ViewShipmentRouteInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                    <fail-widgets>
+                        <include-screen name="FindShipment"/>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditShipment">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductEditShipment"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="EditShipment"/>
+                <set field="shipmentTypeId" from-field="parameters.shipmentTypeId"/>
+                <script location="component://product/groovyScripts/facility/shipment/EditShipment.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${groovy: parameters.shipmentId ? uiLabelMap.ProductEditShipment : uiLabelMap.ProductNewShipment}">
+                            <include-form name="EditShipment" location="component://product/widget/facility/ShipmentForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditShipmentItems">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditShipmentItems"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="EditShipmentItems"/>
+
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentItems.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/EditShipmentItems.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditShipmentPlan">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditShipmentPlan"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="EditShipmentPlan"/>
+
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentPlan.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ProductShipmentPlan}">
+                            <include-form name="FindOrderItems" location="component://product/widget/facility//ShipmentForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <not><if-empty field="addToShipmentPlanRows"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.ProductShipmentPlanAdd}">
+                                    <include-form name="AddToShipmentPlan" location="component://product/widget/facility//ShipmentForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <screenlet title="${uiLabelMap.ProductShipmentPlanList}">
+                            <include-form name="ListShipmentPlan" location="component://product/widget/facility//ShipmentForms.xml"/>
+                            <label style="h2" text="${uiLabelMap.ProductShipmentTotalWeight}: ${totWeight} ${uiLabelMap.ProductShipmentTotalVolume}: ${totVolume}"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <if-compare field="shipment.shipmentTypeId" operator="equals" value="SALES_SHIPMENT"/>
+                            </condition>
+                            <widgets>
+                                <link text="${uiLabelMap.ProductShipmentPlanToOrderItems}" target="AddItemsFromOrder">
+                                    <parameter param-name="shipmentId"/>
+                                    <parameter param-name="selectFromShipmentPlan" value="true"/>
+                                </link>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditShipmentPackages">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditShipmentPackages"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="EditShipmentPackages"/>
+
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentPackages.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/EditShipmentPackages.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditShipmentRouteSegments">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditShipmentRouteSegments"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="EditShipmentRouteSegments"/>
+
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentRouteSegments.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/EditShipmentRouteSegments.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddItemsFromOrder">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleAddItemsFromOrder"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="AddItemsFromOrder"/>
+
+                <script location="component://product/groovyScripts/facility/shipment/AddItemsFromOrder.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/AddItemsFromOrder.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewShipmentReceipts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ViewShipmentReceipts"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="ViewShipmentReceipts"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="ShipmentReceipts" location="component://product/widget/facility/ShipmentForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="QuickShipOrder">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductQuickShipOrder"/>
+                <set field="headerItem" value="shipment"/>
+                <script location="component://product/groovyScripts/facility/shipment/QuickShipOrder.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentItems.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentPackages.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/EditShipmentRouteSegments.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentMainDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/QuickShipOrder.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="VerifyPick">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="ProductVerifyPick"/>
+                <set field="headerItem" value="shipment"/>
+                <script location="component://product/groovyScripts/facility/shipment/VerifyPick.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentMainDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/VerifyPick.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PackOrder">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductPackOrder"/>
+                <set field="headerItem" value="shipment"/>
+                <script location="component://product/groovyScripts/facility/shipment/PackOrder.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentMainDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/PackOrder.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WeightPackageOnly">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductWeighPackageOnly"/>
+                <set field="headerItem" value="shipment"/>
+                <script location="component://product/groovyScripts/facility/shipment/WeightPackage.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentMainDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/WeightPackage.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PackingSlip.fo">
+        <section>
+            <actions>
+                <!-- base/top/specific map first, then more common map added for shared labels -->
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <set field="shipmentId" from-field="parameters.shipmentId"/>
+                <script location="component://product/groovyScripts/facility/shipment/ViewShipment.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/PackingSlip.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <include-screen name="CompanyLogo" location="component://order/widget/ordermgr/OrderPrintScreens.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://product/template/shipment/PackingSlipShipmentBarCode.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://product/template/shipment/PackingSlip.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ShipmentBarCode.fo">
+        <section>
+            <actions>
+                <!-- base/top/specific map first, then more common map added for shared labels -->
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <set field="shipmentId" from-field="parameters.shipmentId"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <xsl-fo><html-template location="component://product/template/shipment/ShipmentBarCode.fo.ftl"/></xsl-fo>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ShipmentManifest.fo">
+        <section>
+            <actions>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <set field="shipmentId" from-field="parameters.shipmentId"/>
+                <script location="component://product/groovyScripts/facility/shipment/ViewShipment.groovy"/>
+                <script location="component://product/groovyScripts/facility/shipment/ShipmentManifest.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <include-screen name="CompanyLogo" location="component://order/widget/ordermgr/OrderPrintScreens.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://product/template/shipment/PackingSlipShipmentBarCode.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://product/template/shipment/ShipmentManifest.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ReceiveInventoryAgainstPurchaseOrder">
+        <section>
+            <actions>
+                <property-map resource="ProductEntityLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="ProductReceiveInventoryAgainstPurchaseOrder"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="ProductReceiveInventoryAgainstPO"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://product/groovyScripts/facility/shipment/ReceiveInventoryAgainstPurchaseOrder.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/ReceiveInventoryAgainstPurchaseOrder.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AddItemsFromInventory">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="ProductAddItemsFromInventory"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="AddItemsFromInventory"/>
+                <script location="component://product/groovyScripts/facility/shipment/AddItemsFromInventory.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator" location="${parameters.commonShipmentDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/template/shipment/AddItemsFromInventory.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

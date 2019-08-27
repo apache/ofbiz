@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="EditOrderHeader" type="single" target="updateOrderHeader" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="orderHeader.statusId"/>
+            </entity-one>
+        </actions>
+        <alt-target target="createOrderHeader" use-when="orderHeader==null"/>
+        <auto-fields-entity entity-name="OrderHeader"/>
+
+        <field name="orderId" use-when="orderHeader!=null" ><display/></field>
+        <field name="orderId" use-when="orderHeader==null" ><ignored/></field>
+        <field name="orderTypeId">
+            <drop-down>
+                <entity-options entity-name="OrderType" key-field-name="orderTypeId">
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="statusId" use-when="orderHeader==null" title="${uiLabelMap.CommonStatus}">
+            <drop-down>
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="orderHeader!=null" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false" current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" value="${orderHeader.statusId}"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="salesChannelEnumId">
+            <drop-down>
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="ORDER_SALES_CHANNEL"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="currencyUom">
+            <drop-down no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="firstAttemptOrderId" ><lookup target-form-name="/ordermgr/control/LookupOrderHeader"/></field>
+        <field name="productStoreId">
+            <lookup target-form-name="/marketing/control/LookupProductStore"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListOrderHeaders" type="single" target="" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-and entity-name="OrderHeader">
+                <field-map field-name="orderId"/>
+            </entity-and>
+        </actions>
+        <auto-fields-entity entity-name="OrderHeader" default-field-type="display"/>
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink description="[${orderId}]" target="EditOrderHeader">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="statusId"> <display-entity entity-name="StatusItem"/> </field>
+        <field name="productStoreId"> <display-entity entity-name="ProductStore"/> </field>
+    </form>
+    <form name="ListOrderTerms" type="list" list-name="orderTerms" target="updateOrderTerm" title=""
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate-target="ListOrderTerms">
+        <auto-fields-entity entity-name="OrderTerm" default-field-type="edit"/>
+        <field name="termTypeId"><display-entity also-hidden="true" entity-name="TermType"/></field>
+        <field name="orderId"><hidden/></field>
+        <field name="orderItemSeqId"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeOrderTerm" also-hidden="false">
+                <parameter param-name="orderId"/>
+                <parameter param-name="termTypeId"/>
+                <parameter param-name="orderItemSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <grid name="ListOrderRoles" target="" title=""
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="OrderRole">
+                <condition-expr field-name="orderId" from-field="orderId"/>
+            </entity-condition>
+        </actions>
+        <field name="roleTypeId"><display-entity entity-name="RoleType" description="[${roleTypeId}] ${description}"/></field>
+        <field name="partyId"><display-entity entity-name="PartyNameView" description="[${partyId}] ${firstName} ${lastName} ${groupName}"/></field>
+    </grid>
+    <form name="AddOrderTerm" type="single" target="createOrderTerm" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="OrderTerm" default-field-type="edit"/>
+        <field name="orderId"><hidden value="${parameters.orderId}"/></field>
+        <field name="termTypeId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="TermType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="addButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="LookupBulkAddSupplierProductsInApprovedOrder" type="multi" use-row-submit="true" list-name="productList" title="" target="bulkAddProductsInApprovedOrder"
+            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupBulkAddSupplierProductsInApprovedOrder" view-size="10">
+        <actions>
+            <set field="orderId" from-field="parameters.orderId"/>
+        </actions>
+        <field name="orderId"><hidden/></field>
+        <field name="shipGroupSeqId"><hidden/></field>
+        <field name="productId" widget-style="buttontext">
+            <hyperlink description="${productId}" target="/catalog/control/EditProductInventoryItems" target-type="inter-app">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="supplierProductId"><display/></field>
+        <field name="supplierProductName"><display/></field>
+        <field name="lastPrice"><display/></field>
+        <field name="quantity" title="${uiLabelMap.OrderQuantity}">
+            <text size="5" maxlength="10"/>
+        </field>
+        <field name="itemDesiredDeliveryDate" title="${uiLabelMap.OrderDesiredDeliveryDate}">
+            <date-time/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.OrderAddToOrder}" widget-style="smallSubmit">
+            <submit/>
+        </field>
+    </form>
+
+    <form name="OrderShipmentMethodHistory" type="list" list-name="orderShipmentHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="shipmentMethod" title="${uiLabelMap.ProductShipmentMethod}"><display/></field>
+        <field name="changedDate" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changedByUser" title="${uiLabelMap.OrderChangedByUser}"><display/></field>
+    </form>
+
+    <form name="OrderUnitPriceHistory" type="list" list-name="orderUnitPriceHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="productId"><display/></field>
+        <field name="oldValue"><display type="currency"/></field>
+        <field name="newValue"><display type="currency"/></field>
+        <field name="changedDate" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changedByUser" title="${uiLabelMap.OrderChangedByUser}"><display/></field>
+    </form>
+
+    <form name="OrderQuantityHistory" type="list" list-name="orderQuantityHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="productId"><display/></field>
+        <field name="oldValue"><display/></field>
+        <field name="newValue"><display/></field>
+        <field name="changedDate" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changedByUser" title="${uiLabelMap.OrderChangedByUser}"><display/></field>
+    </form>
+    
+    <!-- Forms Specific to portlet -->
+    <form name="EditOrderByCustomer" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+        <field name="statusId">
+            <drop-down>
+                <option key="ORDER_CREATED" description="${uiLabelMap.CommonCreated}"/>
+                <option key="ORDER_PROCESSING" description="${uiLabelMap.CommonProcessing}"/>
+                <option key="ORDER_APPROVED" description="${uiLabelMap.CommonApproved}"/>
+                <option key="ORDER_SENT" description="${uiLabelMap.CommonSent}"/>
+                <option key="ORDER_HELD" description="${uiLabelMap.CommonHeld}"/>
+                <option key="ORDER_COMPLETED" description="${uiLabelMap.CommonCompleted}"/>
+                <option key="ORDER_REJECTED" description="${uiLabelMap.CommonRejected}"/>
+                <option key="ORDER_CANDELLED" description="${uiLabelMap.CommonCancelled}"/>
+            </drop-down>
+        </field>
+        <field name="roleTypeId">
+            <drop-down>
+                <option key="PLACING_CUSTOMER" description="${uiLabelMap.MyPortalPlacingCustomer}"/>
+                <option key="SHIP_TO_CUSTOMER" description="${uiLabelMap.MyPortalShipToCustomer}"/>
+                <option key="END_USER_CUSTOMER" description="${uiLabelMap.MyPortalEndUserCustomer}"/>
+                <option key="BILL_TO_CUSTOMER" description="${uiLabelMap.MyPortalBillToCustomer}"/>
+            </drop-down>
+        </field>
+        <field name="updateButton"><submit/></field>
+    </form>
+    <form name="ListCustomerOrders" type="list" target="" list-name="listIt" title="" odd-row-style="alternate-row" 
+        header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="OrderHeaderAndRoles">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="roleTypeId" from-field="roleTypeId"/>
+                <field-map field-name="statusId" from-field="statusId"/>
+            </entity-and>
+        </actions>
+        <field name="orderTypeId" title="${uiLabelMap.FormFieldTitle_orderTypeId}"><display/></field>
+        <field name="orderId" title="${uiLabelMap.OrderOrderId}"><display/></field>
+        <field name="orderName" title="${uiLabelMap.OrderOrderName}"><display/></field>
+        <field name="remainingSubTotal" title="${uiLabelMap.FormFieldTitle_remainingSubTotal}"><display/></field>
+        <field name="grandTotal" title="${uiLabelMap.OrderGrandTotal}"><display/></field>
+        <field name="statusId"><display/></field>
+        <field name="orderDate" title="${uiLabelMap.OrderOrderDate}"><display/></field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><display/></field>
+        <field name="roleTypeId" title="${uiLabelMap.FormFieldTitle_roleTypeId}"><display/></field>
+    </form>
+    <form name="ListPurchaseOrders" type="list" target="" list-name="listIt" title="" odd-row-style="alternate-row" 
+        header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="OrderHeaderAndRoles">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="roleTypeId" from-field="roleTypeId"/>
+                <order-by field-name="orderDate DESC"/>
+            </entity-and>
+        </actions>
+        <field name="orderTypeId" title="${uiLabelMap.FormFieldTitle_orderTypeId}">
+            <display-entity entity-name="OrderType"/>
+        </field>
+        <field name="orderId" title="${uiLabelMap.OrderOrderId}">
+            <hyperlink description="${orderId}" target="orderview">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="orderName" title="${uiLabelMap.OrderOrderName}"><display/></field>
+        <field name="remainingSubTotal" title="${uiLabelMap.FormFieldTitle_remainingSubTotal}"><display/></field>
+        <field name="grandTotal" title="${uiLabelMap.OrderGrandTotal}"><display/></field>
+        <field name="statusId"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="orderDate" title="${uiLabelMap.OrderOrderDate}"><display/></field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}">
+            <display-entity entity-name="PartyNameView" description="${groupName}"/>
+        </field>
+        <field name="roleTypeId" title="${uiLabelMap.FormFieldTitle_roleTypeId}">
+            <display-entity entity-name="RoleType"/>
+        </field>
+    </form>
+
+    <form name="OrderNewNote" target="createordernote" type="single">
+        <field name="orderId"><hidden/></field>
+        <field name="note" title="${uiLabelMap.OrderNote}"><textarea rows="5" cols="70"/></field>
+        <field name="internalNote" title="${uiLabelMap.OrderInternalNote}" tooltip="${uiLabelMap.OrderInternalNoteMessage}">
+            <drop-down allow-empty="true" no-current-selected-key="Y">
+                <option key="Y" description="${uiLabelMap.CommonYes}"/>
+                <option key="N" description="${uiLabelMap.CommonNo}"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+</forms>

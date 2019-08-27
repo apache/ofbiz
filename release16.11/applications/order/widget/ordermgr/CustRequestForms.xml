@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindRequests" target="FindRequest" title="" type="single" default-map-name="parameters"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="CustRequest" default-field-type="find"/>
+        <field name="custRequestTypeId" position="2">
+            <drop-down allow-empty="true" allow-multiple="true">
+                <entity-options entity-name="CustRequestType" key-field-name="custRequestTypeId"/>
+            </drop-down>
+        </field>
+        <field name="statusId">
+            <drop-down allow-multiple="true">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="CUSTREQ_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="salesChannelEnumId" title="${uiLabelMap.OrderSalesChannel}" position="2">
+            <drop-down allow-empty="true" allow-multiple="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" value="ORDER_SALES_CHANNEL"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromPartyId" position="2"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="currencyUomId"><ignored/></field>
+        <field name="maximumAmountUomId"><ignored/></field>
+        <field name="custRequestCategoryId"><ignored/></field>
+        <field name="fulfillContactMechId"><ignored/></field>
+        <field name="priority"><ignored/></field>
+        <field name="description"><ignored/></field>
+        <field name="createdDate"><ignored/></field>
+        <field name="createdByUserLogin"><ignored/></field>
+        <field name="lastModifiedDate"><ignored/></field>
+        <field name="lastModifiedByUserLogin"><ignored/></field>
+        <field name="closedDateTime" position="2"><date-find/></field>
+        <field name="responseRequiredDate" position="2"><date-find/></field>
+        <field name="productStoreId" title="${uiLabelMap.ProductProductStore}">
+            <drop-down allow-empty="true" allow-multiple="true">
+                <entity-options description="${storeName}" entity-name="ProductStore" key-field-name="productStoreId">
+                    <entity-order-by field-name="storeName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="reason" position="2"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+    </form>
+
+    <form name="ListRequests" type="list" extends="ListRequestList" list-name="listIt">
+        <actions>
+          <service service-name="performFind" result-map="result" result-map-list="listIt">
+            <field-map field-name="inputFields" from-field="parameters"/>
+            <field-map field-name="entityName" from-field="entityName"/>
+            <field-map field-name="orderBy" from-field="parameters.sortField"/>
+            <field-map field-name="viewIndex" from-field="viewIndex"/>
+            <field-map field-name="viewSize" from-field="viewSize"/>
+          </service>
+        </actions>
+    </form>
+
+    <form name="ListRequestList" type="list" use-row-submit="true" list-name="custRequests" title="List of customer requests" sort-field-parameter-name="custRequestSortField"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="custRequestId" sort-field="true">
+            <hyperlink description="${custRequestId}" target="ViewRequest">
+                <parameter param-name="custRequestId"/>
+            </hyperlink>
+        </field>
+        <field name="custRequestTypeId"><display-entity entity-name="CustRequestType"/></field>
+        <field name="productStoreId">
+            <display-entity entity-name="ProductStore" description="${storeName}">
+                <sub-hyperlink description="[${productStoreId}]" target="/catalog/control/EditProductStore" target-type="inter-app">
+                    <parameter param-name="productStoreId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="custRequestName" sort-field="true"><display/></field>
+        <field name="priority" sort-field="true"><display/></field>
+        <field name="custRequestDate" sort-field="true"><display/></field>
+        <field name="responseRequiredDate" sort-field="true"><display/></field>
+        <field name="fromPartyId" sort-field="true">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink description="[${fromPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+                    <parameter param-name="partyId" from-field="fromPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="statusId" sort-field="true">
+            <display-entity also-hidden="false" entity-name="StatusItem"/>
+        </field>
+        <field name="lastModifiedDate" sort-field="true"><display/></field>
+        <!--field name="statusId"><hidden value="CRQ_REJECTED"/></field-->
+        <field name="rejectButton">
+            <hyperlink description="${uiLabelMap.FormFieldTitle_rejectButton}" target="setCustRequestStatus">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="statusId" value="CRQ_REJECTED"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="ListRequestItems" type="list" use-row-submit="true"  title="" list-name="custRequestItems"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="RequestItems">
+        <auto-fields-entity entity-name="CustRequestItem" default-field-type="display"/>
+        <field name="sequenceNum"></field>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestItemSeqId" widget-style="buttontext">
+            <hyperlink description="${custRequestItemSeqId}" target="requestitem">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="custRequestItemSeqId"/>
+            </hyperlink>
+        </field>
+        <field name="story"><textarea read-only="true"/></field>
+        <field name="productId" title="${uiLabelMap.ProductProductId}">
+            <display-entity entity-name="Product" key-field-name="productId" description="${productId} - ${internalName}"/>
+        </field>
+        <field name="custRequestResolutionId"><hidden/></field>
+        <field name="statusId">
+            <display-entity also-hidden="false" entity-name="StatusItem"/>
+        </field>
+        <field name="addNote" use-when="!custRequest.get(&quot;statusId&quot;).equals(&quot;CRQ_CANCELLED&quot;)&amp;&amp;!custRequest.get(&quot;statusId&quot;).equals(&quot;CRQ_COMPLETED&quot;)">
+            <hyperlink description="${uiLabelMap.FormFieldTitle_addNote}" target="requestitemnotes">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="custRequestItemSeqId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="OverviewRequestItems" extends="ListRequestItems">
+        <field name="priority"><ignored/></field>
+        <field name="sequenceNum"><ignored/></field>
+        <field name="sequenceNumber"><ignored/></field>
+        <field name="requiredByDate"><ignored/></field>
+        <field name="selectedAmount"><ignored/></field>
+        <field name="maximumAmount"><ignored/></field>
+        <field name="reservStart"><ignored/></field>
+        <field name="reservLength"><ignored/></field>
+        <field name="reservPersons"><ignored/></field>
+        <field name="configId"><ignored/></field>
+    </form>
+
+    <form name="ListRequestQuoteItems" type="list" use-row-submit="true"  title="" list-name="quotes"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="RequestItemQuotes">
+        <auto-fields-entity entity-name="QuoteItem" default-field-type="display"/>
+        <field name="quoteId" widget-style="buttontext">
+            <hyperlink description="${quoteItemSeqId}" target="EditQuoteItemForRequest">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="custRequestItemSeqId"/>
+                <parameter param-name="quoteId"/>
+                <parameter param-name="quoteItemSeqId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" title="${uiLabelMap.ProductProductId}">
+            <display-entity entity-name="Product" key-field-name="productId" description="${productId} - ${internalName}"/>
+        </field>
+        <field name="quoteItemSeqId"><hidden/></field>
+        <field name="productFeatureId"><hidden/></field>
+        <field name="skillTypeId"><hidden/></field>
+        <field name="deliverableTypeId"><hidden/></field>
+        <field name="quoteUnitPrice" title="${uiLabelMap.OrderOrderQuoteUnitPrice}"/>
+        <field name="comments"><hidden/></field>
+        <field name="uomId"><hidden/></field>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestItemSeqId"><hidden/></field>
+    </form>
+
+    <form name="ViewRequestCommunicationEvents" type="list" extends="ListCommEvents"
+            extends-resource="component://party/widget/partymgr/CommunicationEventForms.xml">
+        <field name="subject">
+            <hyperlink description="${subject}" target="/partymgr/control/ViewCommunicationEvent" target-type="inter-app" link-type="hidden-form">
+                <parameter param-name="communicationEventId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="ViewRequestStatus" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="CustRequestStatus">
+                <field-map field-name="custRequestId" from-field="parameters.custRequestId"/>
+                <order-by field-name="custRequestStatusId"/>
+            </entity-and>
+        </actions>
+        <auto-fields-entity entity-name="CustRequestStatus" default-field-type="display"/>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestStatusId"><hidden/></field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+    </form>
+
+    <form name="ViewRequestRoles" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="CustRequestParty">
+                <field-map field-name="custRequestId" from-field="parameters.custRequestId"/>
+                <order-by field-name="partyId"/>
+            </entity-and>
+        </actions>
+        <auto-fields-entity entity-name="CustRequestParty" default-field-type="display"/>
+        <field name="custRequestId"><hidden/></field>
+        <field name="roleTypeId"><display-entity entity-name="RoleType"/></field>
+        <field name="fromDate"><display type="date"/></field>
+        <field name="thruDate"><display type="date"/></field>
+    </form>
+
+
+    <form name="ViewRequestWorkEfforts" type="list" list-name="requestWorkEfforts"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <field name="workEffortId">
+            <hyperlink description="${workEffortName} [${workEffortId}]" target="/workeffort/control/WorkEffortSummary" target-type="inter-app">
+                <parameter param-name="workEffortId"/>
+            </hyperlink>
+        </field>
+        <field name="currentStatusId"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="startDate"><display type="date"/></field>
+        <field name="completionDate"><display type="date"/></field>
+    </form>
+
+    <form name="EditCustRequest" type="single" target="updaterequest" title="Request" default-map-name="custRequest"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="custRequest==null" target="createrequest"/>
+        <auto-fields-service service-name="updateCustRequest" default-field-type="edit"/>
+        <field name="form"><hidden value="list"/></field>
+        <field name="portalPageId"><hidden value="${parameters.portalPageId}"/></field>
+        <field name="custRequestId"><hidden/></field>
+        <field name="communicationEventId"><hidden value="${communicationEvent.communicationEventId}"/></field>
+        <field name="custRequestTypeId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="CustRequestType"/>
+            </drop-down>
+        </field>
+        <field name="custRequestName" encode-output="false"><text default-value="${communicationEvent.subject}"/></field>
+        <field name="salesChannelEnumId" title="${uiLabelMap.OrderSalesChannel}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" value="ORDER_SALES_CHANNEL"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="custRequestCategoryId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="CustRequestCategory"/>
+            </drop-down>
+        </field>
+
+        <field use-when="custRequest==null" name="statusId"><hidden value="CRQ_SUBMITTED"/></field>
+        <field use-when="custRequest!=null" name="statusId">
+            <drop-down allow-empty="false" current="first-in-list" current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" value="${custRequest.statusId}"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="priority">
+            <drop-down allow-empty="true">
+                <option key="1" description="${uiLabelMap.WorkEffortPriorityOne}"/>
+                <option key="2" description="${uiLabelMap.WorkEffortPriorityTwo}"/>
+                <option key="3" description="${uiLabelMap.WorkEffortPriorityThree}"/>
+                <option key="4" description="${uiLabelMap.WorkEffortPriorityFour}"/>
+                <option key="5" description="${uiLabelMap.WorkEffortPriorityFive}"/>
+                <option key="6" description="${uiLabelMap.WorkEffortPrioritySix}"/>
+                <option key="7" description="${uiLabelMap.WorkEffortPrioritySeventh}"/>
+                <option key="8" description="${uiLabelMap.WorkEffortPriorityEight}"/>
+                <option key="9" description="${uiLabelMap.WorkEffortPriorityNine}"/>
+            </drop-down>
+        </field>
+        <field name="story" use-when="custRequest==null"><textarea cols="60" rows="12" default-value="${communicationEvent.content}"/></field>
+        <field name="maximumAmountUomId">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productStoreId" title="${uiLabelMap.ProductProductStore}">
+            <drop-down allow-empty="false">
+                <entity-options description="${storeName}" entity-name="ProductStore" key-field-name="productStoreId"/>
+            </drop-down>
+        </field>
+        <field name="custRequestDate" title="${uiLabelMap.OrderRequestDate}"><date-time type="timestamp"/></field>
+        <field name="responseRequiredDate"><date-time type="timestamp"/></field>
+        <field name="fromPartyId" title="${uiLabelMap.OrderRequestingParty}">
+            <lookup target-form-name="LookupPartyName" default-value="${communicationEvent.partyIdFrom}"/>
+        </field>
+        <field name="fulfillContactMechId">
+            <lookup target-form-name="LookupPreferredContactMech" target-parameter="fromPartyId"/>
+        </field>
+        <field name="currencyUomId" title="${uiLabelMap.CommonCurrency}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="parentCustRequestId"><lookup target-form-name="LookupCustRequest"/></field>
+        <field name="createdDate"><hidden/></field>
+        <field name="createdByUserLogin"><hidden/></field>
+        <field name="lastModifiedDate"><hidden/></field>
+        <field name="lastModifiedByUserLogin"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="EditSmallCustRequest" extends="EditCustRequest">
+        <field name="salesChannelEnumId"><ignored/></field>
+        <field name="custRequestCategoryId"><ignored/></field>
+        <field name="maximumAmountUomId"><ignored/></field>
+        <field name="productStoreId"><ignored/></field>
+        <field name="fulfillContactMechId"><ignored/></field>
+        <field name="currencyUomId"><ignored/></field>
+        <field name="openDateTime"><ignored/></field>
+        <field name="closedDateTime"><ignored/></field>
+        <field name="internalComment"><ignored/></field>
+        <field name="reason"><ignored/></field>
+    </form>
+    <form name="EditCustRequestItem" type="single" target="updaterequestitem" title="" default-map-name="custRequestItem"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="custRequestItem==null" target="createrequestitem"/>
+        <auto-fields-entity entity-name="CustRequestItem" default-field-type="edit"/>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestItemSeqId"><hidden/></field>
+        <field name="custRequestResolutionId"><hidden/></field>
+        <field use-when="custRequestItem==null" name="statusId">
+            <drop-down allow-empty="false" current="first-in-list">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" value="CUSTREQ_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field use-when="custRequestItem!=null" name="statusId">
+            <drop-down allow-empty="false" current="first-in-list" current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" value="${custRequestItem.statusId}"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field use-when="custRequestItem==null" name="sequenceNum" entry-name="nextSequenceNum"><text/></field>
+        <field use-when="custRequestItem!=null" name="sequenceNum"><text/></field>
+        <field name="priority">
+            <drop-down allow-empty="false">
+                <option key="9"/>
+                <option key="8"/>
+                <option key="7"/>
+                <option key="6"/>
+                <option key="5"/>
+                <option key="4"/>
+                <option key="3"/>
+                <option key="2"/>
+                <option key="1"/>
+            </drop-down>
+        </field>
+        <field name="productId"><lookup target-form-name="LookupProduct"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="EditQuoteItemForRequest" type="single" target="updateQuoteItemForRequest" title="" default-map-name="quoteItem"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="quoteItem==null" target="createQuoteItemForRequest"/>
+        <auto-fields-entity entity-name="QuoteItem" default-field-type="edit"/>
+        <field name="quoteId"><display/></field>
+        <field name="quoteItemSeqId"><display/></field>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestItemSeqId"><hidden/></field>
+        <field name="isPromo"><hidden/></field>
+        <field name="productId">
+            <lookup target-form-name="LookupProductAndPrice"/>
+        </field>
+        <field name="productFeatureId">
+            <lookup target-form-name="LookupProductFeature"/>
+        </field>
+        <field name="deliverableTypeId" title="${uiLabelMap.OrderOrderQuoteDeliverableTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="DeliverableType" key-field-name="deliverableTypeId"/>
+            </drop-down>
+        </field>
+        <field name="skillTypeId" title="${uiLabelMap.OrderOrderQuoteSkillTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="SkillType" key-field-name="skillTypeId"/>
+            </drop-down>
+        </field>
+        <field name="uomId" title="${uiLabelMap.OrderOrderQuoteUomId}">
+            <drop-down allow-empty="true">
+                <entity-options description="${uomId} - ${description}" entity-name="Uom" key-field-name="uomId">
+                    <!--<entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>-->
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="quantity" map-name="parameters" use-when="quoteItem==null"><text/></field>
+        <field name="selectedAmount" map-name="parameters" use-when="quoteItem==null"><text/></field>
+        <field name="quoteUnitPrice" title="${uiLabelMap.OrderOrderQuoteUnitPrice}"/>
+        <field name="comments" map-name="parameters" use-when="quoteItem==null"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="CreateQuoteAndQuoteItemForRequest" type="single" extends="EditQuoteItemForRequest" target="createQuoteAndQuoteItemForRequest" title="" default-map-name="quoteItem"
+        header-row-style="header-row" default-table-style="basic-table">
+    </form>
+
+    <form name="ListRequestItemNotes" type="list" use-row-submit="true"  title="" list-name="notes"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="RequestItemNotes">
+        <auto-fields-entity entity-name="CustRequestItemNoteView" default-field-type="display"/>
+        <field name="noteId"><hidden/></field>
+        <field name="noteName"><hidden/></field>
+        <field name="custRequestId"><hidden/></field>
+        <field name="name"><display description="${firstName} ${lastName}"/></field>
+        <field name="firstName"><hidden/></field>
+        <field name="lastName"><hidden/></field>
+    </form>
+    <form name="ListRequestItemWorkEffortReq" type="list" use-row-submit="true"  title="" list-name="requirements"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="RequestItemRequirements">
+        <auto-fields-entity entity-name="Requirement" default-field-type="display"/>
+        <field name="requirementId"><hidden/></field>
+    </form>
+
+    <form name="EditRequestItemNote" type="single" target="createrequestitemnote" title="" default-map-name="quoteItem"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestItemSeqId"><hidden/></field>
+        <field name="note"><textarea cols="60" rows="10"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="ListRequestRoles" type="list" use-row-submit="true" title="" list-name="custRequestParties" target="updateCustRequestParty"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate-target="RequestRoles">
+        <auto-fields-entity entity-name="CustRequestParty" default-field-type="display"/>
+        <field name="custRequestId"><hidden/></field>
+        <field name="partyId" widget-style="buttontext">
+            <display-entity also-hidden="true" entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${firstName} ${lastName}">
+                <sub-hyperlink description="${partyId}" target-type="inter-app" target="/partymgr/control/viewprofile">
+                    <parameter param-name="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRoleType}">
+            <display-entity also-hidden="true" entity-name="RoleType"/>
+        </field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="expireLink" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonExpire}" target="expireCustRequestParty">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteCustRequestParty">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditRequestRole" type="single" target="createCustRequestParty" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="custRequestId"><hidden/></field>
+        <field name="partyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRoleType}">
+            <drop-down allow-empty="false">
+                <option key="REQ_REQUESTER" description="${uiLabelMap.WorkEffortRequestingParty}"/>
+                <option key="AGENT" description="${uiLabelMap.OrderAgent}"/>
+                <option key="REQ_TAKER" description="${uiLabelMap.WorkEffortRequestTaker}"/>
+                <option key="REQ_MANAGER" description="${uiLabelMap.WorkEffortRequestManager}"/>
+            </drop-down>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListRequestItemRequirements" type="list" title="" list-name="custRequestRequirements"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="RequestItemRequirements">
+        <auto-fields-entity entity-name="Requirement" default-field-type="display"/>
+        <field name="requirementId" widget-style="buttontext">
+            <hyperlink description="${requirementId}" target="EditRequirement">
+                <parameter param-name="requirementId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="ListCustRequestItemWorkEfforts" type="list" target="" title=""
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestItemSeqId"><hidden/></field>
+        <field name="workEffortId">
+            <display-entity entity-name="WorkEffort" description="${workEffortName}">
+                <sub-hyperlink description="[${workEffortId}]" target="/workeffort/control/EditWorkEffort" target-type="inter-app" link-style="buttontext">
+                    <parameter param-name="workEffortId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+
+        <field name="deleteLink" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteCustRequestItemWorkEffort">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddCustRequestItemWorkEffort" type="single" target="createCustRequestItemWorkEffort" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="workEffort==null" target="createworkeffort"/>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestItemSeqId"><hidden/></field>
+        <field name="workEffortId"><lookup target-form-name="LookupWorkEffort"/></field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <!-- request form -->
+    <form name="RequestInfo" type="single" title="request information" default-map-name="custRequest"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <set field="lookupPartyId" from-field="custRequest.fromPartyId" default-value="_NA_"/>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="lookupPartyId"/>
+                <field-map field-name="compareDate" from-field="custRequest.custRequestDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+        </actions>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestTypeId" title="${uiLabelMap.CommonType}"><display-entity entity-name="CustRequestType"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="fromPartyId" title="${uiLabelMap.PartyPartyId}">
+            <hyperlink description="${partyNameResultTo.fullName} [${custRequest.fromPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="custRequest.fromPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="custRequestName" title="${uiLabelMap.CommonName}" encode-output="false"><display/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="productStoreId" title="${uiLabelMap.ProductProductStore}"><display-entity entity-name="ProductStore" description="${storeName}"/></field>
+        <field name="internalComment" title="${uiLabelMap.CommonInternalComment}"><display/></field>
+        <field name="reason" title="${uiLabelMap.CommonReason}"><display/></field>
+        <field name="custRequestDate" title="${uiLabelMap.OrderRequestDate}"><display/></field>
+        <field name="createdDate" title="${uiLabelMap.OrderRequestCreatedDate}"><display/></field>
+        <field name="lastModifiedDate" title="${uiLabelMap.OrderRequestLastModifiedDate}"><display/></field>
+    </form>
+
+    <!--Customer Request Content-->
+    <form name="AddCustRequestContent" type="upload" default-map-name="content"
+        focus-field-name="contentId" header-row-style="header-row" default-table-style="basic-table" target="createCustRequestContent?custRequestId=${parameters.custRequestId}">
+        <actions>
+            <set field="custRequestId" from-field="parameters.custRequestId"/>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="content.statusId"/>
+            </entity-one>
+            <entity-one entity-name="DataResource" value-field="dataResource" auto-field-map="false">
+                <field-map field-name="dataResourceId" from-field="content.dataResourceId"/>
+            </entity-one>
+        </actions>
+        <field name="custRequestId" map-name="parameters"><hidden/></field>
+        <field name="contentId" title="Existing Content Id">
+            <lookup target-form-name="LookupTreeContent"/>
+        </field>
+        <field name="contentTypeId">
+            <drop-down allow-empty="false" no-current-selected-key="DOCUMENT">
+                <entity-options entity-name="ContentType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="contentId==void">
+            <drop-down allow-empty="false" no-current-selected-key="CTNT_AVAILABLE">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" value="CONTENT_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="contentId!=void">
+            <drop-down allow-empty="false" current-description="${currentStatus.description}" no-current-selected-key="CTNT_AVAILABLE">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" value="${content.statusId}"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <!--field name="mimeTypeId" >
+            <drop-down allow-empty="false">
+                <entity-options entity-name="MimeType" key-field-name="mimeTypeId"/>
+            </drop-down>
+        </field-->
+        <field name="dataResourceName" title="${uiLabelMap.CommonUpload}" required-field="true"><file/></field>
+       <!-- <field name="dataCategoryId" use-when="dataResource==null">
+            <drop-down allow-empty="false">
+                <entity-options description="${categoryName}" entity-name="DataCategory" key-field-name="dataCategoryId"/>
+            </drop-down>
+        </field>
+        <field name="dataCategoryId" use-when="dataResource!=null"  parameter-name="dataCategoryId">
+            <drop-down allow-empty="false">
+                <entity-options description="${categoryName}" entity-name="DataCategory">
+                    <entity-constraint name="dataCategoryId" value="${dataResource.dataCategoryId}"/>
+                    <entity-order-by field-name="categoryName"/>
+                </entity-options>
+                <entity-options description="${categoryName}" entity-name="DataCategory" key-field-name="dataCategoryId"/>
+            </drop-down>
+            </field>-->
+        <field name="contentIdFrom" title="${uiLabelMap.ContentCompDocParentContentId}"><lookup target-form-name="LookupDetailContentTree"/></field>
+        <field name="createButton"><submit button-type="button"/></field>
+    </form>
+    <form name="ListCustRequestContent" type="list" list-name="custRequestAndContents"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="EditCustRequestContent">
+        <field name="custRequestId"><hidden/></field>
+        <field name="contentId">
+            <display-entity entity-name="Content" key-field-name="contentId" description="${contentName}" also-hidden="true">
+                <sub-hyperlink target="/content/control/ViewSimpleContent" description="[${contentId}]" link-style="buttontext" target-type="inter-app">
+                    <parameter param-name="contentId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="mimeTypeId"><display/></field>
+        <field name="fromDate"><display/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext" use-when="tabButtonItem!=void&amp;&amp;tabButtonItem.equals(&quot;custRequestContent&quot;)">
+           <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteCustRequestContent" also-hidden="false">
+                <parameter param-name="custRequestId"/>
+                <parameter param-name="contentId"/>
+                <parameter param-name="fromDate"/>
+                </hyperlink>
+        </field>
+    </form>
+    <form name="EditCustReqStatusId" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+        <field name="statusGroup">
+            <drop-down>
+                <option key="OPEN" description="Open"/>
+                <option key="COMPLETED" description="Completed"/>
+                <option key="CANCELLED" description="Cancelled"/>
+            </drop-down>
+        </field>
+        <field name="otherContacts"><drop-down allow-empty="false"><option key="Y" description="Yes"/><option key="N" description="No"/></drop-down></field>
+        <field name="saveButton"><submit/></field>
+    </form>
+    <form name="ListCustRequests" type="list"  list-name="custRequests" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" target="updaterequest">
+        <row-actions>
+            <service service-name="getProjectTask" result-map="taskResult">
+                <field-map field-name="taskId" from-field="workEffortId"/>
+            </service>
+        </row-actions>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestName" encode-output="false">
+            <hyperlink description="${custRequestName} [${custRequestId}]" target="ViewRequest">
+                <parameter param-name="custRequestId"/>
+            </hyperlink>
+        </field>
+        <field name="custRequestDate" title="${uiLabelMap.CommonDate}"><display type="date"/></field>
+        <field name="fromPartyId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName} [${fromPartyId}])"/>
+        </field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="priority" use-when="statusGroup!=&quot;OPEN&quot;"><display also-hidden="false"/></field>
+        <field name="currentStatusId" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskStatus}"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="estimatedStartDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskPlanStartDate}"><display type="date"/></field>
+        <field name="estimatedCompletionDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskPlanEndDate}"><display type="date"/></field>
+        <field name="actualStartDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskActStartDate}"><display type="date"/></field>
+        <field name="actualCompletionDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskActEndDate}"><display type="date"/></field>
+        <field name="plannedHours" map-name="taskResult.taskInfo"><display/></field>
+        <field name="actualHours" map-name="taskResult.taskInfo"><display/></field>
+    </form>
+    <form name="ListMyCustRequests" type="list"  list-name="custRequests" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" target="updaterequest">
+        <row-actions>
+            <service service-name="getProjectTask" result-map="taskResult">
+                <field-map field-name="taskId" from-field="workEffortId"/>
+            </service>
+        </row-actions>
+        <field name="custRequestId"><hidden/></field>
+        <field name="custRequestName" encode-output="false">
+            <hyperlink description="${custRequestName} [${custRequestId}]" target="ViewRequest">
+                <parameter param-name="custRequestId"/>
+            </hyperlink>
+        </field>
+        <field name="custRequestDate" title="${uiLabelMap.CommonDate}"><display type="date"/></field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="priority" use-when="!statusId.equals(&quot;CRQ_COMPLETED&quot;)">
+            <drop-down allow-empty="true">
+                <option key="1" description="${uiLabelMap.WorkEffortPriorityOne}"/>
+                <option key="2" description="${uiLabelMap.WorkEffortPriorityTwo}"/>
+                <option key="3" description="${uiLabelMap.WorkEffortPriorityThree}"/>
+                <option key="4" description="${uiLabelMap.WorkEffortPriorityFour}"/>
+                <option key="5" description="${uiLabelMap.WorkEffortPriorityFive}"/>
+                <option key="6" description="${uiLabelMap.WorkEffortPrioritySix}"/>
+                <option key="7" description="${uiLabelMap.WorkEffortPrioritySeventh}"/>
+                <option key="8" description="${uiLabelMap.WorkEffortPriorityEight}"/>
+                <option key="9" description="${uiLabelMap.WorkEffortPriorityNine}"/>
+            </drop-down>
+        </field>
+        <field name="priority" use-when="statusId.equals(&quot;CRQ_COMPLETED&quot;)"><display/></field>
+        <field name="updateButton" widget-style="smallSubmit" use-when="!statusId.equals(&quot;CRQ_COMPLETED&quot;)"><submit /></field>
+        <field name="currentStatusId" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskStatus}"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="estimatedStartDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskPlanStartDate}"><display type="date"/></field>
+        <field name="estimatedCompletionDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskPlanEndDate}"><display type="date"/></field>
+        <field name="actualStartDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskActStartDate}"><display type="date"/></field>
+        <field name="actualCompletionDate" map-name="taskResult.taskInfo" title="${uiLabelMap.MyPortalTaskActEndDate}"><display type="date"/></field>
+        <field name="plannedHours" map-name="taskResult.taskInfo"><display/></field>
+        <field name="actualHours" map-name="taskResult.taskInfo"><display/></field>
+    </form>
+    <form name="EditRequestCustomer" extends="EditSmallCustRequest">
+        <field name="story" title="${uiLabelMap.CommonContent}"><textarea cols="60" rows="15"/></field>
+        <field name="fromPartyId"><hidden value="${userLogin.partyId}"/></field>
+        <field name="custRequestDate"><ignored/></field>
+        <field name="description"><ignored/></field>
+        <field name="custRequestName"><ignored/></field>
+        <field name="subject" parameter-name="custRequestName"><text/></field>
+        <sort-order>
+            <sort-field name="priority"/>
+            <sort-field name="responseRequiredDate"/>
+            <sort-field name="subject"/>
+            <sort-field name="story"/>
+            <sort-field name="submit"/>
+        </sort-order>
+    </form>
+    <form name="EditCustRetStatusId" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+        <field name="statusId" entry-name="attributeMap.statusId">
+            <drop-down>
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_RETURN_STTS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="saveButton"><submit/></field>
+    </form>
+    <form name="ListReturns" type="list" title="" list-name="listIt"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="ReturnHeader">
+                <field-map field-name="fromPartyId" from-field="partyId"/>
+                <field-map field-name="statusId" from-field="statusId"/>
+            </entity-and>
+        </actions>
+        <field name="returnId" title="${uiLabelMap.OrderReturnId}"><display/></field>
+        <field name="entryDate" title="${uiLabelMap.OrderEntryDate}"><display/></field>
+        <field name="destinationFacilityId" title="${uiLabelMap.OrderReturnDestinationFacility}"><display/></field>
+        <field name="statusId"><display/></field>
+    </form>
+</forms>

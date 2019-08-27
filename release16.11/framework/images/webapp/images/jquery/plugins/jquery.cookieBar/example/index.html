@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="author" content="Pavel Kovář - Frontend developer [www.pavelkovar.cz]">
+
+	<meta name="keywords" content="cookie, bar, eu, law, info, accept, multilingual, jquery, plugin">
+	<meta name="description" content="jQuery plugin, which adds a simple Cookie Bar with info about cookies using. Simply modified and contains multilingual support.">
+
+	<title>jQuery Cookie bar plugin</title>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+	<link rel="stylesheet" href="../jquery.cookieBar.min.css">
+	<link rel="stylesheet" href="example.css">
+	<script src="https://use.fontawesome.com/aabc0bcc52.js"></script>
+</head>
+<body>
+
+	<div class="container">
+
+		<nav class="navbar navbar-light bg-faded mb-2">
+			<h1 class="navbar-brand mb-0 text-xs-center float-sm-left" style="float: none;">jQuery Cookie Bar plugin</h1>
+			<button id="reload-cookies" type="button" class="btn btn-danger ml-auto mr-1"><i class="fa fa-refresh fa-fw"></i> Reload page cookies</button>
+			<button id="toggle-style" type="button" class="btn btn-success mr-1">Toggle style</button>
+		</nav>
+
+		<p>
+			<a href="https://github.com/kovarp/jquery.cookieBar" class="btn btn-secondary" target="_blank"><i class="fa fa-github fa-fw"></i> View on GitHub</a>
+		</p>
+
+		<h2>Introduction</h2>
+
+		<p>
+			Small jQuery plugin, which adds a simple Cookie Bar with info about cookies using. Plugin is simply modified and contains clever multilingual function.
+		</p>
+
+		<p>
+			From version 1.2 this plugin supports also GDPR (privacy protection) info.
+		</p>
+
+		<hr>
+
+		<h2>Installing</h2>
+
+		<p>The simplest ways to download and install this plugin.</p>
+
+		<ol style="padding-left: 20px;">
+			<li class="mb-2">
+				<h3>Install</h3>
+
+				<ol style="list-style-type: lower-latin;padding-left: 20px;">
+					<li>
+						<h4>Via npm</h4>
+						<pre class="bg-faded">
+$ npm i kovarp-jquery-cookiebar</pre>
+					</li>
+					<li>
+						<h4>Clone repository</h4>
+						<pre class="bg-faded">
+$ git clone https://github.com/kovarp/jquery.cookieBar</pre>
+					</li>
+					<li>
+						<h4>Direct download</h4>
+
+						<p>
+							Download this plugin direct in latest version from GitHub repository.
+						</p>
+
+						<a class="github-button" href="https://github.com/kovarp/jquery.cookiebar/archive/master.zip" data-style="mega" aria-label="Download kovarp/jquery.cookiebar on GitHub">Download</a>
+					</li>
+				</ol>
+			</li>
+			<li>
+				<h3>Add to page</h3>
+
+				<ol>
+					<li>
+						<h4>Link plugin CSS file in page head</h4>
+						<pre class="bg-faded">
+&#60;link rel="stylesheet" href="jquery.cookieBar.min.css"&#62;</pre>
+					</li>
+					<li>
+						<h4>Link plugin script file after jQuery</h4>
+						<pre class="bg-faded">
+&#60;script src="jquery.min.js"&#62;&#60;/script&#62;
+&#60;script src="jquery.cookieBar.js"&#62;&#60;/script&#62;</pre>
+					</li>
+				</ol>
+			</li>
+		</ol>
+
+
+
+		<hr>
+
+		<h2>Using</h2>
+
+		<p>
+			Examples of plugin using.
+		</p>
+
+		<h3>Default initialization</h3>
+
+		<pre class="bg-faded">
+$(function() {
+	$.cookieBar();
+});</pre>
+
+		<h3>Initialization with custom options</h3>
+
+		<pre class="bg-faded">
+$(function() {
+	$.cookieBar({
+		style: 'bottom'
+	});
+});</pre>
+
+		<hr>
+
+		<h3>Options</h3>
+
+		<p>
+			<strong>style</strong> - Define style of display cookie bar on page
+		</p>
+
+		<pre class="bg-faded">
+default: 'top'
+options: 'top', 'bottom', 'bottom-left', 'bottom-right'</pre>
+
+		<p>
+			<strong>wrapper</strong> - Wrapper, where the cookie bar will prepended
+		</p>
+
+		<pre class="bg-faded">
+default: 'body'
+options: string</pre>
+
+		<p>
+			<strong>expireDays</strong> - Number of days, when the cookies will expires
+		</p>
+
+		<pre class="bg-faded">
+default: 365
+options: integer</pre>
+
+		<p>
+			<strong>infoLink</strong> - URL for "more info link"
+		</p>
+
+		<pre class="bg-faded">
+default: 'https://www.google.com/policies/technologies/cookies/'
+options: string</pre>
+
+		<p>
+			<strong>infoTarget</strong> - Targer for "more info link"
+		</p>
+
+		<pre class="bg-faded">
+default: '_blank'
+options: '_blank', '_self', '_parent', '_top'</pre>
+
+		<p>
+			<strong>language</strong> - Language of the cookie bar
+		</p>
+
+		<pre class="bg-faded">
+default: $('html').attr('lang') || 'en'
+options: 'ISO 639-1 Language Code'</pre>
+		<p>
+			<i>The default value means, that the plugin detect automatically language from html lang attribute.</i>
+		</p>
+
+		<p>
+			<strong>privacy</strong> - Show privacy protection button (GDPR)
+		</p>
+
+		<pre class="bg-faded">
+default: false
+options: false, 'popup', 'bs_modal', 'link'</pre>
+
+		<p>
+			<strong>privacyTarget</strong> - Target attribute for "privacy button link"
+		</p>
+
+		<pre class="bg-faded">
+default: '_blank'
+options: '_blank', '_self', '_parent', '_top'</pre>
+
+		<p>
+			<strong>privacyContent</strong> - Content for privacy button
+		</p>
+
+		<pre class="bg-faded">
+default: null
+options: null, 'custom HTML', 'Bootstrap modal ID', 'url'</pre>
+
+		<hr>
+
+		<h3>Languages support</h3>
+
+		<p>You can simply add new language for Cookie Bar. Just use <strong>addTranslation</strong> method.</p>
+
+		<pre class="bg-faded">
+$(function() {
+	$.cookieBar('addTranslation', 'de', {
+		message:	'Zur Bereitstellung von Diensten verwenden wir Cookies. Durch die Nutzung dieser Website stimmen Sie zu.',
+		acceptText:	'OK',
+		infoText:	'Mehr Informationen',
+		privacyText:	'Datenschutz'
+	});
+});</pre>
+
+		<p>
+			Then, you can initialize the Cookie Bar with your own language.
+		</p>
+
+		<pre class="bg-faded">
+$(function() {
+	$.cookieBar({
+		language: 'de'
+	});
+});</pre>
+
+		<p>
+			<i>Feel free to make pull request with your new language. ;)</i>
+		</p>
+
+		<hr>
+
+		<h3>Detect cookies state</h3>
+
+		<p>You can detect, if user agreed with cookies using. The plugin save this information in cookie with name <strong>cookies-state</strong>. So, you can just read this value by JS or PHP and check, if the value equals <strong>accepted</strong>.</p>
+
+		<hr>
+
+		<footer>
+			<p>Copyright &copy; 2018 by <a href="http://www.pavelkovar.cz/" target="_blank">Pavel Kovář - Frontend developer</a></p>
+		</footer>
+
+	</div>
+
+	<div id="privacyModal" class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Privacy protection</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>
+						Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem, excepturi, expedita illo in
+						labore maiores modi mollitia nulla officiis perferendis quam qui quos rem repellendus
+						repudiandae sapiente temporibus velit vero!
+					</p>
+					<p>
+						Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem, excepturi, expedita illo in
+						labore maiores modi mollitia nulla officiis perferendis quam qui quos rem repellendus
+						repudiandae sapiente temporibus velit vero!
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+	<script src="../jquery.cookieBar.min.js"></script>
+
+	<script>
+		// Cookie Bar initialization
+		$(function() {
+			$.cookieBar({
+				privacy: 'bs_modal',
+				privacyContent: '#privacyModal'
+			});
+		});
+
+		// Just example purpose
+		var style = 1;
+		var styles = [
+			'top',
+			'bottom',
+			'bottom-left',
+			'bottom-right'
+		];
+
+		$(function() {
+			$('#reload-cookies').on('click', function() {
+				if($.cookieBar('getCookie', 'cookies-state') === 'accepted') {
+					$.cookieBar('setCookie', 'cookies-state', '', 0);
+					$.cookieBar('displayBar');
+				}
+			});
+
+			$('#toggle-style').on('click', function() {
+				$('#cookie-bar').remove();
+
+				$.cookieBar({
+					style: styles[style],
+					privacy: 'bs_modal',
+					privacyContent: '#privacyModal'
+				});
+
+				style++;
+
+				if ( style >= styles.length ) {
+					style = 0;
+				}
+			});
+		});
+	</script>
+
+	<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ofbiz.apache.org/Widget-Menu" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Menu http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <menu name="ContentAppBar" title="${uiLabelMap.ContentContentManager}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="websites" title="${uiLabelMap.ContentWebSites}"><link target="FindWebSite"/></menu-item>
+        <menu-item name="survey" title="${uiLabelMap.ContentSurvey}"><link target="FindSurvey"/></menu-item>
+        <menu-item name="Forum" title="${uiLabelMap.ContentForum}"><link target="findForumGroups"/></menu-item>
+        <menu-item name="Blog" title="${uiLabelMap.ContentBlog}"><link target="blogMain"/></menu-item>
+        <menu-item name="Content" title="${uiLabelMap.ContentContent}"><link target="findContent"/></menu-item>
+        <menu-item name="DataResource" title="${uiLabelMap.ContentDataResource}"><link target="findDataResource"/></menu-item>
+        <menu-item name="ContentSetupMenu" title="${uiLabelMap.ContentContentSetup}"><link target="ContentSetupMenu"/></menu-item>
+        <menu-item name="DataResourceSetupMenu" title="${uiLabelMap.ContentDataSetup}"><link target="DataSetupMenu"/></menu-item>
+        <menu-item name="Layout" title="${uiLabelMap.ContentTemplate}"><link target="LayoutMenu"/></menu-item>
+        <menu-item name="CMS" title="${uiLabelMap.ContentCMS}"><link target="CMSContentFind"/></menu-item>
+        <menu-item name="CompDoc" title="${uiLabelMap.ContentCompDoc}"><link target="FindCompDoc"/></menu-item>
+    </menu>
+
+    <menu name="content"  menu-container-style="button-bar tab-bar" default-selected-style="selected" default-menu-item-name="content" default-permission-operation="HAS_AUTHOR_ROLE|CONTENT_ADMIN"
+        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="tabButtonItem"
+        title="" type="simple">
+
+        <menu-item name="content" title="${uiLabelMap.ContentContent}">
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContent">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="association" title="${uiLabelMap.ContentAssociation}">
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContentAssoc">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="role" title="${uiLabelMap.FormFieldTitle_roles}" >
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContentRole">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="purpose" title="${uiLabelMap.FormFieldTitle_purposes}" >
+            <condition>
+                <not>
+                    <if-empty field="currentValue.contentId"/>
+                </not>
+            </condition>
+            <link target="EditContentPurpose">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="attribute" title="${uiLabelMap.ContentAttribute}" >
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContentAttribute">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="websites" title="${uiLabelMap.ContentWebSites}">
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="ListWebSite">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="metaData" title="${uiLabelMap.ContentMetadata}" >
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContentMetaData">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+
+        <menu-item name="workEffort" title="${uiLabelMap.WorkEffortWorkEffort}" >
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContentWorkEfforts">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="keywords" title="${uiLabelMap.ContentKeywords}" >
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContentKeywords">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+    </menu>
+    
+    <menu name="contentSub" menu-container-style="button-bar button-style-2" default-menu-item-name="content" default-permission-operation="HAS_AUTHOR_ROLE|CONTENT_ADMIN"
+        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="currentMenuItemName"
+        title="" type="simple">
+
+        <menu-item name="NewContent" title="${uiLabelMap.CommonCreateNew}">
+            <condition>
+                <not><if-empty field="currentValue.contentId"/></not>
+            </condition>
+            <link target="EditContent"/>
+        </menu-item>
+        <menu-item name="NewContentAssoc" title="${uiLabelMap.CommonCreateNew} ${uiLabelMap.ContentAssociation}">
+            <condition>
+                <if-compare field="tabButtonItem" operator="equals" value="association"/>
+            </condition>
+            <link target="EditContentAssoc">
+                <parameter param-name="contentId" from-field="parameters.contentId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="website"  menu-container-style="button-bar tab-bar" default-selected-style="selected" default-menu-item-name="content" default-permission-operation="CONTENT_ADMIN"
+        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="tabButtonItem"
+        title="" type="simple">
+        <menu-item name="EditWebSite" title="${uiLabelMap.ContentWebSite}">
+            <link target="EditWebSite">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListWebSiteContent" title="${uiLabelMap.ContentContent}">
+            <link target="ListWebSiteContent">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PathAlias" title="${uiLabelMap.ContentPathAlias}">
+            <link target="WebSiteAliases">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditWebSiteParties" title="${uiLabelMap.PartyParties}">
+            <link target="EditWebSiteParties">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WebSiteCMS" title="${uiLabelMap.ContentCMS}">
+            <link target="WebSiteCms">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WebSiteSEO" title="${uiLabelMap.ContentSEO}">
+            <link target="WebSiteSeo">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WebSiteContactList" title="${uiLabelMap.ContentWebSiteContactList}">
+            <link target="WebSiteContactList">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <menu-item name="WebAnalytics" title="${uiLabelMap.CatalogWebAnalytics}">
+            <link target="WebAnalytics">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="blog"  menu-container-style="button-bar tab-bar" default-selected-style="selected" default-menu-item-name="content" default-permission-operation="CONTENT_ADMIN"
+        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="tabButtonItem"
+        title="" type="simple">
+        <menu-item name="ListBlog" title="${uiLabelMap.CommonList}">
+            <link target="blogMain"/>
+        </menu-item>
+        <menu-item name="EditBlog" title="${uiLabelMap.CommonEdit}">
+            <link target="editBlog">
+                <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Articles" title="${uiLabelMap.ContentBlogArticleList}">
+            <link target="blogContent">
+                <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Owners" title="${uiLabelMap.FormFieldTitle_roles}">
+            <link target="EditContentRole">
+                <parameter param-name="contentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="blogSub" menu-container-style="button-bar" default-menu-item-name="content" default-permission-operation="HAS_AUTHOR_ROLE|CONTENT_ADMIN"
+        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="currentMenuItemName"
+        title="" type="simple">
+        <menu-item name="NewBlog" title="${uiLabelMap.ContentCreateNewBlog}" widget-style="buttontext create">
+            <link target="editBlog"/>
+        </menu-item>
+        <menu-item name="NewBlogArticle" title="${uiLabelMap.ContentCreateNewBlogArticle}" widget-style="buttontext create">
+            <condition>
+                <if-compare field="tabButtonItem" operator="equals" value="Articles"/>
+            </condition>
+            <link target="EditBlogArticle">
+                <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="blogArt"  menu-container-style="button-bar tab-bar" default-selected-style="selected" default-menu-item-name="content" default-permission-operation="CONTENT_ADMIN"
+        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="tabButtonItem"
+        title="" type="simple">
+        <menu-item name="ListlogArt" title="${uiLabelMap.CommonList}">
+            <link target="blogContent">
+                <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ViewBlogArt" title="${uiLabelMap.CommonView}">
+            <link target="ViewBlogArticle">
+                <parameter param-name="articleContentId" from-field="parameters.articleContentId"/>
+                <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditBlogArt" title="${uiLabelMap.CommonEdit}">
+            <link target="EditBlogArticle">
+                <parameter param-name="articleContentId" from-field="parameters.articleContentId"/>
+                <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Owners" title="${uiLabelMap.FormFieldTitle_roles}">
+            <link target="EditContentRole">
+                <parameter param-name="contentId" from-field="parameters.articleContentId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="blogArtSub" menu-container-style="button-bar button-style-2" default-menu-item-name="content" default-permission-operation="HAS_AUTHOR_ROLE|CONTENT_ADMIN"
+        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="currentMenuItemName"
+        title="" type="simple">
+        <menu-item name="NewBlogArticle" title="${uiLabelMap.ContentCreateNewBlogArticle}">
+            <link target="EditBlogArticle">
+                <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="contentTopMenu" menu-container-style="button-bar tab-bar" default-selected-style="selected" type="simple" selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="findContent" title="${uiLabelMap.CommonFind}">
+            <link target="findContent"/>
+        </menu-item>
+        <menu-item name="navigateContent" title="${uiLabelMap.ContentNavigate}">
+            <link target="navigateContent"/>
+        </menu-item>
+    </menu>
+    <menu name="lookupMenu" menu-container-style="button-bar tab-bar" default-selected-style="selected" type="simple" selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="close" title="${uiLabelMap.CommonClose}">
+            <link target="javascript:window.close();" url-mode="plain"/>
+        </menu-item>
+        <menu-item name="index" title="${uiLabelMap.CommonExtIndex}">
+            <link target="showHelp?helpTopic=navigateHelp"/>
+        </menu-item>
+    </menu>
+    <menu name="contentMenu" menu-container-style="button-bar button-style-2" default-selected-style="selected">
+        <menu-item name="EditContent" title="${uiLabelMap.CommonCreateNew}" widget-style="buttontext create">
+            <link target="EditContent"/>
+        </menu-item>
+        <menu-item name="ContentSearchOptions" title="${uiLabelMap.CommonAdvancedSearch}" widget-style="buttontext">
+            <link target="ContentSearchOptions"/>
+        </menu-item>
+        <menu-item name="UpdateContentAllKeywords" title="${uiLabelMap.ContentAutoCreateKeywords}" widget-style="buttontext">
+            <link target="updateContentAllKeywords"/>
+        </menu-item>
+    </menu>
+    <menu name="websiteMenu" menu-container-style="button-bar button-style-2" default-selected-style="selected">
+        <menu-item name="EditWebSite" title="${uiLabelMap.ContentCreateNewWebSite}" widget-style="buttontext create">
+            <link target="EditWebSite"/>
+        </menu-item>
+    </menu>
+    <menu name="websitePathAliasMenu" menu-container-style="button-bar button-style-2" default-selected-style="selected">
+        <menu-item name="EditWebSitePathAlias" title="${uiLabelMap.ContentWebSitePathAliasCreate}" widget-style="buttontext create">
+            <link target="EditWebSitePathAlias?webSiteId=${webSiteId}"/>
+        </menu-item>
+    </menu>    
+    <!-- Web Analytics -->
+    <menu name="WebAnalyticsConfigButtonBar" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml" selected-menuitem-context-field-name="tabButtonItem2">
+        <menu-item name="EditWebAnalyticsConfig" title="${uiLabelMap.CommonCreate}">
+            <link target="EditWebAnalyticsConfig" style="buttontext create">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>
+        <!--<menu-item name="WebAnalyticsTypes" title="Create ${uiLabelMap.CatalogWebAnalyticsTypes}">
+            <link target="EditWebAnalyticsType" style="buttontext create">
+                <parameter param-name="webSiteId" from-field="parameters.webSiteId"/>
+            </link>
+        </menu-item>-->
+    </menu>
+</menus>

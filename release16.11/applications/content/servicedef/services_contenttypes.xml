@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Content Component Services</description>
+    <vendor>OFBiz</vendor>
+
+    <!-- ContentType services -->
+    <service name="createContentType" engine="entity-auto" default-entity-name="ContentType" auth="true" invoke="create">
+        <description>Create a ContentType</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateContentType" engine="entity-auto" default-entity-name="ContentType" auth="true" invoke="update">
+        <description>Update a ContentType</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeContentType" engine="entity-auto" default-entity-name="ContentType" auth="true" invoke="delete" >
+        <description>Remove ContentType</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ContentAssocType services -->
+    <service name="createContentAssocType" engine="entity-auto" default-entity-name="ContentAssocType" auth="true" invoke="create">
+        <description>Create a ContentAssocType</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateContentAssocType" engine="entity-auto" default-entity-name="ContentAssocType" auth="true" invoke="update">
+        <description>Update a ContentAssocType</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeContentAssocType" engine="entity-auto" default-entity-name="ContentAssocType" auth="true" invoke="delete">
+        <description>Remove ContentAssocType</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ContentTypeAttr services -->
+    <service name="createContentTypeAttr" engine="entity-auto" default-entity-name="ContentTypeAttr" auth="true" invoke="create">
+        <description>Create a ContentTypeAttr</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeContentTypeAttr" engine="entity-auto" default-entity-name="ContentTypeAttr" auth="true" invoke="delete">
+        <description>Remove ContentTypeAttr</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes entity-name="ContentTypeAttr" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!--ContentAssocPredicate services.-->
+    <service name="createContentAssocPredicate" engine="entity-auto" default-entity-name="ContentAssocPredicate" auth="true" invoke="create">
+        <description>Create a ContentAssocPredicate</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateContentAssocPredicate" engine="entity-auto" default-entity-name="ContentAssocPredicate" auth="true" invoke="update">
+        <description>Update a ContentAssocPredicate</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeContentAssocPredicate" engine="entity-auto" default-entity-name="ContentAssocPredicate" auth="true" invoke="delete">
+        <description>Remove ContentAssocPredicate</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes entity-name="ContentAssocPredicate" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ContentPurposeType services -->
+    <service name="createContentPurposeType" engine="entity-auto" default-entity-name="ContentPurposeType" auth="true" invoke="create">
+        <description>Create a ContentPurposeType</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateContentPurposeType" engine="entity-auto" default-entity-name="ContentPurposeType" auth="true" invoke="update">
+        <description>Update a ContentPurposeType</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeContentPurposeType" engine="entity-auto" default-entity-name="ContentPurposeType" auth="true" invoke="delete">
+        <description>Remove ContentPurposeType</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- CharacterSet services -->
+    <service name="createCharacterSet" engine="entity-auto" default-entity-name="CharacterSet" auth="true" invoke="create">
+        <description>Create a CharacterSet</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateCharacterSet" engine="entity-auto" default-entity-name="CharacterSet" auth="true" invoke="update">
+        <description>Update a CharacterSet</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeCharacterSet" engine="entity-auto" default-entity-name="CharacterSet" auth="true" invoke="delete">
+        <description>Remove CharacterSet</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- DataResourceType services -->
+    <service name="createDataResourceType" engine="entity-auto" default-entity-name="DataResourceType" auth="true" invoke="create">
+        <description>Create a DataResourceType</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateDataResourceType" engine="entity-auto" default-entity-name="DataResourceType" auth="true" invoke="update">
+        <description>Update a DataResourceType</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeDataResourceType" engine="entity-auto" default-entity-name="DataResourceType" auth="true" invoke="delete">
+        <description>Remove DataResourceType</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!--DataResourceTypeAttr services.-->
+    <service name="createDataResourceTypeAttr" engine="entity-auto" default-entity-name="DataResourceTypeAttr" auth="true" invoke="create">
+        <description>Create a DataResourceTypeAttr</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateDataResourceTypeAttr" engine="entity-auto" default-entity-name="DataResourceTypeAttr" auth="true" invoke="update">
+        <description>Update a DataResourceTypeAttr</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeDataResourceTypeAttr" engine="entity-auto" default-entity-name="DataResourceTypeAttr" auth="true" invoke="delete">
+        <description>Remove DataResourceTypeAttr</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FileExtension services -->
+    <service name="createFileExtension" engine="entity-auto" default-entity-name="FileExtension" auth="true" invoke="create">
+        <description>Create a FileExtension</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateFileExtension" engine="entity-auto" default-entity-name="FileExtension" auth="true" invoke="update">
+        <description>Update a FileExtension</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeFileExtension" engine="entity-auto" default-entity-name="FileExtension" auth="true" invoke="delete">
+        <description>Remove FileExtension</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- MetaDataPredicate services -->
+    <service name="createMetaDataPredicate" engine="entity-auto" default-entity-name="MetaDataPredicate" auth="true" invoke="create">
+        <description>Create a MetaDataPredicate</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateMetaDataPredicate" engine="entity-auto" default-entity-name="MetaDataPredicate" auth="true" invoke="update">
+        <description>Update a MetaDataPredicate</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeMetaDataPredicate" engine="entity-auto" default-entity-name="MetaDataPredicate" auth="true" invoke="delete">
+        <description>Remove MetaDataPredicate</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- MimeType services -->
+    <service name="createMimeType" engine="entity-auto" default-entity-name="MimeType" auth="true" invoke="create">
+        <description>Create a MimeType</description>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateMimeType" engine="entity-auto" default-entity-name="MimeType" auth="true" invoke="update">
+        <description>Update a MimeType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeMimeType" engine="entity-auto" default-entity-name="MimeType" auth="true" invoke="delete">
+        <description>Remove MimeType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- MimeTypeHtmlTemplate services -->
+    <service name="createMimeTypeHtmlTemplate" engine="entity-auto" default-entity-name="MimeTypeHtmlTemplate" auth="true" invoke="create">
+        <description>Create a MimeTypeHtmlTemplate</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateMimeTypeHtmlTemplate" engine="entity-auto" default-entity-name="MimeTypeHtmlTemplate" auth="true" invoke="update">
+        <description>Update a MimeTypeHtmlTemplate</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeMimeTypeHtmlTemplate" engine="entity-auto" default-entity-name="MimeTypeHtmlTemplate" auth="true" invoke="delete">
+        <description>Remove MimeTypeHtmlTemplate</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

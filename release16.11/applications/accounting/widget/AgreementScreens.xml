@@ -1,0 +1,868 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <!-- Custom apps can use their own agreement decorator by specifying its
+         location in parameters.agreementDecoratorLocation -->
+    <screen name="CommonAgreementDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="agreements"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-service-permission service-name="acctgAgreementPermissionCheck" main-action="VIEW"/>
+                                    <not><if-empty field="agreement"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="AgreementTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgAgreementPermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="agreement"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <section>
+                                            <condition>
+                                                <not><if-empty field="agreementItem"/></not>
+                                            </condition>
+                                            <widgets>
+                                                <include-menu name="AgreementItemTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                            </widgets>
+                                        </section>
+                                        <label style="h1">${agreement.description} [${agreement.agreementId}] </label>
+                                        <container style="button-bar">
+                                            <link target="EditAgreement" text="${uiLabelMap.AccountingNewAgreement}" style="buttontext create"/>
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.AccountingViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- list all assets in a tabular format -->
+    <screen name="FindAgreement">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindAgreement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgAgreementPermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="EditAgreement" text="${uiLabelMap.AccountingNewAgreement}" style="buttontext create"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindAgreements" location="component://accounting/widget/AgreementForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListAgreements" location="component://accounting/widget/AgreementForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.AccountingViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+
+    <screen name="EditAgreement">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreement"/>
+                <set field="tabButtonItem" value="AgreementMain"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+                
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreement}">
+                            <include-form name="EditAgreement" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <platform-specific>
+                            <html><html-template location="component://accounting/template/agreement/CopyAgreement.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItems">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementItems"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+                <entity-and entity-name="AgreementItem" list="agreementItems">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="button-bar">
+                            <link target="EditAgreementItem" text="${uiLabelMap.AccountingNewAgreementItem}" style="buttontext create">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementItems}">
+                            <include-form name="ListAgreementItems" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementItem">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementItem"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="EditAgreementItem"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <set field="agreementItemSeqId" from-field="parameters.agreementItemSeqId"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="button-bar">
+                            <link target="EditAgreementItem" text="${uiLabelMap.AccountingNewAgreementItem}" style="buttontext create">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementItem}">
+                            <include-form name="EditAgreementItem" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementTerms">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementTerm"/>
+                <set field="tabButtonItem" value="AgreementTerms"/>
+                <set field="buttonBarItem" value="EditAgreementTerms"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AgreementTermPanel" title="${uiLabelMap.PageTitleEditAgreementTerm}" collapsible="true">
+                            <include-form name="AddAgreementTerm" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListAgreementTerms" location="component://accounting/widget/AgreementForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementContents">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleAddAgreementContent"/>
+                <set field="tabButtonItem" value="AgreementContents"/>
+                <set field="buttonBarItem" value="EditAgreementContents"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+                <entity-and entity-name="AgreementContentAndInfo" list="contentDataResourceList">
+                    <field-map field-name="agreementId" from-field="parameters.agreementId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AgreementContentPanel" title="${uiLabelMap.PageTitleAddAgreementContent}" collapsible="true">
+                            <include-form name="AddAgreementContent" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleListContent}">
+                            <include-form name="ListAgreementContent" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementPromoAppls">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementPromoAppls"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementPromoAppls"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementPromoAppl" list="agreementPromoAppls">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                    <order-by field-name="sequenceNum"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementPromoAppl" text="${uiLabelMap.AccountingNewAgreementPromoAppl}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementPromoAppls}">
+                            <include-form name="ListAgreementPromoAppls" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementPromoAppl">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementPromoAppl"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementPromoAppls"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+                <set field="agreementTermId" from-field="parameters.agreementTermId"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem" auto-field-map="true"/>
+                <entity-one entity-name="AgreementPromoAppl" value-field="agreementPromoAppl" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementPromoAppl" text="${uiLabelMap.AccountingNewAgreementPromoAppl}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementPromoAppl}">
+                            <include-form name="EditAgreementPromoAppl" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemTerms">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementItemTerms"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemTerms"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementTerm" list="agreementTerms">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemTerm" text="${uiLabelMap.AccountingNewAgreementItemTerm}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementItemTerms}">
+                            <include-form name="ListAgreementItemTerms" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementItemTerm">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementItemTerm"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemTerms"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <set field="agreementItemSeqId" from-field="parameters.agreementItemSeqId"/>
+                <set field="agreementTermId" from-field="parameters.agreementTermId"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem" auto-field-map="true"/>
+                <entity-one entity-name="AgreementTerm" value-field="agreementTerm" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemTerm" text="${uiLabelMap.AccountingNewAgreementItemTerm}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementItemTerm}">
+                            <include-form name="EditAgreementItemTerm" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemProducts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementItemProducts"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemProducts"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementProductAppl" list="agreementProducts">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                    <order-by field-name="productId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemProduct" text="${uiLabelMap.ProductNewProduct}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                            <link target="ListAgreementItemProductsReport" text="${uiLabelMap.CommonPrint}" style="buttontext" target-window="_BLANK">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementItemProducts}">
+                            <include-form name="ListAgreementItemProducts" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemFacilities">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementItemFacilities"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemFacilities"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementFacilityAppl" list="agreementFacilities">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                    <order-by field-name="facilityId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemFacility" text="${uiLabelMap.ProductNewFacility}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                            <link target="ListAgreementItemFacilitiesReport" text="${uiLabelMap.CommonPrint}" style="buttontext" target-window="_BLANK">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementItemFacilities}">
+                            <include-form name="ListAgreementItemFacilities" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemProductsReport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingPageTitleAgreementPriceList"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementProductAppl" list="agreementProducts">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                    <order-by field-name="productId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingAgreement}">
+                            <include-form name="ViewAgreementInfoForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingAgreementItem}">
+                            <include-form name="ViewAgreementItemInfoForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingAgreementItemProductsForReport}">
+                            <include-form name="ListAgreementItemProductsForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemFacilitiesReport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingPageTitleAgreementPriceList"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementFacilityAppl" list="agreementFacilities">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                    <order-by field-name="facilityId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingAgreement}">
+                            <include-form name="ViewAgreementInfoForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingAgreementItem}">
+                            <include-form name="ViewAgreementItemInfoForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementItemProduct">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementItemProduct"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <set field="agreementItemSeqId" from-field="parameters.agreementItemSeqId"/>
+                <set field="productId" from-field="parameters.productId"/>
+
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-one entity-name="AgreementProductAppl" value-field="agreementProductAppl" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemProduct" text="${uiLabelMap.ProductNewProduct}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementItemProduct}">
+                            <include-form name="EditAgreementItemProduct" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementItemFacility">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementItemFacility"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <set field="agreementItemSeqId" from-field="parameters.agreementItemSeqId"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-one entity-name="AgreementFacilityAppl" value-field="agreementFacilityAppl" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemFacility" text="${uiLabelMap.ProductNewFacility}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementItemFacility}">
+                            <include-form name="EditAgreementItemFacility" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemSupplierProducts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementItemProducts"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemSupplierProducts"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="SupplierProduct" list="agreementProducts">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                    <order-by field-name="productId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemSupplierProduct" text="${uiLabelMap.ProductNewProduct}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                            <link target="ListAgreementItemSupplierProductsReport" text="${uiLabelMap.CommonPrint}" style="buttontext" target-window="_BLANK">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementItemProducts}">
+                            <include-form name="ListAgreementItemSupplierProducts" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemSupplierProductsReport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingPageTitleAgreementPriceList"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="SupplierProduct" list="agreementProducts">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                    <order-by field-name="productId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingAgreement}">
+                            <include-form name="ViewAgreementInfoForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingAgreementItem}">
+                            <include-form name="ViewAgreementItemInfoForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingAgreementItemSupplierProductsForReport}">
+                            <include-form name="ListAgreementItemSupplierProductsForReport" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementItemSupplierProduct">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementItemProduct"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemSupplierProducts"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <set field="agreementItemSeqId" from-field="parameters.agreementItemSeqId"/>
+                <set field="productId" from-field="parameters.productId"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-one entity-name="SupplierProduct" value-field="agreementProductAppl" auto-field-map="true"/>
+            </actions>
+            <widgets>
+            <section>
+            <condition>
+                <and>
+                    <not><if-empty field="agreement.partyIdTo"/></not>
+                    <not><if-empty field="agreementItem.currencyUomId"/></not>
+                </and>
+            </condition>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemSupplierProduct" text="${uiLabelMap.ProductNewProduct}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementItemProduct}">
+                            <include-form name="EditAgreementItemSupplierProduct" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h2">${uiLabelMap.AccountingAgreementIsNotSetForSupplierProducts}</label>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </fail-widgets>
+            </section>
+        </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementItemParties">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementItemParties"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemParties"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementPartyApplic" list="agreementParties">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemParty" text="${uiLabelMap.CommonNew}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementItemParties}">
+                            <include-form name="ListAgreementItemParties" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementItemParty">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementItemParty"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementItemParties"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <set field="agreementItemSeqId" from-field="parameters.agreementItemSeqId"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-one entity-name="AgreementPartyApplic" value-field="agreementPartyApplic" auto-field-map="true"/>
+           </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementItemParty" text="${uiLabelMap.CommonNew}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementItemParty}">
+                            <include-form name="EditAgreementItemParty" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListAgreementGeographicalApplic">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAgreementGeographicalApplic"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementGeographicalApplic"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem"/>
+                <entity-and entity-name="AgreementGeographicalApplic" list="agreementGeographicalApplics">
+                    <field-map field-name="agreementId" from-field="agreement.agreementId"/>
+                    <field-map field-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementGeographicalApplic" text="${uiLabelMap.CommonNew}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleListAgreementGeographicalApplic}">
+                            <include-form name="ListAgreementGeographicalApplic" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementGeographicalApplic">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementGeographicalApplic"/>
+                <set field="tabButtonItem" value="AgreementItems"/>
+                <set field="buttonBarItem" value="ListAgreementGeographicalApplic"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <set field="agreementItemSeqId" from-field="parameters.agreementItemSeqId"/>
+                <set field="geoId" from-field="parameters.geoId"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+                <entity-one entity-name="AgreementItem" value-field="agreementItem" auto-field-map="true"/>
+                <entity-one entity-name="AgreementGeographicalApplic" value-field="agreementGeographicalApplic" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container>
+                            <link target="EditAgreementGeographicalApplic" text="${uiLabelMap.CommonNew}" style="buttontext">
+                                <parameter param-name="agreementId" from-field="agreement.agreementId"/>
+                                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+                            </link>
+                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditAgreementGeographicalApplic}">
+                            <include-form name="EditAgreementGeographicalApplic" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditAgreementWorkEffortApplics">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditAgreementWorkEffortApplics"/>
+                <set field="tabButtonItem" value="AgreementWorkEffortApplics"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="AgreementWorkEffortApplicsPanel" title="${uiLabelMap.AccountingAddAgreementWorkEffortApplic}" collapsible="true">
+                            <include-form name="AddAgreementWorkEffortApplic" location="component://accounting/widget/AgreementForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListAgreementWorkEffortApplics" location="component://accounting/widget/AgreementForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditAgreementRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindAgreementRoles"/>
+                <set field="tabButtonItem" value="AgreementRoles"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="agreementId" from-field="parameters.agreementId"/>
+                <entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator" location="${parameters.agreementDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="add-agreement-roles"  title="${uiLabelMap.PageTitleAddAgreementRoles}" collapsible="true">
+                            <section>
+                                <widgets>
+                                    <include-form name="AddAgreementRole" location="component://accounting/widget/AgreementForms.xml"/>
+                                </widgets>
+                            </section>
+                        </screenlet>
+                        <include-form name="ListAgreementRoles" location="component://accounting/widget/AgreementForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

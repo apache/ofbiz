@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://ofbiz.apache.org/Widget-Menu" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Menu http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <menu name="contentsetup" selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="adddataresource" title="${uiLabelMap.CommonAdd}" >
+            <link target="AddDataResource" name="AddDataResource" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="finddataresource" title="${uiLabelMap.CommonFind}" >
+            <link target="FindDataResource" name="FindDataResource" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="browsedataresource" title="${uiLabelMap.ContentBrowse}" >
+            <link target="BrowseDataResource" name="BrowseDataResource" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="editdataresource" title="${uiLabelMap.ContentDataResource}">
+            <condition disabled-style="buttontextdisabled">
+                <not><if-empty field="dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResource" name="EditDataResource" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="editelectronictext" title="${uiLabelMap.ContentDataResourceText}" >
+            <condition disabled-style="buttontextdisabled">
+                <not><if-empty field="dataResourceId"/></not>
+            </condition>
+            <link target="EditElectronicText" name="EditElectronicText" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="edithtmltext" title="${uiLabelMap.ContentHtml}" >
+            <condition disabled-style="buttontextdisabled">
+                <not><if-empty field="dataResourceId"/></not>
+            </condition>
+            <link target="EditHtmlText" name="EditHtmlText" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="uploadimage" title="${uiLabelMap.ContentImage}" >
+            <condition disabled-style="buttontextdisabled">
+                <not><if-empty field="dataResourceId"/></not>
+            </condition>
+            <link target="UploadImage" name="UploadImage" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="editdataresourceattribute" title="${uiLabelMap.ContentAttribute}" >
+            <condition disabled-style="buttontextdisabled">
+                <not><if-empty field="dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResourceAttribute" name="EditDataResourceAttribute" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="editdataresourcerole" title="${uiLabelMap.ContentDataResourceRole}" >
+            <condition disabled-style="buttontextdisabled">
+                <not><if-empty field="dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResourceRole" name="EditDataResourceRole" target-window="_top" style="tabButton"/>
+        </menu-item>
+        <menu-item name="editdataresourceproductfeatures" title="${uiLabelMap.ContentDataResourceProductFeatures}" >
+            <condition disabled-style="buttontextdisabled">
+                <not><if-empty field="dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResourceProductFeatures" name="EditDataResourceProductFeatures" target-window="_top" style="tabButton"/>
+        </menu-item>
+    </menu>
+    <menu name="dataresourceTopMenu" menu-container-style="button-bar tab-bar" default-selected-style="selected" type="simple" selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="findDataResource" title="${uiLabelMap.CommonFind}">
+            <link target="findDataResource"/>
+        </menu-item>
+        <menu-item name="navigateDataResource" title="${uiLabelMap.ContentNavigate}">
+            <link target="navigateDataResource"/>
+        </menu-item>
+    </menu>
+    <menu name="dataresource" menu-container-style="button-bar tab-bar" default-selected-style="selected" selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="editDataResource" title="${uiLabelMap.CommonEdit}">
+            <condition>
+                <not><if-empty field="currentValue.dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResource">
+                <parameter param-name="dataResourceId" from-field="parameters.dataResourceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="editElectronicText" title="${uiLabelMap.ContentDataResourceText}" >
+            <condition>
+                <and>
+                    <not><if-empty field="currentValue.dataResourceId"/></not>
+                    <if-compare field="currentValue.dataResourceTypeId" operator="equals" value="ELECTRONIC_TEXT"/>
+                </and>
+            </condition>
+            <link target="EditElectronicText">
+                <parameter param-name="dataResourceId" from-field="parameters.dataResourceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="editHtmlText" title="${uiLabelMap.ContentDataResourceHtml}" >
+            <condition>
+                <and>
+                    <not><if-empty field="currentValue.dataResourceId"/></not>
+                    <if-compare field="currentValue.dataResourceTypeId" operator="equals" value="ELECTRONIC_TEXT"/>
+                </and>
+            </condition>
+            <link target="EditHtmlText">
+                <parameter param-name="dataResourceId" from-field="parameters.dataResourceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="uploadImage" title="${uiLabelMap.ContentDataResourceUpload}" >
+            <condition>
+                <or>
+                    <if-compare field="currentValue.dataResourceTypeId" operator="equals" value="IMAGE_OBJECT"/>
+                    <and>
+                        <if-compare field="currentValue.dataResourceTypeId" operator="contains" value="FILE"/>
+                    </and>
+                </or>
+            </condition>
+            <link target="UploadImage">
+                <parameter param-name="dataResourceId" from-field="parameters.dataResourceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditDataResourceAttribute" title="${uiLabelMap.ContentDataResourceAttribute}" >
+            <condition>
+                <not><if-empty field="currentValue.dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResourceAttribute">
+                <parameter param-name="dataResourceId" from-field="parameters.dataResourceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="editDataResourceRole" title="${uiLabelMap.ContentDataResourceRole}" >
+            <condition>
+                <not><if-empty field="currentValue.dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResourceRole">
+                <parameter param-name="dataResourceId" from-field="parameters.dataResourceId"/>
+            </link>
+        </menu-item>
+        <menu-item name="editDataResourceProductFeatures" title="${uiLabelMap.ContentDataResourceProductFeatures}" >
+            <condition>
+                <not><if-empty field="currentValue.dataResourceId"/></not>
+            </condition>
+            <link target="EditDataResourceProductFeatures">
+                <parameter param-name="dataResourceId" from-field="parameters.dataResourceId"/>
+            </link>
+        </menu-item>
+    </menu>
+</menus>

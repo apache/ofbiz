@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Product Component Services for subscriptions entity (subscription entity not ContentRoles)</description>
+    <vendor>OFBiz</vendor>
+
+    <service name="createSubscription" default-entity-name="Subscription" auth="true" engine="simple"
+        location="component://product/minilang/product/subscription/SubscriptionServices.xml" invoke="createSubscription">
+        <description>Create a Subscription Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSubscription" default-entity-name="Subscription" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a Subscription Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="isSubscribed" default-entity-name="Subscription" auth="true" engine="simple"
+        location="component://product/minilang/product/subscription/SubscriptionServices.xml" invoke="isSubscribed">
+        <description>Check if a particular party has at this moment a subscription</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="VIEW"/>
+        <auto-attributes include="all" mode="IN" optional="true"/>
+        <attribute name="filterByDate" type="String" mode="IN" optional="true"/><!-- default is "Y" -->
+        <attribute name="isSubscribed" type="Boolean" mode="OUT"/>
+        <attribute name="subscriptionId" type="String" mode="OUT" optional="true"/>
+        <override name="partyId" optional="false" mode="IN"/>
+    </service>
+
+    <service name="getSubscriptionEnt" default-entity-name="Subscription" auth="true" engine="simple"
+        location="component://product/minilang/product/subscription/SubscriptionServices.xml" invoke="getSubscription">
+        <description>Retrieve a single Subscription Entity Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="VIEW"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <attribute name="subscription" type="org.apache.ofbiz.entity.GenericValue" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="createSubscriptionResource" default-entity-name="SubscriptionResource" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SubscriptionResource Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSubscriptionResource" default-entity-name="SubscriptionResource" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SubscriptionResource Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="createProductSubscriptionResource" default-entity-name="ProductSubscriptionResource" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a ProductSubscriptionResource Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateProductSubscriptionResource" default-entity-name="ProductSubscriptionResource" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a ProductSubscriptionResource Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductSubscriptionResource" default-entity-name="ProductSubscriptionResource" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete a ProductSubscriptionResource Record</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="processExtendSubscription" engine="java" auth="true"
+        location="org.apache.ofbiz.product.subscription.SubscriptionServices" invoke="processExtendSubscription">
+        <description>Creates or updates Subscription record</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="subscriptionResourceId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
+        <attribute name="useRoleTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="useTimeUomId" type="String" mode="IN" optional="false"/>
+        <attribute name="useTime" type="Integer" mode="IN" optional="false"/>
+        <attribute name="automaticExtend" type="String" mode="IN" optional="true"/>
+        <attribute name="canclAutmExtTime" type="Integer" mode="IN" optional="true"/>
+        <attribute name="canclAutmExtTimeUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="alwaysCreateNewRecord" type="String" mode="IN" optional="true"><!-- This defaults to Y (true) which means new Subscription records will be created instead of updating old ones with new thruDates. This keeps a more complete history of subscription activity. --></attribute>
+        <attribute name="gracePeriodOnExpiry" type="Integer" mode="IN" optional="true"/>
+        <attribute name="gracePeriodOnExpiryUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="subscriptionId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="processExtendSubscriptionByProduct" engine="java" auth="true"
+        location="org.apache.ofbiz.product.subscription.SubscriptionServices" invoke="processExtendSubscriptionByProduct">
+        <description>Creates or updates Subscription record</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderCreatedDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="quantity" type="Integer" mode="IN" optional="false"/>
+    </service>
+    <service name="processExtendSubscriptionByOrder" engine="java" auth="true"
+        location="org.apache.ofbiz.product.subscription.SubscriptionServices" invoke="processExtendSubscriptionByOrder">
+        <description>Creates or updates Subscription record</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createSubscriptionAttribute" default-entity-name="SubscriptionAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SubscriptionAttribute</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateSubscriptionAttribute" default-entity-name="SubscriptionAttribute" auth="true" engine="simple"
+             location="component://product/minilang/product/subscription/SubscriptionServices.xml" invoke="updateSubscriptionAttribute">
+        <description>Create (when not exist) or update (when exist) a Subscription attribute</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="UPDATE"/>
+        <attribute name="subscriptionId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="attrName" type="String" mode="IN" optional="false"/>
+        <attribute name="attrValue" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSubscriptionAttribute" default-entity-name="SubscriptionAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SubscriptionAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createSubscriptionCommEvent" default-entity-name="SubscriptionCommEvent" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Subscription Communication Event</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="removeSubscriptionCommEvent" default-entity-name="SubscriptionCommEvent" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Subscription Communication Event</description>
+        <permission-service service-name="subscriptionPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="subscriptionPermissionCheck" engine="simple"
+        location="component://product/minilang/product/subscription/SubscriptionServices.xml" invoke="subscriptionPermissionCheck" auth="true">
+        <description>Subscription Permission Checking Logic</description>
+        <implements service="permissionInterface"/>
+    </service>
+    
+    <service name="runServiceOnSubscriptionExpiry" engine="java" auth="true" use-transaction="true"
+        location="org.apache.ofbiz.product.subscription.SubscriptionServices" invoke="runServiceOnSubscriptionExpiry">
+        <description>A service designed to be automatically run by job scheduler to trigger another service to run for each subscription which has expired.
+            This is done by looking for all subscriptions for which thruDate and gracePeriodOnExpiry are expired and where the automaticExtend flag is set to "N".
+            The service to run is found in SubscriptionResource.ServiceNameOnExpiry (by default OOTB: runSubscriptionExpired, see below)</description>
+    </service>
+    <service name="runSubscriptionExpired" engine="java" auth="true" use-transaction="true"
+        location="org.apache.ofbiz.product.subscription.SubscriptionServices" invoke="runSubscriptionExpired">
+        <description>A dummy service to test subscription expiration, expected to change depending upon the specific service logic that providers will write. 
+            See https://issues.apache.org/jira/browse/OFBIZ-5333 for more information</description>
+        <attribute name="subscriptionId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SubscriptionActivity services -->
+    <service name="createSubscriptionActivity" default-entity-name="SubscriptionActivity" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SubscriptionActivity</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateSubscriptionActivity" default-entity-name="SubscriptionActivity" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a SubscriptionActivity</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSubscriptionActivity" default-entity-name="SubscriptionActivity" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SubscriptionActivity</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SubscriptionType services -->
+    <service name="createSubscriptionType" default-entity-name="SubscriptionType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SubscriptionType</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateSubscriptionType" default-entity-name="SubscriptionType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a SubscriptionType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSubscriptionType" default-entity-name="SubscriptionType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SubscriptionType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SubscriptionTypeAttr services -->
+    <service name="createSubscriptionTypeAttr" default-entity-name="SubscriptionTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a SubscriptionTypeAttr</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateSubscriptionTypeAttr" default-entity-name="SubscriptionTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a SubscriptionTypeAttr</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSubscriptionTypeAttr" default-entity-name="SubscriptionTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a SubscriptionTypeAttr</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

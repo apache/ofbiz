@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="FindFacilityGroup">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindFacilityGroup"/>
+                <set field="headerItem" value="facilityGroup"/>
+                <entity-condition entity-name="FacilityGroup" list="facilityGroups"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleFindFacilityGroup}">
+                            <container style="button-bar">
+                                <link target="EditFacilityGroup" text="${uiLabelMap.ProductNewGroup}" style="buttontext create"/>
+                            </container>
+                            <include-form name="FindFacilityGroup" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonFacilityGroupDecorator">
+        <section>
+            <actions>
+                <set field="facilityGroupId" from-field="parameters.facilityGroupId"/>
+                <entity-one entity-name="FacilityGroup" value-field="facilityGroup"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="FACILITY" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="FacilityGroupTabBar" location="component://product/widget/facility/FacilityMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="FACILITY" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.ProductFacilityViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditFacilityGroup">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFacilityGroup"/>
+                <set field="headerItem" value="facilityGroup"/>
+                <set field="tabButtonItem" value="EditFacilityGroup"/>
+                <entity-one entity-name="FacilityGroup" value-field="facilityGroup"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityGroupDecorator">
+                    <decorator-section name="body">
+                        <container style="page-title"><label text="${groovy: parameters.facilityGroupId ? uiLabelMap.PageTitleEditFacilityGroup : uiLabelMap.PageTitleNewFacilityGroup }"/></container>
+                        <container style="button-bar">
+                            <link target="EditFacilityGroup" text="${uiLabelMap.CommonNew}" style="buttontext create"/>
+                        </container>
+                        <include-form name="EditFacilityGroup" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditFacilityGroupMembers">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFacilityGroupMembers"/>
+                <set field="headerItem" value="facilityGroup"/>
+                <set field="tabButtonItem" value="EditFacilityGroupMembers"/>
+                <entity-one entity-name="FacilityGroup" value-field="facilityGroup"/>
+                <set field="orderByList[]" value="sequenceNum"/>
+                <get-related value-field="facilityGroup" relation-name="FacilityGroupMember" list="facilityGroupMembers" order-by-list="orderByList"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityGroupDecorator">
+                    <decorator-section name="body">
+                        <container style="page-title">
+                            <label>${uiLabelMap.PageTitleEditFacilityGroupMembers} ${uiLabelMap.CommonFor} ${facilityGroup.facilityGroupName} [${facilityGroup.facilityGroupId}]</label>
+                        </container>
+                        <container style="button-bar">
+                            <link target="EditFacilityGroup" text="${uiLabelMap.ProductNewGroup}" style="buttontext create"/>
+                        </container>
+                        <screenlet id="AddFacilityGroupMemberPanel" title="${uiLabelMap.ProductAddFacilityGroupMember}" collapsible="true">
+                            <include-form name="AddFacilityGroupMember" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateFacilityGroupMembers" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditFacilityGroupRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFacilityGroupRoles"/>
+                <set field="headerItem" value="facilityGroup"/>
+                <set field="tabButtonItem" value="EditFacilityGroupRoles"/>
+                <entity-one entity-name="FacilityGroup" value-field="facilityGroup"/>
+                <get-related value-field="facilityGroup" relation-name="FacilityGroupRole" list="facilityRoles"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityGroupDecorator">
+                    <decorator-section name="body">
+                        <container style="page-title">
+                            <label>${uiLabelMap.PageTitleEditFacilityGroupRoles} ${uiLabelMap.CommonFor} ${facilityGroup.facilityGroupName} [${facilityGroup.facilityGroupId}]</label>
+                        </container>
+                        <container style="button-bar">
+                            <link target="EditFacilityGroup" text="${uiLabelMap.ProductNewGroup}" style="buttontext create"/>
+                        </container>
+                        <screenlet id="AddFacilityGroupRolePanel" title="${uiLabelMap.ProductAddFacilityGroupPartyRole}" collapsible="true">
+                            <include-form name="AddFacilityGroupRole" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateFacilityGroupRoles" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditFacilityGroupRollup">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditFacilityGroupRollup"/>
+                <set field="headerItem" value="facilityGroup"/>
+                <set field="tabButtonItem" value="EditFacilityGroupRollup"/>
+                <set field="parameters.facilityGroupId" from-field="parameters.showFacilityGroupId" default-value="${parameters.facilityGroupId}"/>
+                <entity-one entity-name="FacilityGroup" value-field="facilityGroup"/>
+                <get-related relation-name="ParentFacilityGroupRollup" value-field="facilityGroup" list="parentGroupRollups"/>
+                <get-related relation-name="CurrentFacilityGroupRollup" value-field="facilityGroup" list="currentGroupRollups"/>
+                <set field="facilityGroupId" from-field="facilityGroup.facilityGroupId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityGroupDecorator">
+                    <decorator-section name="body">
+                        <container style="page-title"><label>${uiLabelMap.PageTitleEditFacilityGroupRollup} ${uiLabelMap.CommonFor} ${facilityGroup.facilityGroupName} [${facilityGroup.facilityGroupId}]</label></container>
+                            <container style="button-bar">
+                                <link target="EditFacilityGroup" text="${uiLabelMap.ProductNewGroup}" style="buttontext create"/>
+                            </container>
+                        <screenlet id="AddFacilityGroupRollupFromPanel" title="${uiLabelMap.PageTitleAddFacilityGroupRollup}" collapsible="true">
+                            <include-form name="AddFacilityGroupRollupFrom" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateFacilityGroupRollupTo" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                        <screenlet id="AddFacilityGroupRollupToPanel" title="${uiLabelMap.ProductGroupRollupChildGroupsAdd}" collapsible="true">
+                            <include-form name="AddFacilityGroupRollupTo" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateFacilityGroupRollupFrom" location="component://product/widget/facility/FacilityGroupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

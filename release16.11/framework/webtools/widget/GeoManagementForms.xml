@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+    
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="FindGeo" id="FindGeo" target="${currentUrl}" extends="LookupGeo" extends-resource="component://common/widget/LookupForms.xml"/>
+    
+    <form name="FindGeoPoint" id="FindGeo" target="${currentUrl}"  type="single" header-row-style="header-row" default-table-style="basic-table">
+        <field name="geoPointId" title="${uiLabelMap.CommonId}"><text-find/></field>
+        <field name="dataSourceId" title="${uiLabelMap.Source}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="DataSource">
+                    <entity-constraint name="dataSourceTypeId" value="GEOPOINT_SUPPLIER"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="latitude" title="${uiLabelMap.CommonLatitude}"><text-find/></field>
+        <field name="longitude" title="${uiLabelMap.CommonLongitude}"><text-find/></field>
+        <field name="information"><text-find/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="GeoPoint" type="single" title="" default-map-name="geoPoint"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="geoPointId" title="${uiLabelMap.CommonId}"><display/></field>
+        <field name="dataSourceId" title="${uiLabelMap.Source}"><display/></field>
+        <field name="latitude" title="${uiLabelMap.CommonLatitude}"><display/></field>
+        <field name="longitude" title="${uiLabelMap.CommonLongitude}"><display/></field>
+        <field name="elevation" title="${uiLabelMap.Elevation}"><display/></field>
+        <field name="elevationUomId" title="${uiLabelMap.CommonUom}">
+            <display-entity entity-name="Uom" key-field-name="uomId" description="${abbreviation}"/>
+        </field>
+        <field name="information"><display/></field>
+    </form>
+    <form name="ListGeos" extends-resource="component://common/widget/LookupForms.xml" extends="ListLookupGeo" paginate-target="${currentUrl}"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" separate-columns="true" >
+        <field name="geoId"  widget-style="buttontext" title="${uiLabelMap.CommonGeoId}">
+            <hyperlink also-hidden="false" target-type="plain" description="${geoId}"  target="EditGeo">
+                <parameter param-name="geoId"/>
+            </hyperlink>
+        </field>
+        <field name="wellKnownText" title="${uiLabelMap.CommonGeoWellKnownText}"><display/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="deleteGeo">
+                <parameter param-name="geoId"/>
+                <parameter param-name="noConditionFind" value="Y"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="ListGeoPoints" paginate-target="${currentUrl}" type="list" separate-columns="true" default-entity-name="GeoPoint" list-name="listIt" paginate="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="GeoPoint"/>
+                <field-map field-name="orderBy" value="geoPointId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="geoPointId" title="${uiLabelMap.CommonId}">
+            <hyperlink also-hidden="false" target-type="plain" description="${geoPointId}"  target="geoPoint">
+                <parameter param-name="geoPointId"/>
+            </hyperlink>
+        </field>
+        <field name="dataSourceId" title="${uiLabelMap.Source}"><display/></field>
+        <field name="latitude"  title="${uiLabelMap.CommonLatitude}"><display/></field>
+        <field name="longitude" title="${uiLabelMap.CommonLongitude}"><display/></field>
+        <field name="elevation"  title="${uiLabelMap.Elevation}" title-area-style="align-right" widget-area-style="align-right"><display/></field>
+        <field name="elevationUomId" title="${uiLabelMap.CommonUom}">
+            <display-entity entity-name="Uom" key-field-name="uomId" description="${abbreviation}"/>
+        </field>
+        <field name="information"><display/></field>
+    </form>
+    
+    <form name="EditGeo" type="single" target="updateGeo" title="" default-map-name="geo"
+        header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="geo==null" target="createGeo"/>
+        <field name="geoId" title="${uiLabelMap.CommonGeoId}"><text/></field>
+        <field name="geoTypeId" title="${uiLabelMap.CommonGeoTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options key-field-name="geoTypeId" entity-name="GeoType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="geoName" title="${uiLabelMap.CommonName}"><text/></field>
+        <field name="geoCode" title="${uiLabelMap.CommonCode}"><text/></field>
+        <field name="geoSecCode" title="${uiLabelMap.CommonGeoSecCode}"><text/></field>
+        <field name="abbreviation" title="${uiLabelMap.CommonGeoAbbr}"><text/></field>
+        <field name="wellKnownText" title="${uiLabelMap.CommonGeoWellKnownText}"><textarea/></field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupGeo" extends="ListGeos">
+        <field name="geoId" title="${uiLabelMap.CommonGeoId}" widget-style="buttontext">
+            <hyperlink description="${geoId}" target="javascript:set_value('${geoId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="deleteLink"><ignored/></field>
+    </form>
+    
+    <form name="LinkGeos" type="single" target="linkGeos" title="" focus-field-name="geoId" 
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="geoIds" title="${uiLabelMap.CommonGeos}">
+            <drop-down allow-multiple="true">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName} (${geoId})">
+<!--                    <entity-constraint name="geoTypeId" operator="in" value="STATE,PROVINCE,REGIONS"/><!-\- useful to quickly test -\->-->
+                    <entity-order-by field-name="geoId"/>
+                </entity-options>
+            </drop-down>
+        </field>        
+        <field name="dummy" title=" "><display/></field>
+        <field name="geoAssocTypeId" title="${uiLabelMap.CommonGeoAssocTypeId}"
+            event="onChange" 
+            action="typeValue = jQuery('#${asm_typeField}').val(); selectMultipleRelatedValues('${asm_requestName}', '${asm_paramKey}', '${asm_relatedField}', '${asm_multipleSelect}', '${asm_type}', typeValue, '${asm_responseName}');">
+            <drop-down>
+                <entity-options key-field-name="geoAssocTypeId" entity-name="GeoAssocType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="geoId" title="${uiLabelMap.CommonGeo}">
+            <drop-down current="selected">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoName} (${geoId})">
+                    <entity-order-by field-name="geoId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <grid name="ListGeoAssoc" list-name="listIt" paginate-target="EditGeo" target="deleteGeoAssoc"
+          odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="GeoAssoc" list="listIt">
+                <field-map field-name="geoId"/>
+            </entity-and>
+        </actions>
+        <row-actions>
+            <entity-one entity-name="Geo" value-field="geoTo">
+                <field-map field-name="geoId" from-field="geoIdTo"/>
+            </entity-one>
+        </row-actions>
+        <field name="geoId"><hidden/></field>
+        <field name="geoIdTo" title="${uiLabelMap.CommonGeo}">
+            <display-entity entity-name="Geo" key-field-name="geoId" description="${geoName}">
+                <sub-hyperlink target="EditGeo" description="[${geoIdTo}]">
+                    <parameter param-name="geoId" from-field="geoIdTo"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="geoTypeId" map-name="geoTo"  title="${uiLabelMap.CommonGeoTypeId}">
+            <display-entity entity-name="GeoType"/>
+        </field>
+        <field name="geoAssocTypeId" title="${uiLabelMap.CommonGeoAssocTypeId}">
+            <display-entity entity-name="GeoAssocType" key-field-name="geoAssocTypeId"/>
+        </field>
+        <field name="delete" title="${uiLabelMap.CommonDelete}"><submit/></field>
+    </grid>
+
+</forms>

@@ -1,0 +1,1094 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <simple-method method-name="getArithmeticSettingsInline" short-description="getArithmeticSettingsInline">
+        <property-to-field resource="arithmetic" property="finaccount.decimals" field="roundingDecimals" default="2"/>
+        <property-to-field resource="arithmetic" property="finaccount.roundingSimpleMethod" field="roundingMode" default="HalfUp"/>
+        <log level="verbose" message="Got settings from arithmetic.properties: roundingDecimals=${roundingDecimals}, roundingMode=${roundingMode}"/>
+    </simple-method>
+
+    <simple-method method-name="createFinAccount" short-description="Create a Financial Account">
+        <call-simple-method method-name="getArithmeticSettingsInline"/>
+
+        <!-- if no statusId set to default to FNACT_ACTIVE -->
+        <if-empty field="parameters.statusId">
+            <set field="parameters.statusId" value="FNACT_ACTIVE"/>
+        </if-empty>
+
+        <make-value value-field="newEntity" entity-name="FinAccount"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.finAccountId">
+            <sequenced-id sequence-name="FinAccount" field="finAccountId"/>
+            <to-string field="finAccountId"/>
+            <set from-field="finAccountId" field="newEntity.finAccountId"/>
+        </if-empty>
+
+        <!-- set the currency if none is already set -->
+        <if-empty field="newEntity.currencyUomId">
+
+            <property-to-field resource="general" property="currency.uom.id.default" field="defaultCurrency"/>
+            <set field="newEntity.currencyUomId" from-field="defaultCurrency"/>
+        </if-empty>
+
+        <!-- set the refundable flag from the type; if not set -->
+        <if-empty field="newEntity.isRefundable">
+            <entity-one entity-name="FinAccountType" value-field="finAccountType">
+                <field-map field-name="finAccountTypeId" from-field="parameters.finAccountTypeId"/>
+            </entity-one>
+            <if>
+                <condition>
+                    <and>
+                        <not>
+                            <if-empty field="finAccountType.isRefundable"/>
+                        </not>
+                        <if-compare field="finAccountType.isRefundable" value="Y" operator="equals"/>
+                    </and>
+                </condition>
+                <then>
+                    <set field="newEntity.isRefundable" value="Y"/>
+                </then>
+            </if>
+        </if-empty>
+
+        <!-- make sure the replenishLevel is a sane number -->
+        <calculate field="newEntity.replenishLevel" decimal-scale="${roundingDecimals}" rounding-mode="${roundingMode}">
+            <calcop operator="get" field="newEntity.replenishLevel"/>
+        </calculate>
+
+        <create-value value-field="newEntity"/>
+        <field-to-result field="newEntity.finAccountId" result-name="finAccountId"/>
+
+        <set-service-fields service-name="createFinAccountStatus" map="newEntity" to-map="createFinAccountStatusMap"/>
+        <call-service service-name="createFinAccountStatus" in-map-name="createFinAccountStatusMap"/>
+    </simple-method>
+    <simple-method method-name="updateFinAccount" short-description="Update a Financial Account">
+        <call-simple-method method-name="getArithmeticSettingsInline"/>
+
+        <entity-one entity-name="FinAccount" value-field="lookedUpValue"/>
+        <field-to-result field="lookedUpValue.replenishPaymentId" result-name="oldReplenishPaymentId"/>
+        <field-to-result field="lookedUpValue.replenishLevel" result-name="oldReplenishLevel"/>
+
+        <!-- handle statusId change stuff; first put the current statusId in the oldStatusId result -->
+        <field-to-result field="lookedUpValue.statusId" result-name="oldStatusId"/>
+        <if>
+            <condition>
+                <and>
+                    <not><if-empty field="parameters.statusId"></if-empty></not>
+                    <if-compare-field field="lookedUpValue.statusId" operator="not-equals" to-field="parameters.statusId"></if-compare-field>
+                </and>
+            </condition>
+            <then>
+                <!-- if the record exists there should be a statusId, but just in case make it so it won't blow up -->
+                <if-not-empty field="lookedUpValue.statusId">
+                    <!-- if statusId change is not in the StatusValidChange list, complain... -->
+                    <entity-one entity-name="StatusValidChange" value-field="statusValidChange" auto-field-map="false">
+                        <field-map field-name="statusId" from-field="lookedUpValue.statusId"/>
+                        <field-map field-name="statusIdTo" from-field="parameters.statusId"/>
+                    </entity-one>
+                    <if-empty field="statusValidChange">
+                        <!-- no valid change record found? return an error... -->
+                        <add-error>
+                            <fail-property resource="CommonUiLabels" property="CommonErrorNoStatusValidChange"/>
+                        </add-error>
+                        <check-errors/>
+                    </if-empty>
+                </if-not-empty>
+
+                <!-- before we set the nonpk fields, if the statusId is different save a status history record -->
+                <set-service-fields service-name="createFinAccountStatus" map="parameters" to-map="createFinAccountStatusMap"/>
+                <call-service service-name="createFinAccountStatus" in-map-name="createFinAccountStatusMap"/>
+            </then>
+            <else>
+                <if-compare field="lookedUpValue.statusId" operator="equals" value="FNACT_MANFROZEN">
+                    <add-error>
+                        <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountInactiveStatusError"/>
+                    </add-error>
+                </if-compare>
+                <if-compare field="lookedUpValue.statusId" operator="equals" value="FNACT_CANCELLED">
+                    <add-error>
+                        <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountStatusNotValidError"/>
+                    </add-error>
+                </if-compare>
+                <check-errors/>
+            </else>
+        </if>
+
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+
+        <!-- make sure the replenishLevel is a sane number -->
+        <calculate field="lookedUpValue.replenishLevel" decimal-scale="${roundingDecimals}" rounding-mode="${roundingMode}">
+            <calcop operator="get" field="lookedUpValue.replenishLevel"/>
+        </calculate>
+        <store-value value-field="lookedUpValue"/>
+
+        <field-to-result field="lookedUpValue.replenishPaymentId" result-name="replenishPaymentId"/>
+        <field-to-result field="lookedUpValue.replenishLevel" result-name="replenishLevel"/>
+        <field-to-result field="lookedUpValue.finAccountId" result-name="finAccountId"/>
+    </simple-method>
+    <simple-method method-name="deleteFinAccount" short-description="Delete a Financial Account">
+        <entity-one entity-name="FinAccount" value-field="finAccount"/>
+        <remove-value value-field="finAccount"/>
+    </simple-method>
+
+    <!-- FinAccountTrans Services -->
+    <simple-method method-name="createFinAccountTrans" short-description="Create a Financial Account Transaction">
+        <entity-one entity-name="FinAccount" value-field="finAccount"/>
+        <if-compare field="finAccount.statusId" operator="equals" value="FNACT_MANFROZEN">
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountInactiveStatusError"/>
+            </add-error>
+        </if-compare>
+        <if-compare field="finAccount.statusId" operator="equals" value="FNACT_CANCELLED">
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountStatusNotValidError"/>
+            </add-error>
+        </if-compare>
+        <check-errors/>
+        <call-simple-method method-name="getArithmeticSettingsInline"/>
+
+        <make-value value-field="newEntity" entity-name="FinAccountTrans"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <sequenced-id sequence-name="FinAccountTrans" field="newEntity.finAccountTransId"/>
+
+        <now-timestamp field="nowTimestamp"/>
+        <if-empty field="newEntity.transactionDate">
+            <set from-field="nowTimestamp" field="newEntity.transactionDate"/>
+        </if-empty>
+        <if-empty field="newEntity.entryDate">
+            <set from-field="nowTimestamp" field="newEntity.entryDate"/>
+        </if-empty>
+        <if-empty field="newEntity.statusId">
+            <set field="newEntity.statusId" value="FINACT_TRNS_APPROVED"/>    
+        </if-empty>
+        <set field="newEntity.performedByPartyId" from-field="userLogin.partyId"/>
+
+        <!-- make sure the amount is a sane number -->
+        <set field="originalAmount" from-field="newEntity.amount"/>
+        <calculate field="newEntity.amount" decimal-scale="${roundingDecimals}" rounding-mode="${roundingMode}">
+            <calcop operator="get" field="newEntity.amount"/>
+        </calculate>
+        <if-compare-field field="newEntity.amount" to-field="originalAmount" operator="not-equals" type="BigDecimal">
+            <log level="warning" message="In createFinAccountTrans had to round the amount from [${originalAmount}] to [${newEntity.amount}]"></log>
+        </if-compare-field>
+
+        <create-value value-field="newEntity"/>
+        <field-to-result field="newEntity.finAccountTransId" result-name="finAccountTransId"/>
+    </simple-method>
+
+    <!-- FinAccountRole Services -->
+    <simple-method method-name="createFinAccountRole" short-description="Create a Financial Account Role">
+        <entity-one entity-name="FinAccount" value-field="finAccount"/>
+        <if-compare field="finAccount.statusId" operator="equals" value="FNACT_MANFROZEN">
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountInactiveStatusError"/>
+            </add-error>
+        </if-compare>
+        <if-compare field="finAccount.statusId" operator="equals" value="FNACT_CANCELLED">
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountStatusNotValidError"/>
+            </add-error>
+        </if-compare>
+        <check-errors/>
+        <make-value value-field="newEntity" entity-name="FinAccountRole"/>
+        <set-pk-fields value-field="newEntity" map="parameters"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+
+    <!-- FinAccountAuth Services -->
+    <simple-method method-name="createFinAccountAuth" short-description="Create a Financial Account Authorization">
+        <call-simple-method method-name="getArithmeticSettingsInline"/>
+
+        <make-value value-field="newEntity" entity-name="FinAccountAuth"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <sequenced-id sequence-name="FinAccountAuth" field="newEntity.finAccountAuthId"/>
+
+        <now-timestamp field="nowTimestamp"/>
+        <if-empty field="newEntity.authorizationDate">
+            <set from-field="nowTimestamp" field="newEntity.authorizationDate"/>
+        </if-empty>
+        <if-empty field="newEntity.fromDate">
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <!-- make sure the amount is a sane number -->
+        <set field="originalAmount" from-field="newEntity.amount"/>
+        <calculate field="newEntity.amount" decimal-scale="${roundingDecimals}" rounding-mode="${roundingMode}">
+            <calcop operator="get" field="newEntity.amount"/>
+        </calculate>
+        <if-compare-field field="newEntity.amount" to-field="originalAmount" operator="not-equals" type="BigDecimal">
+            <log level="warning" message="In createFinAccountAuth had to round the amount from [${originalAmount}] to [${newEntity.amount}]"></log>
+        </if-compare-field>
+
+        <create-value value-field="newEntity"/>
+        <field-to-result field="newEntity.finAccountAuthId" result-name="finAccountAuthId"/>
+    </simple-method>
+    <simple-method method-name="expireFinAccountAuth" short-description="Expire a Financial Account Authorization">
+        <entity-one entity-name="FinAccountAuth" value-field="finAccountAuth"/>
+        <if-empty field="parameters.expireDateTime">
+            <now-timestamp field="finAccountAuth.thruDate"/>
+        <else>
+            <set from-field="parameters.expireDatetime" field="finAccountAuth.thruDate"/>
+        </else>
+        </if-empty>
+        <store-value value-field="finAccountAuth"/>
+    </simple-method>
+
+    <!-- Some methods to maintain FinAccount.actualBalance and FinAccount.availableBalance -->
+    <simple-method method-name="updateFinAccountBalancesFromTrans" short-description="">
+        <if-not-empty field="parameters.finAccountId">
+            <set field="finAccountId" from-field="parameters.finAccountId"/>
+            <else>
+                <entity-one entity-name="FinAccountTrans" value-field="mainFinAccountTrans"/>
+                <set field="finAccountId" from-field="mainFinAccountTrans.finAccountId"/>
+            </else>
+        </if-not-empty>
+
+        <call-simple-method method-name="inlineUpdateFinAccountActualAndAvailableBalance"/>
+    </simple-method>
+    <simple-method method-name="updateFinAccountBalancesFromAuth" short-description="">
+        <if-not-empty field="parameters.finAccountId">
+            <set field="finAccountId" from-field="parameters.finAccountId"/>
+            <else>
+                <entity-one entity-name="FinAccountAuth" value-field="mainFinAccountAuth"/>
+                <set field="finAccountId" from-field="mainFinAccountAuth.finAccountId"/>
+            </else>
+        </if-not-empty>
+
+        <call-simple-method method-name="inlineUpdateFinAccountActualAndAvailableBalance"/>
+    </simple-method>
+    <simple-method method-name="inlineUpdateFinAccountActualAndAvailableBalance" short-description="">
+        <call-simple-method method-name="getArithmeticSettingsInline"/>
+
+        <!-- NOTE: finAccountId should always be in place -->
+        <!-- Get all of the records for the account from the database and sum everything up again, make sure we don't have any errors propagated over time -->
+
+        <entity-condition entity-name="FinAccountTrans" list="finAccountTransList">
+            <condition-expr field-name="finAccountId" from-field="finAccountId"/>
+        </entity-condition>
+        <set field="actualBalanceSum" value="0" type="BigDecimal"/>
+        <iterate list="finAccountTransList" entry="finAccountTrans">
+            <if>
+                <condition>
+                    <if-compare field="finAccountTrans.statusId" operator="equals" value="FINACT_TRNS_APPROVED"/>
+                </condition>
+            <then>
+                <if>
+                    <condition><if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="DEPOSIT"/></condition>
+                    <then><set field="amountForCalc" from-field="finAccountTrans.amount"/></then>
+                <else-if>
+                    <condition><if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="WITHDRAWAL"/></condition>
+                    <then><calculate field="amountForCalc"><calcop operator="negative" field="finAccountTrans.amount"/></calculate></then>
+                </else-if>
+                <else-if>
+                    <condition><if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="ADJUSTMENT"/></condition>
+                    <then><set field="amountForCalc" from-field="finAccountTrans.amount"/></then>
+                </else-if>
+                </if>
+                <set field="actualBalanceSum" value="${actualBalanceSum + amountForCalc}" type="BigDecimal"/>
+            </then>
+            </if>
+        </iterate>
+        <calculate field="actualBalanceSum" decimal-scale="${roundingDecimals}" rounding-mode="${roundingMode}">
+            <calcop operator="get" field="actualBalanceSum"/>
+        </calculate>
+
+        <!-- start with the actual balance, and subtract off FinAccountAuth.amount -->
+        <set field="availableBalanceSum" from-field="actualBalanceSum"/>
+        <entity-condition entity-name="FinAccountAuth" list="finAccountAuthList" filter-by-date="true">
+            <condition-expr field-name="finAccountId" from-field="finAccountId"/>
+        </entity-condition>
+        <iterate list="finAccountAuthList" entry="finAccountAuth">
+            <calculate field="availableBalanceSum" type="BigDecimal" decimal-scale="${roundingDecimals}" rounding-mode="${roundingMode}">
+                <calcop operator="add" field="availableBalanceSum">
+                    <calcop operator="negative" field="finAccountAuth.amount"/>
+                </calcop>
+            </calculate>
+        </iterate>
+
+        <!-- Okay, now just store the results -->
+        <entity-one entity-name="FinAccount" value-field="finAccount"/>
+        <log level="verbose" message="In updateFinAccountBalancesFromTrans/Auth updating FinAccount with ID [${finAccountId}] with actualBalance: ${finAccount.actualBalance} -> ${actualBalanceSum}, and availableBalance: ${finAccount.availableBalance} -> ${availableBalanceSum}"/>
+        <set field="finAccount.actualBalance" from-field="actualBalanceSum"/>
+        <set field="finAccount.availableBalance" from-field="availableBalanceSum"/>
+        <store-value value-field="finAccount"/>
+    </simple-method>
+
+    <simple-method method-name="depositWithdrawPayments" short-description="Deposit withdraw payments">
+        <set field="paymentIds" from-field="parameters.paymentIds"/>
+        <set field="finAccountId" from-field="parameters.finAccountId"/>
+        <entity-one entity-name="FinAccount" value-field="finAccount"/>
+        <!-- Do not create a batch against a financial account which is Manually Frozen or Canceled -->
+        <if>
+           <condition>
+               <or>
+                   <if-compare field="finAccount.statusId" operator="equals" value="FNACT_MANFROZEN"/>
+                   <if-compare field="finAccount.statusId" operator="equals" value="FNACT_CANCELLED"/>
+               </or>
+           </condition>
+           <then>
+               <add-error>
+                   <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountInactiveStatusError"/>
+               </add-error>
+           </then>
+        </if>
+        <check-errors/>
+        <set field="paymentRunningTotal" type="BigDecimal" value="0"/>
+        <entity-condition entity-name="Payment" list="payments">
+            <condition-expr field-name="paymentId" operator="in" from-field="paymentIds"/>
+        </entity-condition>
+        <iterate list="payments" entry="payment">
+            <set field="paymentRunningTotal" value="${paymentRunningTotal + payment.amount}" type="BigDecimal"/>
+            <if-not-empty field="payment.finAccountTransId">
+                <add-error>
+                    <fail-property resource="AccountingUiLabels" property="AccountingPaymentAlreadyAssociatedToFinAccountError"/>
+                </add-error>
+            </if-not-empty>
+            <check-errors/>
+            <set field="isValidStatus" value="${payment.statusId == 'PMNT_SENT' @or payment.statusId == 'PMNT_RECEIVED'}" type="Boolean"/>
+            <if-compare field="isValidStatus" operator="equals" value="false">
+                <add-error>
+                    <fail-property resource="AccountingUiLabels" property="AccountingPaymentStatusIsNotReceivedOrSentError"/>
+                </add-error>
+            </if-compare>
+            <check-errors/>
+        </iterate>
+        <if-compare field="parameters.groupInOneTransaction" operator="equals" value="Y">
+            <set field="createFinAccountTransMap.finAccountId" from-field="finAccountId"/>
+            <set field="createFinAccountTransMap.finAccountTransTypeId" value="DEPOSIT"/>
+            <set field="createFinAccountTransMap.partyId" from-field="finAccount.ownerPartyId"/>
+            <set field="createFinAccountTransMap.amount" from-field="paymentRunningTotal"/>
+            <set field="createFinAccountTransMap.statusId" value="FINACT_TRNS_CREATED"/>
+            <call-service service-name="createFinAccountTrans" in-map-name="createFinAccountTransMap">
+                <result-to-field result-name="finAccountTransId"/>
+                <result-to-result result-name="finAccountTransId"/>
+            </call-service>
+            <iterate list="payments" entry="payment">
+                <set field="isReceipt" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.isReceipt(payment)}" type="Boolean"/>
+                <if-compare field="isReceipt" operator="equals" value="false" type="Boolean">
+                    <add-error>
+                        <fail-property resource="AccountingUiLabels" property="AccountingCannotIncludeApPaymentError"/>
+                    </add-error>
+                </if-compare>
+                <check-errors/>
+                <set field="updatePaymentCtx.paymentId" from-field="payment.paymentId"/>
+                <set field="updatePaymentCtx.finAccountTransId" from-field="finAccountTransId"/>
+                <call-service service-name="updatePayment" in-map-name="updatePaymentCtx"/>
+                <clear-field field="updatePaymentCtx"/>
+            </iterate>
+            <set-service-fields service-name="checkAndCreateBatchForValidPayments" map="parameters" to-map="checkAndCreateBatchForValidPaymentsMap"/>
+            <call-service service-name="checkAndCreateBatchForValidPayments" in-map-name="checkAndCreateBatchForValidPaymentsMap">
+                <result-to-result result-name="paymentGroupId"/>
+            </call-service>
+        <else>
+            <iterate list="payments" entry="payment">
+                <set field="isReceipt" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.isReceipt(payment)}" type="Boolean"/>
+                <set field="isDisbursement" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.isDisbursement(payment)}" type="Boolean"/>
+                <if-compare field="isReceipt" operator="equals" value="true" type="Boolean">
+                    <set field="createFinAccountTransMap.finAccountTransTypeId" value="DEPOSIT"/>
+                <else>
+                    <if-compare field="isDisbursement" operator="equals" value="true" type="Boolean">
+                        <set field="createFinAccountTransMap.finAccountTransTypeId" value="WITHDRAWAL"/>
+                    </if-compare>
+                </else>
+                </if-compare>
+                <set field="createFinAccountTransMap.finAccountId" from-field="finAccountId"/>
+                <set field="createFinAccountTransMap.partyId" from-field="finAccount.ownerPartyId"/>
+                <set field="createFinAccountTransMap.paymentId" from-field="payment.paymentId"/>
+                <set field="createFinAccountTransMap.amount" from-field="payment.amount"/>
+                <set field="createFinAccountTransMap.statusId" value="FINACT_TRNS_CREATED"/>
+                <call-service service-name="createFinAccountTrans" in-map-name="createFinAccountTransMap">
+                    <result-to-field result-name="finAccountTransId"/>
+                </call-service>
+                <set field="updatePaymentCtx.paymentId" from-field="payment.paymentId"/>
+                <set field="updatePaymentCtx.finAccountTransId" from-field="finAccountTransId"/>
+                <call-service service-name="updatePayment" in-map-name="updatePaymentCtx"/>
+                <clear-field field="updatePaymentCtx"/>
+                <clear-field field="createFinAccountTransMap"/>
+            </iterate>
+        </else>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="setFinAccountTransStatus" short-description="set the financial account transaction status">
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans"/>
+        <field-to-result field="finAccountTrans.statusId" result-name="oldStatusId"/>
+        <if-compare-field field="finAccountTrans.statusId" operator="not-equals" to-field="parameters.statusId">
+            <entity-one entity-name="StatusValidChange" value-field="statusChange" auto-field-map="false">
+                <field-map field-name="statusId" from-field="finAccountTrans.statusId"/>
+                <field-map field-name="statusIdTo" from-field="parameters.statusId"/>
+            </entity-one>
+            <if-empty field="statusChange">
+                <add-error>
+                    <fail-property resource="AccountingUiLabels" property="AccountingPSInvalidStatusChange"/>
+                </add-error>
+                <log level="error" message="Cannot change from ${finAccountTrans.statusId} to ${parameters.statusId}"/>
+                <check-errors/>
+            <else>
+                <set field="finAccountTrans.statusId" from-field="parameters.statusId"/>
+                <store-value value-field="finAccountTrans"/>
+            </else>
+            </if-empty>
+        </if-compare-field>
+    </simple-method>
+    
+    <simple-method method-name="updatePaymentOnFinAccTransStatusSetToCancel" short-description="remove field finAccountTransId from Payment entity.">
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans"/>
+        <if-empty field="finAccountTrans.paymentId">
+            <entity-and entity-name="Payment" list="payments">
+                <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+            </entity-and>
+            <else>
+                <get-related-one relation-name="Payment" value-field="finAccountTrans" to-value-field="payment"/>
+                <field-to-list field="payment" list="payments"/>
+            </else>
+        </if-empty>
+        <iterate list="payments" entry="payment">
+            <set field="updatePaymentMap.paymentId" from-field="payment.paymentId"/>
+            <clear-field field="updatePaymentMap.finAccountTransId"/>
+            <call-service service-name="updatePayment" in-map-name="updatePaymentMap"/>
+            <clear-field field="updatePaymentMap"/>
+        </iterate>
+    </simple-method>
+    <simple-method method-name="expirePaymentAssociationsOnFinAccountTransCancel" short-description="expire payment associations with paymentGroup on finAccountTrans cancel">
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans"/>
+        <if-empty field="finAccountTrans.paymentId">
+            <entity-and entity-name="Payment" list="payments">
+                <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+            </entity-and>
+            <else>
+                <get-related-one relation-name="Payment" value-field="finAccountTrans" to-value-field="payment"/>
+                <field-to-list field="payment" list="payments"/>
+            </else>
+        </if-empty>
+        <iterate list="payments" entry="payment">
+            <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers" filter-by-date="true">
+                <field-map field-name="paymentId" from-field="payment.paymentId"/>
+            </entity-and>
+            <if-not-empty field="paymentGroupMembers">
+                <first-from-list list="paymentGroupMembers" entry="paymentGroupMember"/>
+                <set-service-fields service-name="expirePaymentGroupMember" map="paymentGroupMember" to-map="expirePaymentGroupMemberMap"/>
+                <call-service service-name="expirePaymentGroupMember" in-map-name="expirePaymentGroupMemberMap"/>
+                <clear-field field="expirePaymentGroupMemberMap"/>
+            </if-not-empty>
+        </iterate>
+    </simple-method>
+
+    <simple-method method-name="getFinAccountTransListAndTotals" short-description="Retrieve Financial Account Transaction List and Totals">
+        <entity-condition entity-name="FinAccountTrans" list="finAccountTransactions">
+            <condition-expr field-name="finAccountId" from-field="parameters.finAccountId"/>
+            <use-iterator/>
+        </entity-condition>
+        <set field="grandTotal" type="BigDecimal" value="0"/>
+        <set field="createdGrandTotal" type="BigDecimal" value="0"/>
+        <set field="totalCreatedTransactions" type="Long" value="0"/>
+        <set field="approvedGrandTotal" type="BigDecimal" value="0"/>
+        <set field="totalApprovedTransactions" type="Long" value="0"/>
+        <set field="createdApprovedGrandTotal" type="BigDecimal" value="0"/>
+        <set field="glReconciliationApprovedGrandTotal" type="BigDecimal" value="0"/>
+        <iterate list="finAccountTransactions" entry="finAccountTransaction">
+            <if-compare field="finAccountTransaction.finAccountTransTypeId" operator="equals" value="WITHDRAWAL">
+                <if-compare field="finAccountTransaction.statusId" operator="equals" value="FINACT_TRNS_CREATED">
+                    <set field="totalCreatedTransactions" value="${totalCreatedTransactions + 1}" type="Long"/>
+                    <set field="createdGrandTotal" value="${createdGrandTotal - finAccountTransaction.amount}" type="BigDecimal"/>
+                    <set field="createdApprovedGrandTotal" value="${createdApprovedGrandTotal - finAccountTransaction.amount}" type="BigDecimal"/>
+                </if-compare>
+                <if-compare field="finAccountTransaction.statusId" operator="equals" value="FINACT_TRNS_APPROVED">
+                    <set field="totalApprovedTransactions" value="${totalApprovedTransactions + 1}" type="Long"/>
+                    <set field="approvedGrandTotal" value="${approvedGrandTotal - finAccountTransaction.amount}" type="BigDecimal"/>
+                    <set field="createdApprovedGrandTotal" value="${createdApprovedGrandTotal - finAccountTransaction.amount}" type="BigDecimal"/>
+                    <if-compare-field field="parameters.glReconciliationId" operator="equals" to-field="finAccountTransaction.glReconciliationId">
+                        <set field="glReconciliationApprovedGrandTotal" value="${glReconciliationApprovedGrandTotal - finAccountTransaction.amount}" type="BigDecimal"/>
+                    </if-compare-field>
+                </if-compare>
+            <else>
+                <if-compare field="finAccountTransaction.statusId" operator="equals" value="FINACT_TRNS_CREATED">
+                    <set field="totalCreatedTransactions" value="${totalCreatedTransactions + 1}" type="Long"/>
+                    <set field="createdGrandTotal" value="${createdGrandTotal + finAccountTransaction.amount}" type="BigDecimal"/>
+                    <set field="createdApprovedGrandTotal" value="${createdApprovedGrandTotal + finAccountTransaction.amount}" type="BigDecimal"/>
+                </if-compare>
+                <if-compare field="finAccountTransaction.statusId" operator="equals" value="FINACT_TRNS_APPROVED">
+                    <set field="totalApprovedTransactions" value="${totalApprovedTransactions + 1}" type="Long"/>
+                    <set field="approvedGrandTotal" value="${approvedGrandTotal + finAccountTransaction.amount}" type="BigDecimal"/>
+                    <set field="createdApprovedGrandTotal" value="${createdApprovedGrandTotal + finAccountTransaction.amount}" type="BigDecimal"/>
+                    <if-compare-field field="parameters.glReconciliationId" operator="equals" to-field="finAccountTransaction.glReconciliationId">
+                        <set field="glReconciliationApprovedGrandTotal" value="${glReconciliationApprovedGrandTotal + finAccountTransaction.amount}" type="BigDecimal"/>
+                    </if-compare-field>
+                </if-compare>
+            </else>
+            </if-compare>
+        </iterate>
+        <if-compare field="parameters.glReconciliationId" operator="equals" value="_NA_">
+            <set field="isConditionalStatusId" value="${parameters.statusId == null @or parameters.statusId != 'FINACT_TRNS_CANCELED'}" type="Boolean"/>
+            <if-compare field="isConditionalStatusId" operator="equals" value="true" type="Boolean">
+                <set field="conditionalStatusId" value="FINACT_TRNS_CANCELED"/>
+            </if-compare>
+            <entity-condition entity-name="FinAccountTrans" list="finAccountTransList">
+                <condition-list combine="and">
+                    <condition-expr field-name="finAccountId" from-field="parameters.finAccountId"/>
+                    <condition-expr field-name="finAccountTransTypeId" from-field="parameters.finAccountTransTypeId" ignore-if-empty="true"/>
+                    <condition-expr field-name="statusId" operator="not-equals" from-field="conditionalStatusId" ignore-if-empty="true"/>
+                    <condition-expr field-name="statusId" operator="equals" from-field="parameters.statusId" ignore-if-empty="true"/>
+                    <condition-expr field-name="glReconciliationId" operator="equals" from-field="nullField"/>
+                    <condition-expr field-name="transactionDate" operator="greater-equals" from-field="parameters.fromTransactionDate" ignore-if-empty="true"/>
+                    <condition-expr field-name="transactionDate" operator="less-equals" from-field="parameters.thruTransactionDate" ignore-if-empty="true"/>
+                    <condition-expr field-name="entryDate" operator="greater-equals" from-field="parameters.fromEntryDate" ignore-if-empty="true"/>
+                    <condition-expr field-name="entryDate" operator="less-equals" from-field="parameters.thruEntryDate" ignore-if-empty="true"/>
+                </condition-list>
+            </entity-condition>
+        <else>
+            <entity-condition entity-name="FinAccountTrans" list="finAccountTransList">
+                <condition-list combine="and">
+                    <condition-expr field-name="finAccountId" from-field="parameters.finAccountId"/>
+                    <condition-expr field-name="finAccountTransTypeId" from-field="parameters.finAccountTransTypeId" ignore-if-empty="true"/>
+                    <condition-expr field-name="statusId" from-field="parameters.statusId" ignore-if-empty="true"/>
+                    <condition-expr field-name="glReconciliationId" from-field="parameters.glReconciliationId" ignore-if-empty="true"/>
+                    <condition-expr field-name="transactionDate" operator="greater-equals" from-field="parameters.fromTransactionDate" ignore-if-empty="true"/>
+                    <condition-expr field-name="transactionDate" operator="less-equals" from-field="parameters.thruTransactionDate" ignore-if-empty="true"/>
+                    <condition-expr field-name="entryDate" operator="greater-equals" from-field="parameters.fromEntryDate" ignore-if-empty="true"/>
+                    <condition-expr field-name="entryDate" operator="less-equals" from-field="parameters.thruEntryDate" ignore-if-empty="true"/>
+                </condition-list>
+            </entity-condition>
+        </else>
+        </if-compare>
+        <iterate list="finAccountTransList" entry="finAccountTrans">
+            <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="WITHDRAWAL">
+                <set field="grandTotal" value="${grandTotal - finAccountTrans.amount}" type="BigDecimal"/>
+            <else>
+                <set field="grandTotal" value="${grandTotal + finAccountTrans.amount}" type="BigDecimal"/>
+            </else>
+            </if-compare>
+        </iterate>
+        <call-object-method obj-field="finAccountTransList" method-name="size" ret-field="searchedNumberOfRecords"/>
+        <set field="totalCreatedApprovedTransactions" value="${totalCreatedTransactions + totalApprovedTransactions}" type="Long"/>
+        <field-to-result field="finAccountTransList"/>
+        <field-to-result field="searchedNumberOfRecords"/>
+        <field-to-result field="grandTotal"/>
+        <field-to-result field="createdGrandTotal"/>
+        <field-to-result field="totalCreatedTransactions"/>
+        <field-to-result field="approvedGrandTotal"/>
+        <field-to-result field="totalApprovedTransactions"/>
+        <field-to-result field="createdApprovedGrandTotal"/>
+        <field-to-result field="totalCreatedApprovedTransactions"/>
+        <if-not-empty field="parameters.openingBalance">
+            <set field="glReconciliationApprovedGrandTotal" type="BigDecimal" value="${glReconciliationApprovedGrandTotal + parameters.openingBalance}"/>
+        </if-not-empty>
+        <field-to-result field="glReconciliationApprovedGrandTotal"/>
+    </simple-method>
+
+    <simple-method method-name="getFinAccountTransRunningTotalAndBalances" short-description="Calculate running total and Balances of Financial Account Transactions">
+        <set field="runningTotal" type="BigDecimal" from-field="parameters.runningTotal" default-value="0"/>
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans" auto-field-map="true"/>
+        <if-compare field="finAccountTrans.finAccountTransTypeId"  operator="equals" value="WITHDRAWAL">
+            <set field="runningTotal" value="${runningTotal - finAccountTrans.amount}" type="BigDecimal"/>
+        <else>
+            <set field="runningTotal" value="${runningTotal + finAccountTrans.amount}" type="BigDecimal"/>
+        </else>
+        </if-compare>
+        <field-to-result field="runningTotal"/>
+        <set field="numberOfTransactions" type="Long" from-field="parameters.numberOfTransactions" default-value="0"/>
+        <set field="numberOfTransactions" type="Long" value="${numberOfTransactions + 1}"/>
+        <field-to-result field="numberOfTransactions"/>
+        <set field="openingBalance" type="BigDecimal" from-field="parameters.openingBalance" default-value="0"/>
+        <set field="reconciledBalance" type="BigDecimal" from-field="parameters.reconciledBalance" default-value="0"/>
+        <set field="endingBalance" type="BigDecimal" value="${openingBalance + reconciledBalance + runningTotal}"/>
+        <set-service-fields service-name="getPartyAccountingPreferences" map="parameters" to-map="getPartyAccountingPreferencesMap"/>
+        <call-service service-name="getPartyAccountingPreferences" in-map-name="getPartyAccountingPreferencesMap">
+            <result-to-field result-name="partyAccountingPreference"/>
+        </call-service>
+        <set field="currencyUomId" from-field="partyAccountingPreference.baseCurrencyUomId"/>
+        <if-empty field="currencyUomId">
+            <property-to-field resource="general" property="currency.uom.id.default" field="currencyUomId"/>
+        </if-empty>
+        <set field="finAccountTransRunningTotal" value="${groovy:org.apache.ofbiz.base.util.UtilFormatOut.formatCurrency(runningTotal, currencyUomId, parameters.locale)}"/>
+        <set field="endingBalance" value="${groovy:org.apache.ofbiz.base.util.UtilFormatOut.formatCurrency(endingBalance, currencyUomId, parameters.locale)}"/>
+        <field-to-result field="finAccountTransRunningTotal"/>
+        <field-to-result field="endingBalance"/>
+    </simple-method>
+    
+    <simple-method method-name="reconcileFinAccountTrans" short-description="Reconcile Financial Accounting Transaction">
+        <now-timestamp field="nowTimestamp"/>
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans" auto-field-map="true"/>
+        <if-not-empty field="finAccountTrans.glReconciliationId">
+            <!-- Create AcctgTrans, AcctgTransEntries and GlReconciliationEntries -->
+            <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="ADJUSTMENT">
+                <set-service-fields service-name="reconcileAdjustmentFinAcctgTrans" map="parameters" to-map="reconcileAdjustmentFinAcctgTransMap"/>
+                <set field="reconcileAdjustmentFinAcctgTransMap.finAccountTrans" from-field="finAccountTrans"/>
+                <set field="reconcileAdjustmentFinAcctgTransMap.organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <call-service service-name="reconcileAdjustmentFinAcctgTrans" in-map-name="reconcileAdjustmentFinAcctgTransMap"/>
+            </if-compare>
+            <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="DEPOSIT">
+                <set-service-fields service-name="reconcileDepositFinAcctgTrans" map="parameters" to-map="reconcileDepositFinAcctgTransMap"/>
+                <set field="reconcileDepositFinAcctgTransMap.finAccountTrans" from-field="finAccountTrans"/>
+                <call-service service-name="reconcileDepositFinAcctgTrans" in-map-name="reconcileDepositFinAcctgTransMap"/>
+            </if-compare>
+            <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="WITHDRAWAL">
+                <set-service-fields service-name="reconcileWithdrawalFinAcctgTrans" map="parameters" to-map="reconcileWithdrawalFinAcctgTransMap"/>
+                <set field="reconcileWithdrawalFinAcctgTransMap.finAccountTrans" from-field="finAccountTrans"/>
+                <call-service service-name="reconcileWithdrawalFinAcctgTrans" in-map-name="reconcileWithdrawalFinAcctgTransMap"/>
+            </if-compare>
+
+            <!-- Update FinAccount Trans Record -->
+            <set-service-fields service-name="setFinAccountTransStatus" map="finAccountTrans" to-map="setFinAccountTransStatusMap"/>
+            <set field="setFinAccountTransStatusMap.statusId" value="FINACT_TRNS_APPROVED"/>
+            <call-service service-name="setFinAccountTransStatus" in-map-name="setFinAccountTransStatusMap"/>
+
+            <!-- Update GlReconciliation record -->
+            <get-related-one relation-name="GlReconciliation" value-field="finAccountTrans" to-value-field="glReconciliation"/>
+            <set-service-fields service-name="updateGlReconciliation" map="glReconciliation" to-map="updateGlReconciliationMap"/>
+            <set field="isAdjustmentOrDeposit" value="${finAccountTrans.finAccountTransTypeId == 'ADJUSTMENT' @or finAccountTrans.finAccountTransTypeId == 'DEPOSIT'}" type="Boolean"/> 
+            <if-compare field="isAdjustmentOrDeposit" operator="equals" value="true" type="Boolean">
+                <set field="updateGlReconciliationMap.reconciledBalance" value="${glReconciliation.reconciledBalance + finAccountTrans.amount}" type="BigDecimal"/>
+            <else>
+                <set field="updateGlReconciliationMap.reconciledBalance" value="${glReconciliation.reconciledBalance - finAccountTrans.amount}" type="BigDecimal"/>
+            </else>
+            </if-compare>
+            <set field="isGlReconciliationReconciledMap.glReconciliationId" from-field="finAccountTrans.glReconciliationId"/>
+            <call-service service-name="isGlReconciliationReconciled" in-map-name="isGlReconciliationReconciledMap">
+                <result-to-field result-name="isReconciled"/>
+            </call-service>
+            <if-compare field="isReconciled" operator="equals" value="true" type="Boolean">
+                <if-empty field="updateGlReconciliationMap.reconciledDate">
+                    <set field="updateGlReconciliationMap.reconciledDate" from-field="nowTimestamp"/>
+                </if-empty>
+            </if-compare>
+            <call-service service-name="updateGlReconciliation" in-map-name="updateGlReconciliationMap"/>
+        <else>
+            <add-error>
+                <fail-property resource="AccountingUiLabels" property="AccountingReconciliationError"/>
+            </add-error>
+            <check-errors/>
+        </else>
+        </if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="reconcileAdjustmentFinAcctgTrans" short-description="Reconcile financial accounting transaction of type adjustment">
+        <set field="finAccountTrans" from-field="parameters.finAccountTrans"/>
+        <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="ADJUSTMENT">
+            <entity-and entity-name="AcctgTrans" list="acctgTransList">
+                <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+            </entity-and>
+            <if-not-empty field="acctgTransList">
+                <first-from-list list="acctgTransList" entry="acctgTrans"/>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N">
+                    <set-service-fields service-name="postAcctgTrans" map="acctgTrans" to-map="postAcctgTransMap"/>
+                    <call-service service-name="postAcctgTrans" in-map-name="postAcctgTransMap"/>
+                </if-compare>
+                <get-related relation-name="AcctgTransEntry" list="acctgTransEntries" value-field="acctgTrans"/>
+                <iterate  list="acctgTransEntries" entry="acctgTransEntry">
+                    <set-service-fields service-name="createGlReconciliationEntry" map="acctgTransEntry" to-map="createGlReconciliationEntryMap"/>
+                    <set field="createGlReconciliationEntryMap.glReconciliationId" from-field="finAccountTrans.glReconciliationId"/>
+                    <set field="createGlReconciliationEntryMap.reconciledAmount" from-field="acctgTransEntry.amount"/>
+                    <call-service service-name="createGlReconciliationEntry" in-map-name="createGlReconciliationEntryMap"/>
+                    <set-service-fields service-name="updateAcctgTransEntry" map="acctgTransEntry" to-map="updateAcctgTransEntryMap"/>
+                    <set field="updateAcctgTransEntryMap.reconcileStatusId" value="AES_RECONCILED"/>
+                    <call-service service-name="updateAcctgTransEntry" in-map-name="updateAcctgTransEntryMap"/>
+                </iterate>
+            </if-not-empty>
+        <else>
+            <property-to-field property="AccountingNotAdjustmentFinAccountTrans" resource="AccountingUiLabels" field="errorMessage"/>
+            <field-to-result field="errorMessage" result-name="errorMessage"/>
+        </else>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="reconcileDepositFinAcctgTrans" short-description="Reconcile financial accounting transaction of type deposit">
+        <now-timestamp field="nowTimestamp"/>
+        <set field="finAccountTrans" from-field="parameters.finAccountTrans"/>
+        <get-related-one relation-name="FinAccount" value-field="finAccountTrans" to-value-field="finAccount"/>
+        <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="DEPOSIT">
+            <if-empty field="finAccountTrans.paymentId">
+                <entity-and entity-name="Payment" list="payments">
+                    <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+                </entity-and>
+            <else>
+                <get-related-one relation-name="Payment" value-field="finAccountTrans" to-value-field="payment"/>
+                <field-to-list field="payment" list="payments"/>
+            </else>
+            </if-empty>
+            <if-empty field="payments">
+                <entity-and entity-name="AcctgTrans" list="acctgTransList">
+                    <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+                </entity-and>
+                <first-from-list list="acctgTransList" entry="acctgTrans"/>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N">
+                    <set-service-fields service-name="postAcctgTrans" map="acctgTrans" to-map="postAcctgTransMap"/>
+                    <call-service service-name="postAcctgTrans" in-map-name="postAcctgTransMap"/>
+                </if-compare>
+            </if-empty>
+            <iterate list="payments" entry="payment">
+                <clear-field field="createAcctgTransAndEntriesMap"/>
+                <get-related relation-name="AcctgTrans" list="acctgTransList" value-field="payment"/>
+                <first-from-list list="acctgTransList" entry="acctgTrans"/>
+                <set-service-fields service-name="createAcctgTransAndEntries" map="acctgTrans" to-map="createAcctgTransAndEntriesMap"/>
+                <set field="entryAmount" type="BigDecimal" value="0"/>
+                <iterate list="acctgTransList" entry="acctgTrans">
+                    <if-compare field="acctgTrans.acctgTransTypeId" operator="not-equals" value="PAYMENT_APPL">
+                        <get-related relation-name="AcctgTransEntry" list="acctgTransEntries" value-field="acctgTrans"/>
+                    </if-compare> 
+                    <iterate list="acctgTransEntries" entry="oldAcctgTransEntry">
+                        <if-compare field="oldAcctgTransEntry.debitCreditFlag" operator="equals" value="D">
+                            <make-value value-field="newAcctgTransEntry" entity-name="AcctgTransEntry"/>
+                            <set field="newAcctgTransEntry.glAccountId" from-field="oldAcctgTransEntry.glAccountId"/>
+                            <set field="organizationPartyId" from-field="oldAcctgTransEntry.organizationPartyId"/>
+                            <set field="newAcctgTransEntry.organizationPartyId" from-field="organizationPartyId"/>
+                            <set field="newAcctgTransEntry.partyId" from-field="oldAcctgTransEntry.partyId"/>
+                            <set field="newAcctgTransEntry.amount" from-field="oldAcctgTransEntry.amount"/>
+                            <set field="newAcctgTransEntry.acctgTransEntryTypeId" from-field="oldAcctgTransEntry.acctgTransEntryTypeId"/>
+                            <set field="newAcctgTransEntry.debitCreditFlag" value="C"/>
+                            <set field="entryAmount" type="BigDecimal" value="${entryAmount + newAcctgTransEntry.amount}"/>
+                            <field-to-list field="newAcctgTransEntry" list="createAcctgTransAndEntriesMap.acctgTransEntries"/>
+                        </if-compare>
+                        <set-service-fields service-name="updateAcctgTransEntry" map="oldAcctgTransEntry" to-map="updateAcctgTransEntryMap"/>
+                        <set field="updateAcctgTransEntryMap.reconcileStatusId" value="AES_RECONCILED"/>
+                        <call-service service-name="updateAcctgTransEntry" in-map-name="updateAcctgTransEntryMap"/>
+                    </iterate>
+                </iterate>
+                <clear-field field="createAcctgTransAndEntriesMap.acctgTransId"/>
+                <set field="createAcctgTransAndEntriesMap.transactionDate" from-field="nowTimestamp"/>
+                <set field="createAcctgTransAndEntriesMap.postedDate" from-field="nowTimestamp"/>
+                <make-value value-field="newAcctgTransEntry" entity-name="AcctgTransEntry"/>
+                <set field="newAcctgTransEntry.glAccountId" from-field="finAccount.postToGlAccountId"/>
+                <set field="newAcctgTransEntry.organizationPartyId" from-field="organizationPartyId"/>
+                <set field="newAcctgTransEntry.partyId" from-field="oldAcctgTransEntry.partyId"/>
+                <set field="newAcctgTransEntry.amount" from-field="entryAmount"/>
+                <set field="newAcctgTransEntry.acctgTransEntryTypeId" value="_NA_"/>
+                <set field="newAcctgTransEntry.debitCreditFlag" value="D"/>
+                <field-to-list field="newAcctgTransEntry" list="createAcctgTransAndEntriesMap.acctgTransEntries"/>
+                <call-service service-name="createAcctgTransAndEntries" in-map-name="createAcctgTransAndEntriesMap">
+                    <result-to-field result-name="acctgTransId"/>
+                </call-service>
+                <entity-and entity-name="AcctgTransEntry" list="acctgTransEntries">
+                    <field-map field-name="acctgTransId"/>
+                </entity-and>
+                <iterate list="acctgTransEntries" entry="acctgTransEntry">
+                    <set-service-fields service-name="createGlReconciliationEntry" map="acctgTransEntry" to-map="createGlReconciliationEntryMap"/>
+                    <set field="createGlReconciliationEntryMap.glReconciliationId" from-field="finAccountTrans.glReconciliationId"/>
+                    <set field="createGlReconciliationEntryMap.reconciledAmount" from-field="acctgTransEntry.amount"/>
+                    <call-service service-name="createGlReconciliationEntry" in-map-name="createGlReconciliationEntryMap"/>
+                </iterate>
+            </iterate>
+        <else>
+            <property-to-field property="AccountingNotDepositFinAccountTrans" resource="AccountingUiLabels" field="errorMessage"/>
+            <field-to-result field="errorMessage" result-name="errorMessage"/>
+        </else>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="reconcileWithdrawalFinAcctgTrans" short-description="Reconcile financial accounting transaction of type withdrawl">
+        <now-timestamp field="nowTimestamp"/>
+        <set field="finAccountTrans" from-field="parameters.finAccountTrans"/>
+        <get-related-one relation-name="FinAccount" value-field="finAccountTrans" to-value-field="finAccount"/>
+        <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="WITHDRAWAL">
+            <if-empty field="finAccountTrans.paymentId">
+                <entity-and entity-name="Payment" list="payments">
+                    <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+                </entity-and>
+            <else>
+                <get-related-one relation-name="Payment" value-field="finAccountTrans" to-value-field="payment"/>
+                <field-to-list field="payment" list="payments"/>
+            </else>
+            </if-empty>
+            <if-empty field="payments">
+                <entity-and entity-name="AcctgTrans" list="acctgTransList">
+                    <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+                </entity-and>
+                <first-from-list list="acctgTransList" entry="acctgTrans"/>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N">
+                    <set-service-fields service-name="postAcctgTrans" map="acctgTrans" to-map="postAcctgTransMap"/>
+                    <call-service service-name="postAcctgTrans" in-map-name="postAcctgTransMap"/>
+                </if-compare>
+            </if-empty>
+            <iterate list="payments" entry="payment">
+                <clear-field field="createAcctgTransAndEntriesMap"/>
+                <get-related relation-name="AcctgTrans" list="acctgTransList" value-field="payment"/>
+                <first-from-list list="acctgTransList" entry="acctgTrans"/>
+                <set-service-fields service-name="createAcctgTransAndEntries" map="acctgTrans" to-map="createAcctgTransAndEntriesMap"/>
+                <set field="entryAmount" type="BigDecimal" value="0"/>
+                <iterate list="acctgTransList" entry="acctgTrans">
+                    <if-compare field="acctgTrans.acctgTransTypeId" operator="not-equals" value="PAYMENT_APPL">
+                        <get-related relation-name="AcctgTransEntry" list="acctgTransEntries" value-field="acctgTrans"/>
+                    </if-compare> 
+                    <iterate list="acctgTransEntries" entry="oldAcctgTransEntry">
+                        <if-compare field="oldAcctgTransEntry.debitCreditFlag" operator="equals" value="C">
+                            <make-value value-field="newAcctgTransEntry" entity-name="AcctgTransEntry"/>
+                            <set field="newAcctgTransEntry.glAccountId" from-field="oldAcctgTransEntry.glAccountId"/>
+                            <set field="organizationPartyId" from-field="oldAcctgTransEntry.organizationPartyId"/>
+                            <set field="newAcctgTransEntry.organizationPartyId" from-field="organizationPartyId"/>
+                            <set field="newAcctgTransEntry.partyId" from-field="oldAcctgTransEntry.partyId"/>
+                            <set field="newAcctgTransEntry.amount" from-field="oldAcctgTransEntry.amount"/>
+                            <set field="newAcctgTransEntry.acctgTransEntryTypeId" from-field="oldAcctgTransEntry.acctgTransEntryTypeId"/>
+                            <set field="newAcctgTransEntry.debitCreditFlag" value="D"/>
+                            <set field="entryAmount" type="BigDecimal" value="${entryAmount + newAcctgTransEntry.amount}"/>
+                            <field-to-list field="newAcctgTransEntry" list="createAcctgTransAndEntriesMap.acctgTransEntries"/>
+                        </if-compare>
+                        <set-service-fields service-name="updateAcctgTransEntry" map="oldAcctgTransEntry" to-map="updateAcctgTransEntryMap"/>
+                        <set field="updateAcctgTransEntry.reconcileStatusId" value="AES_RECONCILED"/>
+                        <call-service service-name="updateAcctgTransEntry" in-map-name="updateAcctgTransEntryMap"/>
+                    </iterate>
+                </iterate>
+                <clear-field field="createAcctgTransAndEntriesMap.acctgTransId"/>
+                <set field="createAcctgTransAndEntriesMap.transactionDate" from-field="nowTimestamp"/>
+                <set field="createAcctgTransAndEntriesMap.postedDate" from-field="nowTimestamp"/>
+                <make-value value-field="newAcctgTransEntry" entity-name="AcctgTransEntry"/>
+                <set field="newAcctgTransEntry.glAccountId" from-field="finAccount.postToGlAccountId"/>
+                <set field="newAcctgTransEntry.organizationPartyId" from-field="organizationPartyId"/>
+                <set field="newAcctgTransEntry.partyId" from-field="oldAcctgTransEntry.partyId"/>
+                <set field="newAcctgTransEntry.amount" from-field="entryAmount"/>
+                <set field="newAcctgTransEntry.acctgTransEntryTypeId" value="_NA_"/>
+                <set field="newAcctgTransEntry.debitCreditFlag" value="C"/>
+                <field-to-list field="newAcctgTransEntry" list="createAcctgTransAndEntriesMap.acctgTransEntries"/>
+                <call-service service-name="createAcctgTransAndEntries" in-map-name="createAcctgTransAndEntriesMap">
+                    <result-to-field result-name="acctgTransId"/>
+                </call-service>
+                <entity-and entity-name="AcctgTransEntry" list="acctgTransEntries">
+                    <field-map field-name="acctgTransId"/>
+                </entity-and>
+                <iterate list="acctgTransEntries" entry="acctgTransEntry">
+                    <set-service-fields service-name="createGlReconciliationEntry" map="acctgTransEntry" to-map="createGlReconciliationEntryMap"/>
+                    <set field="createGlReconciliationEntryMap.glReconciliationId" from-field="finAccountTrans.glReconciliationId"/>
+                    <set field="createGlReconciliationEntryMap.reconciledAmount" from-field="acctgTransEntry.amount"/>
+                    <call-service service-name="createGlReconciliationEntry" in-map-name="createGlReconciliationEntryMap"/>
+                </iterate>
+            </iterate>
+        <else>
+            <property-to-field property="AccountingNotWithdrawalFinAccountTrans" resource="AccountingUiLabels" field="errorMessage"/>
+            <field-to-result field="errorMessage" result-name="errorMessage"/>
+        </else>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="createPaymentAndFinAccountTrans" short-description="create new payment and associate with respective financial account in FinAccountTrans Entity.">
+        <set-service-fields service-name="createPayment" map="parameters" to-map="createPaymentMap"/>
+        <if-not-empty field="parameters.paymentMethodId">
+            <entity-one entity-name="PaymentMethod" value-field="paymentMethod" auto-field-map="true"/>
+            <set field="createPaymentMap.paymentMethodTypeId" from-field="paymentMethod.paymentMethodTypeId"/>
+        </if-not-empty>
+        <call-service service-name="createPayment" in-map-name="createPaymentMap">
+            <result-to-field result-name="paymentId"/>
+        </call-service>
+        <if-not-empty field="paymentMethod.finAccountId">
+            <entity-one entity-name="FinAccount" value-field="finAccount">
+                <field-map field-name="finAccountId" from-field="paymentMethod.finAccountId"/>
+            </entity-one>
+            <if-compare field="finAccount.statusId" operator="equals" value="FNACT_MANFROZEN">
+                <add-error>
+                    <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountInactiveStatusError"/>
+                </add-error>
+            </if-compare>
+            <if-compare field="finAccount.statusId" operator="equals" value="FNACT_CANCELLED">
+                <add-error>
+                    <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountStatusNotValidError"/>
+                </add-error>
+            </if-compare>
+            <check-errors/>
+            <if-compare field="parameters.isDepositWithDrawPayment" operator="equals" value="Y">
+                <set-service-fields service-name="createFinAccountTrans" map="parameters" to-map="createFinAccountTransMap"/>
+                <set field="createFinAccountTransMap.finAccountId" from-field="paymentMethod.finAccountId"/>
+                <set field="createFinAccountTransMap.paymentId" from-field="paymentId"/>
+                <set field="createFinAccountTransMap.statusId" value="FINACT_TRNS_CREATED"/>
+                <set field="createFinAccountTransMap.partyId" from-field="parameters.partyIdFrom"/>
+                <call-service service-name="createFinAccountTrans" in-map-name="createFinAccountTransMap">
+                    <result-to-field result-name="finAccountTransId"/>
+                </call-service>
+                <set field="updatePaymentCtx.paymentId" from-field="paymentId"/>
+                <set field="updatePaymentCtx.finAccountTransId" from-field="finAccountTransId"/>
+                <call-service service-name="updatePayment" in-map-name="updatePaymentCtx"/>
+            </if-compare>
+        </if-not-empty>
+        <field-to-result field="paymentId"/>
+    </simple-method>
+
+    <simple-method method-name="getTransactionTotalByGlReconcileId" short-description="Transaction Total By GlReconcile Id">
+        <entity-one entity-name="GlReconciliation" value-field="glReconciliation"/>
+        <entity-and entity-name="FinAccountTrans" list="finAccountTransList">
+            <field-map field-name="glReconciliationId" from-field="parameters.glReconciliationId"/>
+        </entity-and>
+        <set field="reconciledBalance" from-field="glReconciliation.reconciledBalance" type="BigDecimal"/>
+        <set field="grandTotal" value="0" type="BigDecimal"/>
+        <if-empty field="reconciledBalance">
+            <set field="reconciledBalance" value="0" type="BigDecimal"/>
+        </if-empty>
+        <iterate list="finAccountTransList" entry="finAccountTrans">
+            <if-compare field="finAccountTrans.finAccountTransTypeId" operator="equals" value="WITHDRAWAL">
+                <set field="grandTotal" value="${grandTotal - finAccountTrans.amount}" type="BigDecimal"/>
+            <else>
+                <set field="grandTotal" value="${grandTotal + finAccountTrans.amount}" type="BigDecimal"/>
+            </else>
+            </if-compare>
+        </iterate>
+        <set field="grandTotal" value="${grandTotal + reconciledBalance}" type="BigDecimal"/>
+        <field-to-result field="grandTotal"/>
+    </simple-method>
+
+    <simple-method method-name="assignGlRecToFinAccTrans" short-description="Assignment of Gl Reconciliation to Fin Account Trans">
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans"/>
+        <set field="glReconciliationId" from-field="parameters.glReconciliationId"/>
+        <entity-one entity-name="GlReconciliation" value-field="glReconciliation"/>
+        <if-compare field="glReconciliation.statusId" operator="equals" value="GLREC_CREATED">
+            <if-compare field="finAccountTrans.statusId" operator="not-equals" value="FINACT_TRNS_CREATED">
+                <add-error>
+                    <fail-property resource="AccountingUiLabels" property="AccountingInvalidGlReconciliationAssignment"/>
+                </add-error>
+                <check-errors/>
+            <else>
+                <set field="finAccountTrans.glReconciliationId" from-field="glReconciliationId"/>
+                <store-value value-field="finAccountTrans"/>
+            </else>
+            </if-compare>
+            <if-empty field="finAccountTrans.paymentId">
+                <entity-and entity-name="Payment" list="payments">
+                    <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+                </entity-and>
+            <else>
+                <entity-one entity-name="Payment" value-field="payment">
+                    <field-map field-name="paymentId" from-field="finAccountTrans.paymentId"/>
+                </entity-one>
+                <field-to-list field="payment" list="payments"/>
+            </else>
+            </if-empty>
+            <iterate list="payments" entry="payment">
+                <if-compare field="${payment.statusId == 'PMNT_SENT' @or payment.statusId == 'PMNT_RECEIVED' @or payment.statusId == 'PMNT_CONFIRMED'}" operator="equals" value="false">
+                    <add-error>
+                        <fail-property resource="AccountingUiLabels" property="AccountingPaymentsAssociateWithFinAccountHasInvalidStatusError"/>
+                    </add-error>
+                    <check-errors/>
+                </if-compare>
+            </iterate>
+        <else>
+            <add-error>
+                <fail-property resource="AccountingUiLabels" property="AccountingInvalidGlReconciliation"/>
+            </add-error>
+            <check-errors/>
+        </else>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="removeFinAccountTransFromReconciliation" short-description="Remove finAccountTrans from reconciliation">
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans"/>
+        <if-compare field="finAccountTrans.statusId" operator="equals" value="FINACT_TRNS_CREATED">
+            <clear-field field="finAccountTrans.glReconciliationId"/>
+            <store-value value-field="finAccountTrans"/>
+        <else>
+            <add-error>
+                <fail-property resource="AccountingUiLabels" property="AccountingFinAccountTransInvalidStatusError"/>
+            </add-error>
+            <check-errors/>
+        </else>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="isGlReconciliationReconciled" short-description="Check GlReconciliation is Reconciled or not">
+        <set field="glReconciliationId" from-field="parameters.glReconciliationId"/>
+        <entity-and entity-name="FinAccountTrans" list="finAccountTransList">
+            <field-map field-name="glReconciliationId"/>
+        </entity-and>
+        <set field="finAccountTransIds" value="${groovy:org.apache.ofbiz.entity.util.EntityUtil.getFieldListFromEntityList(finAccountTransList, 'finAccountTransId', true);}" type="List"/>
+        <entity-condition entity-name="FinAccountTrans" list="finAccountTransactions">
+            <condition-list>
+                <condition-expr field-name="finAccountTransId" operator="in" from-field="finAccountTransIds"/>
+                <condition-expr field-name="statusId" value="FINACT_TRNS_CREATED"/>
+            </condition-list>
+        </entity-condition>
+        <if-not-empty field="finAccountTransactions">
+            <set field="isReconciled" value="false" type="Boolean"/>
+        <else>
+            <set field="isReconciled" value="true" type="Boolean"/>
+        </else>
+        </if-not-empty>
+        <field-to-result field="isReconciled"/>
+    </simple-method>
+
+    <simple-method method-name="cancelBankReconciliation" short-description="Cancel bank reconciliation.">
+        <entity-and entity-name="FinAccountTrans" list="finAccountTransList">
+            <field-map field-name="glReconciliationId" from-field="parameters.glReconciliationId"/>
+            <field-map field-name="statusId" value="FINACT_TRNS_CREATED"/>
+        </entity-and>
+        <if-not-empty field="finAccountTransList">
+            <iterate list="finAccountTransList" entry="finAccountTrans">
+                <set field="removeFinAccountTransFromReconciliationMap.finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+                <call-service service-name="removeFinAccountTransFromReconciliation" in-map-name="removeFinAccountTransFromReconciliationMap"/>
+            </iterate>
+        </if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="getAssociatedAcctgTransEntriesWithFinAccountTrans" short-description="Get associated acctgTransEntries with finAccountTrans">
+        <set field="finAccountTransId" from-field="parameters.finAccountTransId"/>
+        <entity-one entity-name="FinAccountTrans" value-field="finAccountTrans"/>
+        <if-empty field="finAccountTrans.paymentId">
+            <entity-and entity-name="Payment" list="payments">
+                <field-map field-name="finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+            </entity-and>
+        <else>
+            <entity-one entity-name="Payment" value-field="payment">
+                <field-map field-name="paymentId" from-field="finAccountTrans.paymentId"/>
+            </entity-one>
+            <field-to-list field="payment" list="payments"/>
+        </else>
+        </if-empty>
+        <set field="paymentIds" value="${groovy:org.apache.ofbiz.entity.util.EntityUtil.getFieldListFromEntityList(payments, 'paymentId', true);}" type="List"/>
+        <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransAndEntries">
+            <condition-expr field-name="paymentId" operator="in" from-field="paymentIds"/>
+            <order-by field-name="acctgTransId"/>
+            <order-by field-name="acctgTransEntrySeqId"/>
+        </entity-condition>
+        <field-to-result field="acctgTransAndEntries"/>
+    </simple-method>
+    
+    <simple-method method-name="getReconciliationClosingBalance" short-description="Get Reconciliation Closing Balance.">
+        <entity-one entity-name="GlReconciliation" value-field="glReconciliation"/>
+        <set field="reconciledBalance" from-field="glReconciliation.reconciledBalance" default-value="0" type="BigDecimal"/>
+        <set field="openingBalance" from-field="glReconciliation.openingBalance" default-value="0" type="BigDecimal"/>
+        <set field="closingBalance" value="${reconciledBalance + openingBalance}" type="BigDecimal"/>
+        <field-to-result field="closingBalance"/>
+    </simple-method>
+    
+    <simple-method method-name="autoFinAccountReconciliation" short-description="Auto Reconcile Financial(bank) Account Transactions">
+        <now-timestamp field="nowTimestamp"/>
+        <set field="reconciliationDayStart" value="${groovy: org.apache.ofbiz.base.util.UtilDateTime.getDayStart(nowTimestamp)}" type="Timestamp"/>
+        <set field="reconciliationDayEnd" value="${groovy: org.apache.ofbiz.base.util.UtilDateTime.getDayEnd(nowTimestamp)}" type="Timestamp"/>
+        <entity-condition entity-name="GlReconciliation" list="glReconciliation">
+            <condition-list combine="and">
+                <condition-expr field-name="reconciledDate" operator="greater-equals" from-field="reconciliationDayStart"/>
+                <condition-expr field-name="reconciledDate" operator="less-equals" from-field="reconciliationDayEnd"/>
+                <condition-expr field-name="statusId" operator="equals" value="GLREC_CREATED"/>
+            </condition-list>
+        </entity-condition>
+        <set field="glReconciliationIds" value="${groovy:org.apache.ofbiz.entity.util.EntityUtil.getFieldListFromEntityList(glReconciliation, 'glReconciliationId', true);}" type="List"/>
+        <entity-condition entity-name="FinAccountTrans" list="finAccountTransList">
+            <condition-expr field-name="glReconciliationId" operator="in" from-field="glReconciliationIds"/>
+        </entity-condition>
+        <iterate list="finAccountTransList" entry="finAccountTrans">
+            <set field="reconcileFinAccountTransMap.finAccountTransId" from-field="finAccountTrans.finAccountTransId"/>
+            <set field="reconcileFinAccountTransMap.organizationPartyId" from-field="finAccountTrans.partyId"/>
+            <call-service service-name="reconcileFinAccountTrans" in-map-name="reconcileFinAccountTransMap"/>
+        </iterate>
+    </simple-method>
+</simple-methods>

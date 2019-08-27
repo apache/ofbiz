@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    <simple-method method-name="createFacilityContactMech" short-description="Create a FacilityContactMech">
+        <make-value entity-name="FacilityContactMech" value-field="newValue"/>
+        <make-value entity-name="FacilityContactMech" value-field="newFacilityContactMech"/>
+        <log level="info" message="contactMechId is ${parameters.contactMechId}"/>
+        <if-empty field="parameters.contactMechId">
+
+            <set-service-fields service-name="createContactMech" map="parameters" to-map="createContactMechMap"/>
+            <set field="createContactMechMap.contactMechTypeId" from-field="parameters.contactMechTypeId"/>
+            <call-service service-name="createContactMech" in-map-name="createContactMechMap">
+                <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyCreated"/>
+                <result-to-field result-name="contactMechId" field="newValue.contactMechId"/>
+            </call-service>
+            <log level="info" message="ContactMech created"/>
+            <else>
+                <set field="newValue.contactMechId" from-field="parameters.contactMechId"/>
+            </else>
+        </if-empty>
+        <log level="info" message="Creating a FacilityContactMech with id: ${parameters.contactMechId}"/>
+        <set field="newValue.facilityId" from-field="parameters.facilityId"/>
+        <field-to-result field="newValue.contactMechId" result-name="contactMechId"/>
+        <field-to-request field="newValue.contactMechId" request-name="contactMechId"/>
+        <set-nonpk-fields map="parameters" value-field="newValue"/>
+        <now-timestamp field="newValue.fromDate"/>
+
+        <create-value value-field="newValue"/>
+        
+        <!-- now create the FacilityContactMechPurpose record -->
+        <if-not-empty field="parameters.contactMechPurposeTypeId">
+            <make-value value-field="facilityContactMechPurpose" entity-name="FacilityContactMechPurpose"/>
+            <set-pk-fields map="newValue" value-field="facilityContactMechPurpose"/>
+            <set field="facilityContactMechPurpose.contactMechPurposeTypeId" from-field="parameters.contactMechPurposeTypeId"/>
+            <create-value value-field="facilityContactMechPurpose"/>
+        </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="updateFacilityContactMech" short-description="Update a FacilityContactMech">
+        <make-value entity-name="FacilityContactMech" value-field="newFacilityContactMech"/>
+
+        <!-- Find old value -->
+
+        <entity-and entity-name="FacilityContactMech" list="facilityContactMechs" filter-by-date="true">
+            <field-map field-name="facilityId" from-field="parameters.facilityId"/>
+            <field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+        </entity-and>
+        <first-from-list list="facilityContactMechs" entry="facilityContactMech"/>
+        <if-empty field="facilityContactMech">
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyCannotUpdateContactBecauseNotWithSpecifiedParty"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+
+        <log message="parameters: ${parameters}" level="info"/>
+        <clone-value value-field="facilityContactMech" new-value-field="newFacilityContactMech"/>
+        <log message="parameters: ${parameters}" level="info"/>
+        <!-- If we already have a new contactMechId don't update ContactMech -->
+        <if-empty field="parameters.newContactMechId">
+            <set-service-fields service-name="updateContactMech" map="parameters" to-map="updateContactMechMap"/>
+            <set field="updateContactMechMap.contactMechTypeId" from-field="parameters.contactMechTypeId"/>
+            <call-service service-name="updateContactMech" in-map-name="updateContactMechMap">
+                <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyUpdated"/>
+                <result-to-field result-name="contactMechId" field="newFacilityContactMech.contactMechId"/>
+            </call-service>
+            <else>
+                <set field="newFacilityContactMech.contactMechId" from-field="parameters.newContactMechId"/>
+                <log level="info" message="Using supplied new contact mech id: ${newFacilityContactMech.contactMechId}"/>
+            </else>
+        </if-empty>
+
+        <set-nonpk-fields map="parameters" value-field="newFacilityContactMech"/>
+
+        <now-timestamp field="newFacilityContactMech.fromDate"/>
+        <now-timestamp field="facilityContactMech.thruDate"/>
+
+        <store-value value-field="facilityContactMech"/>
+        <create-value value-field="newFacilityContactMech"/>
+
+        <if-compare-field to-field="newFacilityContactMech.contactMechId" field="parameters.contactMechId" operator="not-equals">
+            <get-related value-field="facilityContactMech" relation-name="FacilityContactMechPurpose" list="facilityContactMechPurposes"/>
+            <iterate list="facilityContactMechPurposes" entry="facilityContactMechPurposeOld">
+                <clone-value value-field="facilityContactMechPurposeOld" new-value-field="facilityContactMechPurpose"/>
+
+                <now-timestamp field="facilityContactMechPurposeOld.thruDate"/>
+                <store-value value-field="facilityContactMechPurposeOld"/>
+
+                <set field="facilityContactMechPurpose.contactMechId" from-field="newFacilityContactMech.contactMechId"/>
+                <set field="purposeMap.facilityId" from-field="facilityContactMechPurpose.facilityId"/>
+                <set field="purposeMap.contactMechPurposeTypeId" from-field="facilityContactMechPurpose.contactMechPurposeTypeId"/>
+                <set field="purposeMap.contactMechId" from-field="facilityContactMechPurpose.contactMechId"/>
+                <find-by-and entity-name="FacilityContactMechPurpose" list="purposeResult" map="purposeMap"/>
+
+                <if-empty field="purposeResult">
+
+                    <create-value value-field="facilityContactMechPurpose"/>
+                </if-empty>
+            </iterate>
+        </if-compare-field>
+
+        <log level="info" message="Setting id to result: ${newFacilityContactMech.contactMechId}"/>
+        <field-to-result field="newFacilityContactMech.contactMechId" result-name="contactMechId"/>
+        <field-to-request field="newFacilityContactMech.contactMechId" request-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="deleteFacilityContactMech" short-description="Delete a FacilityContactMech">
+        <make-value entity-name="FacilityContactMech" value-field="newFacilityContactMech"/>
+        
+        <make-value entity-name="FacilityContactMech" value-field="facilityContactMechMap"/>
+        <set-pk-fields value-field="facilityContactMechMap" map="parameters"/>
+        <find-by-and entity-name="FacilityContactMech" list="facilityContactMechs" map="facilityContactMechMap"/>
+        <filter-list-by-date list="facilityContactMechs" to-list="validFacilityContactMechs"/>
+
+        <first-from-list list="validFacilityContactMechs" entry="facilityContactMech"/>
+        <if-empty field="facilityContactMech">
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyContactMechNotFoundCannotDelete"/>
+            </add-error>
+            <return/>
+        </if-empty>
+        <now-timestamp field="facilityContactMech.thruDate"/>
+        <store-value value-field="facilityContactMech"/>
+    </simple-method>
+
+    <simple-method method-name="createFacilityPostalAddress" short-description="Create a PostalAddress for facility">
+        <set-service-fields service-name="createPostalAddress" map="parameters" to-map="createPostalAddressMap"/>
+        <call-service in-map-name="createPostalAddressMap" service-name="createPostalAddress">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
+            <result-to-field result-name="contactMechId" field="newFacilityContactMech.contactMechId"/>
+        </call-service>
+
+        <check-errors/>
+
+        <set field="createFacilityContactMechMap.contactMechId" from-field="newFacilityContactMech.contactMechId"/>
+        <set-service-fields service-name="createFacilityContactMech" map="parameters" to-map="createFacilityContactMechMap"/>
+
+        <call-service service-name="createFacilityContactMech" in-map-name="createFacilityContactMechMap" break-on-error="true">
+            <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyCreated"/>
+        </call-service>
+        <field-to-request field="newFacilityContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newFacilityContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="updateFacilityPostalAddress" short-description="Update a PostalAddress for facility">
+        <make-value entity-name="FacilityContactMech" value-field="newFacilityContactMech"/>
+        <set-service-fields service-name="updatePostalAddress" map="parameters" to-map="updatePostalAddressMap"/>
+        <call-service in-map-name="updatePostalAddressMap" service-name="updatePostalAddress">
+            <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyUpdated"/>
+            <result-to-field result-name="contactMechId" field="newFacilityContactMech.contactMechId"/>
+        </call-service>
+
+        <set-service-fields service-name="updateFacilityContactMech" map="parameters" to-map="updateFacilityContactMechMap"/>
+        <set field="updateFacilityContactMechMap.newContactMechId" from-field="newFacilityContactMech.contactMechId"/>
+
+        <set field="updateFacilityContactMechMap.contactMechTypeId" value="POSTAL_ADDRESS"/>
+        <log level="info" message="Copied id to updateFacilityContactMechMap: ${updateFacilityContactMechMap.newContactMechId}"/>
+        <call-service service-name="updateFacilityContactMech" in-map-name="updateFacilityContactMechMap">
+            <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyUpdated"/>
+        </call-service>
+        <field-to-request field="newFacilityContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newFacilityContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="createFacilityTelecomNumber" short-description="Create a TelecomNumber for facility">
+        <log level="info" message="Creating telecom number"/>
+        <set-service-fields service-name="createTelecomNumber" map="parameters" to-map="createTelecomNumberMap"/>
+        <call-service in-map-name="createTelecomNumberMap" service-name="createTelecomNumber">
+            <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyCreated"/>
+            <result-to-field result-name="contactMechId" field="newFacilityContactMech.contactMechId"/>
+        </call-service>
+
+        <set-service-fields service-name="createFacilityContactMech" map="parameters" to-map="createFacilityContactMechMap"/>
+        <set field="createFacilityContactMechMap.contactMechId" from-field="newFacilityContactMech.contactMechId"/>
+        <log level="info" message="Copied id to createFacilityContactMechMap: ${createFacilityContactMechMap.contactMechId}"/>
+
+        <call-service service-name="createFacilityContactMech" in-map-name="createFacilityContactMechMap" break-on-error="true">
+            <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyCreated"/>
+        </call-service>
+        <field-to-request field="newFacilityContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newFacilityContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="updateFacilityTelecomNumber" short-description="Update a TelecomNumber for facility">
+        <make-value entity-name="FacilityContactMech" value-field="newFacilityContactMech"/>
+        <set-service-fields service-name="updateTelecomNumber" map="parameters" to-map="updateTelecomNumberMap"/>
+        <call-service service-name="updateTelecomNumber" in-map-name="updateTelecomNumberMap">
+            <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyUpdated"/>
+            <result-to-field result-name="contactMechId" field="newFacilityContactMech.contactMechId"/>
+        </call-service>
+
+        <set-service-fields service-name="updateFacilityContactMech" map="parameters" to-map="updateFacilityContactMechMap"/>
+        <set field="updateFacilityContactMechMap.newContactMechId" from-field="newFacilityContactMech.contactMechId"/>
+
+        <set field="updateFacilityContactMechMap.contactMechTypeId" value="TELECOM_NUMBER"/>
+        <log level="info" message="Copied id to updateFacilityContactMechMap: ${updateFacilityContactMechMap.newContactMechId}"/>
+
+        <call-service in-map-name="updateFacilityContactMechMap" service-name="updateFacilityContactMech">
+            <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyUpdated"/>
+        </call-service>
+        <log level="info" message="Setting result id: ${newFacilityContactMech.contactMechId}"/>
+        <field-to-request field="newFacilityContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newFacilityContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+
+    <simple-method method-name="createFacilityEmailAddress" short-description="Create an email address for facility">
+        <if-validate-method field="parameters.emailAddress" method="isEmail">
+        <else>
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyEmailAddressNotFormattedCorrectly"/>
+            </add-error>
+        </else>
+        </if-validate-method>
+        <check-errors/>
+
+        <set-service-fields service-name="createFacilityContactMech" map="parameters" to-map="createFacilityContactMechMap"/>
+        <set field="createFacilityContactMechMap.infoString" from-field="parameters.emailAddress"/>
+        <set field="createFacilityContactMechMap.contactMechTypeId" value="EMAIL_ADDRESS"/>
+        <call-service service-name="createFacilityContactMech" in-map-name="createFacilityContactMechMap">
+            <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyCreated"/>
+            <result-to-result result-name="contactMechId"/>
+            <result-to-request result-name="contactMechId"/>
+        </call-service>
+    </simple-method>
+
+    <simple-method method-name="updateFacilityEmailAddress" short-description="Update an email address for facility">
+        <if-validate-method field="parameters.emailAddress" method="isEmail">
+        <else>
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyEmailAddressNotFormattedCorrectly"/>
+            </add-error>
+        </else>
+        </if-validate-method>
+        <check-errors/>
+
+        <set-service-fields service-name="updateFacilityContactMech" map="parameters" to-map="updateFacilityContactMechMap"/>
+        <set field="updateFacilityContactMechMap.infoString" from-field="parameters.emailAddress"/>
+        <set field="updateFacilityContactMechMap.contactMechTypeId" value="EMAIL_ADDRESS"/>
+        <call-service service-name="updateFacilityContactMech" in-map-name="updateFacilityContactMechMap">
+            <default-message resource="PartyUiLabels" property="PartyContactMechanismSuccessfullyUpdated"/>
+            <result-to-result result-name="contactMechId"/>
+            <result-to-request result-name="contactMechId"/>
+        </call-service>
+    </simple-method>
+
+    <simple-method method-name="createFacilityContactMechPurpose" short-description="Create a facility/contact mech purpose">
+        <make-value value-field="lookUpMap" entity-name="FacilityContactMechPurpose"/>
+        <set field="lookUpMap.facilityId" from-field="parameters.facilityId"/>
+        <set field="lookUpMap.contactMechId" from-field="parameters.contactMechId"/>
+        <set field="lookUpMap.contactMechPurposeTypeId" from-field="parameters.contactMechPurposeTypeId"/>
+        <find-by-and entity-name="FacilityContactMechPurpose" map="lookUpMap" list="purposeList"/>
+        <filter-list-by-date list="purposeList"/>
+
+        <if-not-empty field="purposeList">
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyCouldNotCreateNewPurpose"/>
+            </add-error>
+            <check-errors/>
+        </if-not-empty>
+
+        <now-timestamp field="nowTimestamp"/>
+        <make-value value-field="newEntity" entity-name="FacilityContactMechPurpose"/>
+        <set field="newEntity.facilityId" from-field="parameters.facilityId"/>
+        <set field="newEntity.contactMechId" from-field="parameters.contactMechId"/>
+        <set field="newEntity.contactMechPurposeTypeId" from-field="parameters.contactMechPurposeTypeId"/>
+        <set field="newEntity.fromDate" from-field="nowTimestamp"/>
+
+        <create-value value-field="newEntity"/>
+
+        <field-to-result field="newEntity.fromDate" result-name="fromDate"/>
+    </simple-method>
+
+    <simple-method method-name="deleteFacilityContactMechPurpose" short-description="Delete a facility/contact mech purpose">
+        <make-value value-field="lookUpMap" entity-name="FacilityContactMechPurpose"/>
+
+        <set-pk-fields map="parameters" value-field="lookUpMap"/>
+        <find-by-primary-key value-field="purposeEntity" entity-name="FacilityContactMechPurpose" map="lookUpMap"/>
+
+        <if-empty field="purposeEntity">
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyUnableToLocatePurpose"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <now-timestamp field="nowTimestamp"/>
+        <set field="purposeEntity.thruDate" from-field="nowTimestamp"/>
+
+        <store-value value-field="purposeEntity"/>
+    </simple-method>
+</simple-methods>

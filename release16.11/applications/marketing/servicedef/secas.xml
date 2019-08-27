@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+    <eca service="createContactListPartyStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_PENDING"/>
+        <action service="sendContactListPartyVerifyEmail" mode="async" persist="true"/>
+    </eca>
+    <eca service="createContactListPartyStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_ACCEPTED"/>
+        <action service="sendContactListPartySubscribeEmail" mode="async" persist="true"/>
+    </eca>
+    <eca service="updatePartyEmailAddress" event="return">
+        <action service="updatePartyEmailContactListParty" mode="sync"/>
+    </eca>
+    <eca service="updateContactListParty" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_REJECTED"/>
+        <action service="sendContactListPartyUnSubscribeEmail" mode="sync" persist="true"/>
+    </eca>
+    <eca service="createContactListPartyStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_UNSUBSCRIBED"/>
+        <action service="sendContactListPartyUnSubscribeEmail" mode="async" persist="true"/>
+    </eca>
+    <eca service="createContactListPartyStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_UNSUBS_PENDING"/>
+        <action service="sendContactListPartyUnSubscribeVerifyEmail" mode="async" persist="true"/>
+    </eca>
+    
+    <!--  update contact list communication status -->
+    <eca service="updateCommunicationEvent" event="commit">
+        <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
+        <action service="updateCommStatusFromCommEvent" mode="sync"/>
+    </eca>
+    
+    <!--  update contact list party for bounced messages -->
+    <eca service="updateContactListCommStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_BOUNCED"/>
+        <condition field-name="contactMechId" operator="is-not-empty"/>
+        <condition field-name="partyId" operator="is-not-empty"/>
+        <set field-name="statusId" value="CLPT_INVALID"/>
+        <action service="updateContactListParty" mode="sync"/>
+    </eca>
+            
+    <!-- quick add functions which pass a contactListId as well -->
+    <eca service="createLead" event="commit">
+        <condition field-name="contactListId" operator="is-not-empty"/>
+        <condition field-name="contactMechId" operator="is-not-empty"/>
+        <set field-name="statusId" value="CLPT_ACCEPTED"/>
+        <set field-name="preferredContactMechId" env-name="contactMechId"/>
+        <action service="createContactListParty" mode="sync"/>
+    </eca>
+    <eca service="createContact" event="commit">
+        <condition field-name="contactListId" operator="is-not-empty"/>
+        <condition field-name="contactMechId" operator="is-not-empty"/>
+        <set field-name="statusId" value="CLPT_ACCEPTED"/>
+        <set field-name="preferredContactMechId" env-name="contactMechId"/>
+        <action service="createContactListParty" mode="sync"/>
+    </eca>
+</service-eca>

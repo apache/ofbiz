@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="FilterCalendarEvents" type="single" target="calendar">
+        <field name="calendarType">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" value="CALENDAR_TYPE"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyId">
+            <lookup target-form-name="LookupPartyName" size="16"/>
+        </field>
+        <field name="workEffortTypeId" title="${uiLabelMap.PartyEventType}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="WorkEffortType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="facilityId" title="${uiLabelMap.Facility}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" description="${facilityName}">
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fixedAssetId" title="${uiLabelMap.AccountingFixedAsset}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FixedAsset" description="${fixedAssetName}">
+                    <entity-order-by field-name="fixedAssetId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="hideEvents"><check/></field>
+        <field name="viewButton" title="${uiLabelMap.CommonView}"><submit/></field>
+    </form>
+
+    <!-- Forms Specific to portlet -->
+    <form name="EditCalendar" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+        <field name="initialView">
+            <drop-down>
+                <option key="day" description="${uiLabelMap.WorkEffortDayView}"/>
+                <option key="week" description="${uiLabelMap.WorkEffortWeekView}"/>
+                <option key="month" description="${uiLabelMap.WorkEffortMonthView}"/>
+            </drop-down>
+        </field>
+        <field name="updateButton"><submit/></field>
+    </form>
+
+    <form name="EditCalEvent" type="single" default-map-name="workEffort">
+        <actions>
+            <set field="statusTypeIds[]" value="EVENT_STATUS"/>
+            <set field="statusTypeIds[]" value="CALENDAR_STATUS"/>
+            <!-- Allow containing screens to specify the create and update URLs -->
+            <set field="createCalEventUrl" from-field="createCalEventUrl" default-value="createWorkEffortAndPartyAssign" />
+            <set field="updateCalEventUrl" from-field="updateCalEventUrl" default-value="updateWorkEffort" />
+        </actions>
+        <alt-target use-when="workEffort==null" target="${createCalEventUrl}" />
+        <alt-target use-when="workEffort!=null" target="${updateCalEventUrl}" />
+        <field name="workEffortId" use-when="workEffort!=null"><hidden /></field>
+        <field name="start"><hidden value="${parameters.start}" /></field>
+        <field name="partyId"><hidden value="${parameters.userLogin.partyId}" /></field>
+        <field name="fixedAssetId"><hidden value="${parameters.fixedAssetId}" /></field>
+        <field name="roleTypeId" use-when="workEffort==null"><hidden value="CAL_OWNER" /></field>
+        <field name="statusId" use-when="workEffort==null"><hidden value="PRTYASGN_ASSIGNED" /></field>
+        <field name="workEffortName" title="${uiLabelMap.WorkEffortEventName}"><text /></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><text /></field>
+        <!-- This is wrong. A calendar item work effort type is an EVENT. "Meeting" is a work effort purpose. -->
+        <field name="workEffortTypeId" use-when="parentTypeId!=void" title="${uiLabelMap.PartyEventType}">
+            <drop-down no-current-selected-key="MEETING">
+                <entity-options entity-name="WorkEffortType">
+                    <entity-constraint name="parentTypeId" env-name="parentTypeId" />
+                    <entity-order-by field-name="description" />
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="workEffortTypeId" use-when="parentTypeId==void" title="${uiLabelMap.PartyEventType}">
+            <drop-down>
+                <entity-options entity-name="WorkEffortType">
+                    <entity-order-by field-name="description" />
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="currentStatusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down no-current-selected-key="CAL_TENTATIVE">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="in" env-name="statusTypeIds"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="scopeEnumId">
+            <drop-down no-current-selected-key="WES_PRIVATE">
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" value="WORK_EFF_SCOPE" />
+                    <entity-order-by field-name="description" />
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="estimatedStartDate"><date-time input-method="time-dropdown" /></field>
+        <field name="estimatedCompletionDate"><date-time input-method="time-dropdown" /></field>
+        <field name="actualStartDate" use-when="workEffort!=null"><date-time input-method="time-dropdown" /></field>
+        <field name="actualCompletionDate" use-when="workEffort!=null"><date-time input-method="time-dropdown" /></field>
+        <field name="addButton" use-when="workEffort==null"><submit /></field>
+        <field name="updateButton" use-when="workEffort!=null"><submit /></field>
+    </form>
+
+    <form name="CancelEvent" type="single" target="updateWorkEffort">
+        <field name="workEffortId"><hidden value="${parameters.workEffortId}"/></field>
+        <field name="currentStatusId"><hidden value="CAL_CANCELLED"/></field>
+        <field name="cancel" title="${uiLabelMap.WorkEffortCancelCalendarEvent}"><submit/></field>
+    </form>
+
+    <form name="ShowCalEvent" type="single" default-map-name="workEffort">
+        <field name="workEffortName" title="${uiLabelMap.WorkEffortEventName}"><display/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="workEffortTypeId" title="${uiLabelMap.PartyEventType}">
+            <display-entity entity-name="WorkEffortType"/>
+        </field>
+        <field name="currentStatusId" title="${uiLabelMap.CommonStatus}">
+            <display-entity entity-name="StatusItem" key-field-name="statusId"/>
+        </field>
+        <field name="scopeEnumId">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="estimatedStartDate"><display type="date-time"></display></field>
+        <field name="estimatedCompletionDate"><display type="date-time"></display></field>
+        <field name="actualStartDate"><display type="date-time"/></field>
+        <field name="actualCompletionDate"><display type="date-time"/></field>
+    </form>
+
+    <grid name="showCalEventRoles" list-name="roles" 
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="WorkEffortPartyAssignment" list="roles" filter-by-date="true">
+                <field-map field-name="workEffortId" from-field="parameters.workEffortId"/>
+            </entity-and>
+        </actions>
+        <field name="workEffortId"><hidden value="${parameters.workEffortId}"/></field>
+        <field name="fromDate"><hidden/></field>
+        <field name="partyId" >
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${lastName} ${firstName} ${middleName}"/>
+        </field>
+        <field name="roleTypeId"><display-entity entity-name="RoleType"/></field>
+        <field name="statusId" use-when="workEffort!=null">
+            <display-entity entity-name="StatusItem"/>
+        </field>
+    </grid>
+    <grid name="showCalEventRolesDel" extends="showCalEventRoles" target="deleteWorkEffortPartyAssign">
+        <field name="remove" title="${uiLabelMap.CommonRemove}"><submit/></field>
+    </grid>
+    <form name="AddCalEventRole" type="single" target="createWorkEffortPartyAssign">
+        <field name="workEffortId"><hidden value="${parameters.workEffortId}"/></field>
+        <field name="statusId"><hidden value="PRTYASGN_ASSIGNED"/></field>
+        <field name="partyId" position="1"><lookup target-form-name="LookupPartyName" size="10"></lookup></field>
+        <field name="roleTypeId" position="2">
+            <drop-down no-current-selected-key="CAL_ATTENDEE">
+                <entity-options entity-name="RoleType">
+                    <entity-constraint name="parentTypeId" value="CALENDAR_ROLE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="add" title="${uiLabelMap.CommonAdd}"><submit/></field>
+    </form>
+    
+</forms>

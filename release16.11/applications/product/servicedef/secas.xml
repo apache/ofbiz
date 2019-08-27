@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+    <!-- update inventory item -->
+    <eca service="updateInventoryItem" event="commit">
+        <condition field-name="statusId" operator="is-not-empty"/>
+        <condition-field field-name="oldStatusId" operator="not-equals" to-field-name="statusId"/>
+        <action service="createInventoryItemStatus" mode="sync"/>
+    </eca>
+    <eca service="updateInventoryItem" event="commit">
+        <condition field-name="statusId" operator="is-not-empty"/>
+        <condition field-name="productId" operator="is-not-empty"/>
+        <condition-field field-name="oldProductId" operator="not-equals" to-field-name="productId"/>
+        <action service="createInventoryItemStatus" mode="sync"/>
+    </eca>
+    <eca service="updateInventoryItem" event="commit">
+        <condition field-name="statusId" operator="is-not-empty"/>
+        <condition field-name="ownerPartyId" operator="is-not-empty"/>
+        <condition-field field-name="oldOwnerPartyId" operator="not-equals" to-field-name="ownerPartyId"/>
+        <action service="createInventoryItemStatus" mode="sync"/>
+    </eca>
+    <eca service="createItemIssuance" event="return"><!-- change the owner after item issuance transactions are created for old owner -->
+        <condition field-name="orderId" operator="is-not-empty"/>
+        <condition field-name="inventoryItemId" operator="is-not-empty"/>
+        <action service="changeOwnerUponIssuance" mode="sync"/>
+    </eca>
+
+    <!-- inventory transfer -->
+    <eca service="createInventoryTransfer" event="invoke">
+        <condition field-name="statusId" operator="not-equals" value="IXF_CANCELLED"/>
+        <action service="prepareInventoryTransfer" mode="sync"/>
+    </eca>
+    <eca service="createInventoryTransfer" event="commit">
+        <condition field-name="statusId" operator="equals" value="IXF_COMPLETE"/>
+        <action service="completeInventoryTransfer" mode="sync"/>
+        <action service="balanceInventoryItems" mode="sync"/>
+    </eca>
+
+    <eca service="updateInventoryTransfer" event="invoke">
+        <condition field-name="statusId" operator="equals" value="IXF_CANCELLED"/>
+        <action service="cancelInventoryTransfer" mode="sync"/>
+    </eca>
+    <eca service="updateInventoryTransfer" event="commit">
+        <condition field-name="statusId" operator="equals" value="IXF_COMPLETE"/>
+        <action service="completeInventoryTransfer" mode="sync"/>
+        <action service="balanceInventoryItems" mode="sync"/>
+    </eca>
+
+    <!-- inventory variance -->
+    <eca service="createPhysicalInventoryAndVariance" event="commit">
+        <action service="balanceInventoryItems" mode="sync"/>
+    </eca>
+
+    <!-- inventory changes -->
+    <eca service="balanceInventoryItems" event="commit">
+        <action service="updateProductIfAvailableFromShipment" mode="sync"/>
+    </eca>
+
+    <!-- Product Price Change ECAs -->
+    <eca service="createProductPrice" event="commit">
+        <action service="saveProductPriceChange" mode="sync"/>
+    </eca>
+    <eca service="updateProductPrice" event="commit">
+        <condition-field field-name="price" operator="not-equals" to-field-name="oldPrice" type="BigDecimal"/>
+        <action service="saveProductPriceChange" mode="sync"/>
+    </eca>
+    <eca service="deleteProductPrice" event="commit">
+        <action service="saveProductPriceChange" mode="sync"/>
+    </eca>
+
+    <!-- Product Party ECAs -->
+    <eca service="addPartyToCategory" event="invoke">
+        <condition field-name="roleTypeId" operator="equals" value="_NA_"/>
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+    <eca service="addPartyToFacility" event="invoke">
+        <condition field-name="roleTypeId" operator="equals" value="_NA_"/>
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+    <eca service="addPartyToFacility" event="invoke">
+        <condition field-name="roleTypeId" operator="not-equals" value="_NA_"/>
+        <action service="ensurePartyRole" mode="sync"/>
+    </eca>
+    <eca service="addPartyToFacilityGroup" event="invoke">
+        <condition field-name="roleTypeId" operator="equals" value="_NA_"/>
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+    <eca service="addPartyToFacilityGroup" event="invoke">
+        <condition field-name="roleTypeId" operator="not-equals" value="_NA_"/>
+        <action service="ensurePartyRole" mode="sync"/>
+    </eca>
+    <eca service="addProdCatalogToParty" event="invoke">
+        <condition field-name="roleTypeId" operator="equals" value="_NA_"/>
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+
+    <!-- Product Content ECAs -->
+    <eca service="createProductContent" event="in-validate">
+        <condition field-name="contentId" operator="is-empty"/>
+        <action service="createContent" mode="sync"/>
+    </eca>
+
+    <!-- pick list ECAs -->
+    <eca service="createPicklistFromOrders" event="in-validate">
+        <condition field-name="orderHeaderList" operator="is-empty"/>
+        <condition field-name="orderIdList" operator="is-not-empty"/>
+        <action service="convertPickOrderIdListToHeaders" mode="sync"/>
+    </eca>
+
+    <eca service="receiveInventoryProduct" event="commit">
+        <condition field-name="facilityId" operator="is-not-empty"/>
+        <condition field-name="orderId" operator="is-not-empty"/>
+        <action service="updateIssuanceShipmentAndPoOnReceiveInventory" mode="sync"/>
+    </eca>
+
+    <!-- Set the average cost of product -->
+    <eca service="receiveInventoryProduct" event="commit">
+        <action service="updateProductAverageCostOnReceiveInventory" mode="sync"/>
+    </eca>
+
+    <!-- Remove party content of image  -->
+    <eca service="deletePartyRole" event="commit">
+        <condition field-name="roleTypeId" operator="equals" value="IMAGEAPPROVER"/>
+        <action service="removeImageContentApproval" mode="sync"/>
+    </eca>
+
+    <!-- ProductStoreGroup seca  -->
+    <eca service="updateProductStoreGroup" event="commit">
+        <condition field-name="primaryParentGroupId" operator="not-equals" value=""/>
+        <action service="checkProductStoreGroupRollup" mode="sync"/>
+    </eca>
+    <eca service="createProductStoreGroupRollup" event="commit">
+        <action service="checkProductStoreGroupRollup" mode="sync"/>
+    </eca>
+</service-eca>

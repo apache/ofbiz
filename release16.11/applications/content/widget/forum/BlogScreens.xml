@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="commonBlogDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="Blog"/>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="CONTENTMGR" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.ContentViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="blogDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="commonBlogDecorator">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="parameters.blogContentId"/></not>
+                            </condition>
+                            <actions>
+                                <set field="contentId" from-field="parameters.blogContentId"/>
+                                <entity-one entity-name="Content" value-field="blogContent"/>
+                            </actions>
+                            <widgets>
+                                <include-menu name="blog" location="component://content/widget/content/ContentMenus.xml"/>
+                                <include-menu name="blogSub" location="component://content/widget/content/ContentMenus.xml"/>
+                                <label style="h1" text="${blogContent.contentName}"/>
+                                <link style="h1" text=" [${blogContent.contentId}]" target="blogContent">
+                                    <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+                                </link>
+                            </widgets>
+                        </section>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="blogArtDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="commonBlogDecorator">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="parameters.articleContentId"/></not>
+                            </condition>
+                            <actions>
+                                <set field="contentId" from-field="parameters.blogContentId"/>
+                                <entity-one entity-name="Content" value-field="blogContent"/>
+                            </actions>
+                            <widgets>
+                                <include-menu name="blogArt" location="component://content/widget/content/ContentMenus.xml"/>
+                                <include-menu name="blogArtSub" location="component://content/widget/content/ContentMenus.xml"/>
+                                <label style="h1" text="${blogContent.contentName}"/>
+                                <link style="h1" text=" [${blogContent.contentId}]" target="blogContent">
+                                    <parameter param-name="blogContentId" from-field="parameters.blogContentId"/>
+                                </link>
+                            </widgets>
+                        </section>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="BlogMain">
+        <section>
+            <actions>
+                <set field="headerItem" value="Blog"/>
+                <entity-condition entity-name="ContentAssocViewTo" list="blogs" use-cache="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="contentIdStart" operator="equals" value="BLOGROOT"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="caFromDate" operator="equals" from-field="null"/>
+                            <condition-expr field-name="caFromDate" operator="less-equals" from-field="nowTimestamp"/>
+                        </condition-list>
+                        <condition-list combine="or">
+                            <condition-expr field-name="caThruDate" operator="equals" from-field="nullField"/>
+                            <condition-expr field-name="caThruDate" operator="greater-equals" from-field="nowTimestamp"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="contentName"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonBlogDecorator">
+                    <decorator-section name="body">
+                        <include-menu name="blogSub" location="component://content/widget/content/ContentMenus.xml"/>
+                        <screenlet title="${uiLabelMap.ContentBlogList}" navigation-form-name="ListBlogs">
+                            <include-form name="ListBlogs" location="component://content/widget/forum/BlogForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditBlog">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="EditBlog"/>
+                <set field="contentId" from-field="parameters.blogContentId"/>
+                <entity-one entity-name="Content" value-field="content"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="blogDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ContentBlogEdit}">
+                            <include-form name="EditBlog" location="component://content/widget/forum/BlogForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="BlogContent">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="Articles"/>
+                <entity-condition entity-name="ContentAssocViewTo" use-cache="false" list="blogContent">
+                    <condition-list combine="and">
+                        <condition-expr field-name="contentIdStart" operator="equals" from-field="parameters.blogContentId"/>
+                        <condition-expr field-name="caContentAssocTypeId" operator="equals" value="PUBLISH_LINK"/>
+                        <condition-expr field-name="caThruDate" operator="equals" value=""/>
+                    </condition-list>
+                    <order-by field-name="caFromDate DESC"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="blogDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ContentBlogArticleList}" navigation-form-name="BlogContent">
+                            <include-form name="BlogContent" location="component://content/widget/forum/BlogForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditArticle">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="EditBlogArt"/>
+                <set field="blogContentId" from-field="parameters.blogContentId"/>
+                <set field="upPerm.contentId" from-field="parameters.blogContentId"/>
+                <set field="upPerm.contentOperationId" value="CONTENT_UPDATE"/>
+                <set field="upPerm.contentPurposeTypeId" value="ARTICLE"/>
+                <set field="contentId" from-field="parameters.articleContentId"/>
+            </actions>
+            <widgets>
+                <section>
+                    <!--condition>
+                        <if-service-permission service-name="genericContentPermission" main-action="UPDATE"/>
+                        </condition-->
+                    <actions>
+                        <service service-name="getBlogEntry" result-map="blogEntry" auto-field-map="true"/>
+                    </actions>
+                    <widgets>
+                        <decorator-screen name="blogArtDecorator">
+                            <decorator-section name="body">
+                                <sub-content content-id="${contentId}" map-key="IMAGE"/>
+                                <include-form name="EditArticle" location="component://content/widget/forum/BlogForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                    <fail-widgets>
+                        <label text="${uiLabelMap.EditBlogArticlePermissionError}: ${contentId} ${uiLabelMap.ContentBlog} ${blogContentId}"></label>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewArticle">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="ViewBlogArt"/>
+                <set field="contentId" from-field="parameters.articleContentId"/>
+                <set field="blogContentId" from-field="parameters.blogContentId"/>
+                <entity-one entity-name="Content" value-field="blogEntry"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="blogArtDecorator">
+                    <decorator-section name="body">
+                        <container><label text="${blogEntry.contentName}: ${blogEntry.description}" style="h2"/></container>
+                        <horizontal-separator/>
+                        <container style="lefthalf">
+                            <label style="h3" text="${uiLabelMap.ContentImage}"/>
+                            <container>
+                                <sub-content content-id="${contentId}" map-key="IMAGE"/>
+                            </container>
+                        </container>
+                        <container style="righthalf">
+                            <label style="h3" text="${uiLabelMap.ContentBlogSummary}"/>
+                            <container>
+                                <sub-content content-id="${contentId}" map-key="SUMMARY"/>
+                            </container>
+                        </container>
+                        <container style="clear"/>
+                        <horizontal-separator/>
+                        <label style="h3" text="${uiLabelMap.ContentBlogArticle}"/>
+                        <container>
+                            <sub-content content-id="${contentId}" map-key="ARTICLE"/>
+                        </container>
+                        <horizontal-separator/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

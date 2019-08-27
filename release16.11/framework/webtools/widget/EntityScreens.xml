@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="EntitySQLProcessor">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEntitySQLProcessor"/>
+                <set field="tabButtonItem" value="EntitySQLProcessor"/>
+                <set field="labelTitleProperty" value="PageTitleEntitySQLProcessor"/>
+                <set field="sqlCommand" from-field="parameters.sqlCommand"/>
+                <set field="selGroup" from-field="parameters.group"/>
+                <set field="rowLimit" from-field="parameters.rowLimit" type="Integer"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+
+                <script location="component://webtools/groovyScripts/entity/EntitySQLProcessor.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="EntitySQLCommand" location="component://webtools/widget/EntityForms.xml"/>
+                        <platform-specific>
+                            <html><html-template location="component://webtools/template/entity/EntitySQLProcessor.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EntityExportAll">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEntityExportAll"/>
+                <set field="tabButtonItem" value="entityExportAll"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+                <set field="results" from-field="parameters.results"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/entity/EntityExportAll.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ProgramExport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEntityExportAll"/>
+                <set field="tabButtonItem" value="programExport"/>
+                <script location="component://webtools/groovyScripts/entity/ProgramExport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                         <screenlet>
+                            <include-form name="ProgramExport" location="component://webtools/widget/MiscForms.xml"/>
+                        </screenlet>
+                        <screenlet>
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/entity/ProgramExport.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EntityImportDir">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEntityImportDir"/>
+                <set field="tabButtonItem" value="entityImportDir"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+
+                <set field="messages" from-field="parameters.messages"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/entity/EntityImportDir.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EntityImport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEntityImport"/>
+                <set field="tabButtonItem" value="entityImport"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+
+                <set field="messages" from-field="parameters.messages"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/entity/EntityImport.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EntityImportReaders">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEntityImportReaders"/>
+                <set field="tabButtonItem" value="entityImportReaders"/>
+                <set field="parameters.TRANSACTION_TIMEOUT" value="7200"/>
+
+                <set field="messages" from-field="parameters.messages"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <platform-specific>
+                                <html><html-template location="component://webtools/template/entity/EntityImportReaders.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EntityMaint">
+        <section>
+            <actions>
+                <set field="titleProperty" value="WebtoolsEntityDataMaintenance"/>
+                <set field="tabButtonItem" value="entitymaint"/>
+                <script location="component://webtools/groovyScripts/entity/EntityMaint.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.WebtoolsFindRecord}">
+                            <include-form name="FilterEntities" location="component://webtools/widget/EntityForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.WebtoolsFindRecord}">
+                            <iterate-section entry="firstChar" list="firstChars" view-size="100">
+                                <section>
+                                    <widgets>
+                                        <link text="${firstChar}" style="buttontext button-bar" target="#${firstChar}" full-path="true" url-mode="plain"></link>
+                                    </widgets>
+                                </section>
+                            </iterate-section>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.WebtoolsEntitiesAlpha}">
+                            <include-grid name="ListEntities" location="component://webtools/widget/EntityForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindGeneric">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <script location="component://webtools/groovyScripts/entity/FindGeneric.groovy"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap"/>
+                <set field="title" value="${uiLabelMap.WebtoolsFindValues} ${uiLabelMap.WebtoolsForEntity}: ${entityName}"/>
+                <set field="commonDisplaying" value="${uiLabelMap.CommonDisplaying}"/>
+                <set field="tabButtonItem" value="entitymaint"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <container style="button-bar button-style-1">
+                                    <link target="entitymaint" text="${uiLabelMap.WebtoolsBackToEntityList}"/>
+                                    <link target="ViewRelations" text="${uiLabelMap.WebtoolsViewRelations}">
+                                        <parameter param-name="entityName" from-field="entityName"/>
+                                    </link>
+                                    <link target="ViewGeneric" text="${uiLabelMap.CommonCreateNew}" style="create">
+                                        <parameter param-name="entityName" from-field="entityName"/>
+                                        <parameter param-name="enableEdit" value="true"/>
+                                    </link>
+                                </container>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <platform-specific>
+                                    <html><html-template location="component://webtools/template/entity/FindGeneric.ftl"/></html>
+                                </platform-specific>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <platform-specific>
+                                    <html><html-template location="component://webtools/template/entity/ListGeneric.ftl"/></html>
+                                </platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="ViewGeneric">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <script location="component://webtools/groovyScripts/entity/ViewGeneric.groovy"/>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap"/>
+                <set field="title" value="${uiLabelMap.WebtoolsViewValue}: ${entityName}"/>
+                <set field="tabButtonItem" value="entitymaint"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/template/entity/ViewGeneric.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="ViewRelations">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <script location="component://webtools/groovyScripts/entity/ViewRelations.groovy"/>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap"/>
+                <set field="title" value="${uiLabelMap.WebtoolsRelations}: ${entityName}"/>
+                <set field="tabButtonItem" value="entitymaint"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/template/entity/ViewRelations.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityRef">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsEntityReferenceChart"/>
+                <script location="component://webtools/groovyScripts/entity/EntityRef.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <widgets>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/template/entity/EntityRef.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityRefMain">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsEntityReferenceChart"/>
+                <service service-name="getEntityRefData" result-map="result"/>
+                <set field="numberOfEntities" from-field="result.numberOfEntities"/>
+                <set field="packagesList" from-field="result.packagesList"/>
+            </actions>
+            <widgets>
+                <section>
+                    <widgets>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/template/entity/EntityRefMain.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityRefList">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsEntityReference"/>
+                <script location="component://webtools/groovyScripts/entity/EntityRefList.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <widgets>
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://webtools/template/entity/EntityRefList.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </widgets>
+                </section>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EntityRefReport">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsEntityReferenceChart"/>
+                <service service-name="getEntityRefData" result-map="result"/>
+                <set field="numberOfEntities" from-field="result.numberOfEntities"/>
+                <set field="packagesList" from-field="result.packagesList"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <xsl-fo>
+                        <html-template location="component://webtools/template/entity/EntityRefReport.fo.ftl"/>
+                    </xsl-fo>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EntityEoModelBundle">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="PageTitleEntityEoModelBundle"/>
+                <set field="tabButtonItem" value="entityEoModelBundle"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <include-form name="EntityEoModelBundle" location="component://webtools/widget/EntityForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CheckDb">
+        <section>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsCheckUpdateDatabase"/>
+                <set field="tabButtonItem" value="checkDb"/>
+                <script location="component://webtools/groovyScripts/entity/CheckDb.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <platform-specific><html><html-template location="component://webtools/template/entity/CheckDb.ftl"/></html></platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EntityPerformanceTest">
+        <section>
+            <condition>
+                <if-has-permission permission="ENTITY_MAINT"/>
+            </condition>
+            <actions>
+                <set field="headerItem" value="main"/>
+                <set field="titleProperty" value="WebtoolsPerformanceTests"/>
+                <set field="tabButtonItem" value="entityPerformanceTest"/>
+                <script location="component://webtools/groovyScripts/entity/EntityPerformanceTest.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <label>${uiLabelMap.WebtoolsNotePerformanceResultsMayVary}</label>
+                            <include-form name="ListPerformanceResults" location="component://webtools/widget/EntityForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.WebtoolsPermissionMaint}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="xmldsdump">
+        <section>
+            <actions>
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="PageTitleEntityExport"/>
+                <set field="tabButtonItem" value="xmlDsDump"/>
+                <set field="entityFrom" from-field="parameters.entityFrom" type="Timestamp"/>
+                <set field="entityThru" from-field="parameters.entityThru" type="Timestamp"/>
+                <script location="component://webtools/groovyScripts/entity/XmlDsDump.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <platform-specific><html><html-template location="component://webtools/template/entity/XmlDsDump.ftl"/></html></platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ConnectionPoolStatus">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ConnectionPoolStatus"/>
+                <set field="tabButtonItem" value="ConnectionPoolStatus"/>
+                <set field="labelTitleProperty" value="ConnectionPoolStatus"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEntityDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://webtools/template/entity/ConnectionPoolStatus.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

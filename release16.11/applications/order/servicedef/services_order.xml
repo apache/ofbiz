@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Order Services: Orders </description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Order -->
+    <service name="createOrderAdjustmentAttribute" default-entity-name="OrderAdjustmentAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderAdjustmentAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderAdjustmentAttribute" default-entity-name="OrderAdjustmentAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderAdjustmentAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderAdjustmentAttribute" default-entity-name="OrderAdjustmentAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderAdjustmentAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderAdjustmentType" default-entity-name="OrderAdjustmentType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderAdjustmentType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderAdjustmentType" default-entity-name="OrderAdjustmentType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderAdjustmentType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderAdjustmentType" default-entity-name="OrderAdjustmentType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderAdjustmentType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderAttribute" default-entity-name="OrderAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderAttribute" default-entity-name="OrderAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderAttribute" default-entity-name="OrderAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createOrderBlacklist" default-entity-name="OrderBlacklist" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderBlacklist record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderBlacklist" default-entity-name="OrderBlacklist" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderBlacklist record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createOrderBlacklistType" default-entity-name="OrderBlacklistType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderBlacklistType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderBlacklistType" default-entity-name="OrderBlacklistType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderBlacklistType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderBlacklistType" default-entity-name="OrderBlacklistType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderBlacklistType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemAssoc" default-entity-name="OrderItemAssoc" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemAssoc record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemAssoc" default-entity-name="OrderItemAssoc" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemAssoc record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemAssoc" default-entity-name="OrderItemAssoc" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemAssoc record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemAssocType" default-entity-name="OrderItemAssocType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemAssocType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemAssocType" default-entity-name="OrderItemAssocType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemAssocType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemAssocType" default-entity-name="OrderItemAssocType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemAssocType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemContactMech" default-entity-name="OrderItemContactMech" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemContactMech record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemContactMech" default-entity-name="OrderItemContactMech" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemContactMech record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemContactMech" default-entity-name="OrderItemContactMech" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemContactMech record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemGroup" default-entity-name="OrderItemGroup" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemGroup record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemGroup" default-entity-name="OrderItemGroup" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemGroup record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemGroup" default-entity-name="OrderItemGroup" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemGroup record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemPriceInfo" default-entity-name="OrderItemPriceInfo" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemPriceInfo record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemPriceInfo" default-entity-name="OrderItemPriceInfo" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemPriceInfo record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemPriceInfo" default-entity-name="OrderItemPriceInfo" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemPriceInfo record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemRole" default-entity-name="OrderItemRole" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemPriceInfo record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemRole" default-entity-name="OrderItemRole" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemPriceInfo record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemShipGrpInvRes" default-entity-name="OrderItemShipGrpInvRes" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemShipGrpInvRes record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemShipGrpInvRes" default-entity-name="OrderItemShipGrpInvRes" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemShipGrpInvRes record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemShipGrpInvRes" default-entity-name="OrderItemShipGrpInvRes" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemShipGrpInvRes record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemType" default-entity-name="OrderItemType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemType" default-entity-name="OrderItemType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemType" default-entity-name="OrderItemType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderItemTypeAttr" default-entity-name="OrderItemTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderItemTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderItemTypeAttr" default-entity-name="OrderItemTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderItemTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderItemTypeAttr" default-entity-name="OrderItemTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderItemTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="updateOrderNotification" default-entity-name="OrderNotification" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderNotification record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderNotification" default-entity-name="OrderNotification" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderNotification record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderProductPromoCode" default-entity-name="OrderProductPromoCode" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderProductPromoCode record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderProductPromoCode" default-entity-name="OrderProductPromoCode" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderProductPromoCode record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="updateOrderRequirementCommitment" default-entity-name="OrderRequirementCommitment" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderRequirementCommitment record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderRequirementCommitment" default-entity-name="OrderRequirementCommitment" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderRequirementCommitment record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <service name="createOrderSummaryEntry" default-entity-name="OrderSummaryEntry" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderSummaryEntry record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderSummaryEntry" default-entity-name="OrderSummaryEntry" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderSummaryEntry record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderSummaryEntry" default-entity-name="OrderSummaryEntry" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderSummaryEntry record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderTermAttribute" default-entity-name="OrderTermAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderTermAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderTermAttribute" default-entity-name="OrderTermAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderTermAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderTermAttribute" default-entity-name="OrderTermAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderTermAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderType" default-entity-name="OrderType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderType" default-entity-name="OrderType" engine="entity-auto" invoke="update" auth="true">
+         <description>Update an OrderType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderType" default-entity-name="OrderType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createOrderTypeAttr" default-entity-name="OrderTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an OrderTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateOrderTypeAttr" default-entity-name="OrderTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an OrderTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderTypeAttr" default-entity-name="OrderTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an OrderTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- OrderContentType services -->
+    <service name="createOrderContentType" default-entity-name="OrderContentType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a OrderContentType</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateOrderContentType" default-entity-name="OrderContentType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a OrderContentType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteOrderContentType" default-entity-name="OrderContentType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a OrderContentType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+</services>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of an Apache OFBiz Component</title>
+    <description>None</description>
+    <version>1.0</version>
+
+    <!-- ========================================================= -->
+    <!-- ======================== Data Model ===================== -->
+    <!-- The modules in this file are as follows:                  -->
+    <!--  - org.apache.ofbiz.entity.audit -->
+    <!--  - org.apache.ofbiz.entity.crypto -->
+    <!--  - org.apache.ofbiz.entity.sequence -->
+    <!--  - org.apache.ofbiz.entity.tenant -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="EntityAuditLog" package-name="org.apache.ofbiz.entity.audit" title="Entity Audit Log">
+        <field name="auditHistorySeqId" type="id-ne"><description>Sequenced primary key</description></field>
+        <field name="changedEntityName" type="long-varchar"></field>
+        <field name="changedFieldName" type="long-varchar"></field>
+        <field name="pkCombinedValueText" type="long-varchar"></field>
+        <field name="oldValueText" type="long-varchar"></field>
+        <field name="newValueText" type="long-varchar"></field>
+        <field name="changedDate" type="date-time"></field>
+        <field name="changedByInfo" type="long-varchar"><description>This should contain whatever information is available about the user or system that changed the value. This could be a userLoginId, but could be something else too, so there is no foreign key.</description></field>
+        <field name="changedSessionInfo" type="long-varchar"><description>This should contain whatever information is available about the session during which the value was changed. This could be a visitId, but could be something else too, so there is no foreign key.</description></field>
+        <prim-key field="auditHistorySeqId"/>
+    </entity>
+    <entity entity-name="EntityKeyStore" package-name="org.apache.ofbiz.entity.crypto" title="Entity Key Store Entity">
+        <field name="keyName" type="id-vlong-ne"></field>
+        <field name="keyText" type="long-varchar"></field>
+        <prim-key field="keyName"/>
+    </entity>
+    <entity entity-name="SequenceValueItem" package-name="org.apache.ofbiz.entity.sequence" title="Sequence Value Item Entity">
+      <field name="seqName" type="id-long-ne"></field>
+      <field name="seqId" type="numeric"></field>
+      <prim-key field="seqName"/>
+    </entity>
+    <entity entity-name="JavaResource" package-name="org.apache.ofbiz.entity" title="Java Resource">
+        <field name="resourceName" type="id-vlong-ne" />
+        <field name="resourceValue" type="byte-array" />
+        <prim-key field="resourceName" />
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- org.apache.ofbiz.entity.tenant -->
+    <!-- ========================================================= -->
+    
+    <entity entity-name="Tenant" package-name="org.apache.ofbiz.entity.tenant">
+        <field name="tenantId" type="id-ne"/>
+        <field name="tenantName" type="name"/>
+        <field name="initialPath" type="value"/>
+        <field name="disabled" type="indicator"><description>Disabled if 'Y', defaults to 'N' (not disabled).</description></field>
+        <prim-key field="tenantId"/>
+    </entity>
+    <entity entity-name="TenantDataSource" package-name="org.apache.ofbiz.entity.tenant">
+        <description>
+            There should be one record for each tenant and each group-map for the active delegator.
+            The jdbc fields will override the datasource -> inline-jdbc values for the per-tenant delegator.
+        </description>
+        <field name="tenantId" type="id-ne"/>
+        <field name="entityGroupName" type="name"/>
+        <field name="jdbcUri" type="long-varchar"/>
+        <field name="jdbcUsername" type="long-varchar"/>
+        <field name="jdbcPassword" type="long-varchar">
+            <!-- This field should probably be encrypted, but the encrypt=true attribute will not work in this case
+            because different tenants will have different sets of encryption keys because the EntityKeyStore table is
+            in the per-tenant database an not in the shared tenant control database, which causes different keys to
+            be used for those logged in under different tenants, causing decryption errors unless you do all 
+            TenantDataSource maintenance from only one tenant (or the non-tenant master db).
+            
+            The problem is that each tenant has their own encryption keys, and that is they way it should be since 
+            having easy access to the encryption keys that other tenants are using would be bad, and not having access 
+            to your own encryption keys would also be bad. Because of that we can't move the EntityKeyStore entity 
+            into the tenant control database. If we encrypt this with the keys from one tenant then no one logged in 
+            with another tenant database will be able to decrypt it, so we can't use the keys in the per-tenant 
+            databases for this.
+            
+            Technically we don't have to encrypt the JDBC password, it often isn't encrypted in the configuration 
+            files anyway. But it would be nice to encrypt it to protect other databases anyway, even if they are 
+            probably on the same box and in the same database server instance.
+            -->
+        </field>
+        <prim-key field="tenantId"/>
+        <prim-key field="entityGroupName"/>
+        <relation type="one" fk-name="TNTDTSRC_TNT" rel-entity-name="Tenant">
+            <key-map field-name="tenantId"/>
+        </relation>
+    </entity>
+    <entity entity-name="TenantKeyEncryptingKey" package-name="org.apache.ofbiz.entity.tenant">
+        <description>
+            There should be one record for each tenant and each group-map for the active delegator.
+            The jdbc fields will override the datasource -> inline-jdbc values for the per-tenant delegator.
+        </description>
+        <field name="tenantId" type="id-ne"/>
+        <field name="kekText" type="long-varchar"></field>
+        <prim-key field="tenantId"/>
+        <relation type="one" fk-name="TNTKEK_TNT" rel-entity-name="Tenant">
+            <key-map field-name="tenantId"/>
+        </relation>
+    </entity>
+    <!-- may be no reason for this entity, user is authenticated inside the tenant and this would only be useful to 
+    get a list of tenants per user
+    <entity entity-name="TenantUserLogin" package-name="org.apache.ofbiz.entity.tenant">
+        <field name="tenantId" type="id-ne"/>
+        <field name="userLoginId" type="id-vlong-ne"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <prim-key field="tenantId"/>
+        <prim-key field="userLoginId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="TNTUSRLGN_TNT" rel-entity-name="Tenant">
+            <key-map field-name="tenantId"/>
+        </relation>
+        <!- - NOTE: there is no FK to the UserLogin entity, which is in a higher-level component, and would normally be in a separate database - ->
+    </entity>
+    -->
+    <entity entity-name="Component" package-name="org.apache.ofbiz.entity.tenant">
+        <description>Component Entity</description>
+        <field name="componentName" type="name"></field>
+        <field name="rootLocation" type="description"></field>
+        <prim-key field="componentName"/>
+    </entity>
+    <entity entity-name="TenantComponent" package-name="org.apache.ofbiz.entity.tenant">
+        <description></description>
+        <field name="tenantId" type="id-ne"></field>
+        <field name="componentName" type="name"></field>
+        <field name="sequenceNum" type="numeric"></field>
+        <prim-key field="componentName"/>
+        <prim-key field="tenantId"/>
+        <relation type="one" fk-name="TNTCOMP_TNT" rel-entity-name="Tenant">
+            <key-map field-name="tenantId"/>
+        </relation>
+        <relation type="one" fk-name="COMP_CNT" rel-entity-name="Component">
+            <key-map field-name="componentName"/>
+        </relation>
+    </entity>
+    <entity entity-name="TenantDomainName" package-name="org.apache.ofbiz.entity.tenant" 
+            title="Tenant and its Domain Name">
+        <field name="tenantId" type="id-ne"></field>
+        <field name="domainName" type="long-varchar"></field>
+        <prim-key field="domainName"/>
+        <relation type="one" fk-name="TNNT_DMNAM" rel-entity-name="Tenant">
+            <key-map field-name="tenantId"/>
+        </relation>
+    </entity>
+</entitymodel>

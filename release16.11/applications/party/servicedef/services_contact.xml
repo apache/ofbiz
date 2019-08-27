@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Party Contact Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Party contact services -->
+    <service name="createContactMechType" default-entity-name="ContactMechType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new ContactMech Type Record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateContactMechType" default-entity-name="ContactMechType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ContactMech Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteContactMechType" default-entity-name="ContactMechType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ContactMech Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="createContactMechPurposeType" default-entity-name="ContactMechPurposeType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new ContactMech Purpose Type Record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateContactMechPurposeType" default-entity-name="ContactMechPurposeType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ContactMech Purpose Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteContactMechPurposeType" default-entity-name="ContactMechPurposeType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ContactMech Purpose Type Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="createContactMechTypeAttr" default-entity-name="ContactMechTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new ContactMech Type Attr Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateContactMechTypeAttr" default-entity-name="ContactMechTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ContactMech Type Attr Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteContactMechTypeAttr" default-entity-name="ContactMechTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing ContactMech Type Attr Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <service name="createContactMechTypePurpose" default-entity-name="ContactMechTypePurpose" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new ContactMech Type Purpose Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateContactMechTypePurpose" default-entity-name="ContactMechTypePurpose" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ContactMech Type Purpose Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteContactMechTypePurpose" default-entity-name="ContactMechTypePurpose" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing ContactMech Type Purpose Record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+</services>

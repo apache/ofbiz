@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Product Costing Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <service name="createCostComponent" default-entity-name="CostComponent" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a CostComponent</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <!--<override name="costComponentTypeId" optional="false"/>-->
+    </service>
+    <service name="updateCostComponent" default-entity-name="CostComponent" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a CostComponent</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCostComponent" default-entity-name="CostComponent" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a CostComponent</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="recreateCostComponent" default-entity-name="CostComponent" engine="simple"
+                location="component://product/minilang/product/cost/CostServices.xml" invoke="recreateCostComponent" auth="true">
+        <description>Create a CostComponent and cancel the existing ones</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+    </service>
+    <service name="cancelCostComponents" engine="simple"
+                location="component://product/minilang/product/cost/CostServices.xml" invoke="cancelCostComponents" auth="true">
+        <description>Cancels CostComponent</description>
+        <attribute mode="IN" name="costComponentId" optional="true" type="String"/>
+        <attribute mode="IN" name="productId" optional="true" type="String"/>
+        <attribute mode="IN" name="costUomId" optional="true" type="String"/>
+        <attribute mode="IN" name="costComponentTypeId" optional="true" type="String"/>
+    </service>
+    <service name="createProductCostComponentCalc" default-entity-name="ProductCostComponentCalc" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ProductCostComponentCalc</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProductCostComponentCalc" default-entity-name="ProductCostComponentCalc" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ProductCostComponentCalc</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductCostComponentCalc" default-entity-name="ProductCostComponentCalc" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Example</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="getProductCost" engine="simple" auth="true"
+                location="component://product/minilang/product/cost/CostServices.xml" invoke="getProductCost">
+        <description>Gets the product's costs from CostComponent entries</description>
+        <attribute mode="IN" name="productId" optional="false" type="String"/>
+        <attribute mode="IN" name="currencyUomId" optional="false" type="String"/>
+        <attribute mode="IN" name="costComponentTypePrefix" optional="false" type="String"/>
+        <attribute mode="OUT" name="productCost" type="BigDecimal" optional="false"/>
+    </service>
+    <service name="getTaskCost" engine="simple" auth="true"
+                location="component://product/minilang/product/cost/CostServices.xml" invoke="getTaskCost">
+        <description>Gets the production run task's costs</description>
+        <attribute mode="IN" name="workEffortId" optional="false" type="String"/>
+        <attribute mode="IN" name="currencyUomId" optional="false" type="String"/>
+        <attribute mode="IN" name="productId" optional="true" type="String"/>
+        <attribute mode="IN" name="routingId" optional="true" type="String"/>
+        <attribute mode="OUT" name="taskCost" type="BigDecimal" optional="false"/>
+        <attribute mode="OUT" name="costsByType" type="Map" optional="true"/>
+    </service>
+    <service name="calculateProductCosts" engine="simple" auth="true"
+                location="component://product/minilang/product/cost/CostServices.xml" invoke="calculateProductCosts">
+        <description>Calculates the product's costs. If the product does not have cost component defined, will use the BOM to calculate the cost.</description>
+        <attribute mode="IN" name="productId" optional="false" type="String"/>
+        <attribute mode="IN" name="currencyUomId" optional="false" type="String"/>
+        <attribute mode="IN" name="costComponentTypePrefix" optional="false" type="String"/>
+        <attribute mode="OUT" name="totalCost" type="BigDecimal"/>
+    </service>
+    <service name="calculateAllProductsCosts" engine="simple" auth="true" transaction-timeout="7200"
+                location="component://product/minilang/product/cost/CostServices.xml" invoke="calculateAllProductsCosts">
+        <description>Calculates estimated costs for all the products</description>
+        <attribute mode="IN" name="currencyUomId" optional="false" type="String"/>
+        <attribute mode="IN" name="costComponentTypePrefix" optional="false" type="String"/>
+    </service>
+    <service name="calculateProductAverageCost" engine="simple" auth="true"
+            location="component://product/minilang/product/cost/CostServices.xml" invoke="calculateProductAverageCost">
+        <description>Calculate inventory average cost for a product</description>
+        <attribute name="productId" type="String" mode="IN"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="ownerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="totalQuantityOnHand" type="BigDecimal" mode="OUT"/>
+        <attribute name="totalInventoryCost" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="productAverageCost" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="currencyUomId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="productCostCalcInterface" engine="interface">
+        <description>Interface to describe base parameters for Product Cost Calculation Services</description>
+        <attribute name="productCostComponentCalc" type="GenericValue" mode="IN" optional="false"/>
+        <attribute name="costComponentCalc" type="GenericValue" mode="IN" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="false"/>
+        <attribute name="costComponentTypePrefix" type="String" mode="IN" optional="false"/>
+        <attribute name="baseCost" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="productCostAdjustment" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <service name="productCostPercentageFormula" engine="simple"
+                location="component://product/minilang/product/cost/CostServices.xml" invoke="productCostPercentageFormula" auth="true">
+        <description>Formula that creates a cost component equal to a percentage of total product cost</description>
+        <implements service="productCostCalcInterface"/>
+    </service>
+    <service name="createCostComponentAttribute" default-entity-name="CostComponentAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Cost Component Attribute Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateCostComponentAttribute" default-entity-name="CostComponentAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a CostComponentAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCostComponentAttribute" default-entity-name="CostComponentAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing CostComponentAttribute Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    <service name="createCostComponentType" default-entity-name="CostComponentType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Cost Component Type Record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateCostComponentType" default-entity-name="CostComponentType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Cost Component Type</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCostComponentType" default-entity-name="CostComponentType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Cost Component Type Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    <service name="createCostComponentTypeAttr" default-entity-name="CostComponentTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Cost Component Type Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateCostComponentTypeAttr" default-entity-name="CostComponentTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Cost Component Type</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCostComponentTypeAttr" default-entity-name="CostComponentTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Cost Component Type Attr Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+</services>

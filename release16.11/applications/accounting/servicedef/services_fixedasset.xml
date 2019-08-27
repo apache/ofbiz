@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Accounting Services: Fixed Asset </description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Fixed Asset  -->
+    <service name="createFixedAsset" default-entity-name="FixedAsset" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Fixed Asset</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fixedAssetTypeId" optional="false"/>
+    </service>
+    <service name="updateFixedAsset" default-entity-name="FixedAsset" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Fixed Asset</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fixedAssetTypeId" optional="false"/>
+    </service>
+
+    <!-- Product to Fixed Asset maintenance -->
+    <service name="addFixedAssetProduct" default-entity-name="FixedAssetProduct" engine="entity-auto" invoke="create" auth="true">
+        <description>Add Product To Fixed Asset</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateFixedAssetProduct" default-entity-name="FixedAssetProduct" engine="entity-auto" invoke="update" auth="true">
+        <description>Update the Product to Fixed Asset information</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeFixedAssetProduct" default-entity-name="FixedAssetProduct" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove Product From Fixed Asset</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FixedAssetStdCost  -->
+    <!-- TODO: we should cancel the existing costs of the same type with seca -->
+    <service name="createFixedAssetStdCost" default-entity-name="FixedAssetStdCost" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Fixed Asset Standard Cost</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateFixedAssetStdCost" default-entity-name="FixedAssetStdCost" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Fixed Asset Standard Cost</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="cancelFixedAssetStdCost" default-entity-name="FixedAssetStdCost" engine="simple"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="cancelFixedAssetStdCost" auth="true">
+        <description>Cancel a Fixed Asset Standard Cost</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <!-- FixedAssetIdent -->
+    <service name="createFixedAssetIdent" default-entity-name="FixedAssetIdent" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Fixed Asset Identification</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateFixedAssetIdent" default-entity-name="FixedAssetIdent" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Fixed Asset Identification</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeFixedAssetIdent" default-entity-name="FixedAssetIdent" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Fixed Asset Identification</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <!-- Equipment Registration Create/Update/Delete-->
+    <service name="createFixedAssetRegistration" default-entity-name="FixedAssetRegistration" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Fixed Asset Registration</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateFixedAssetRegistration" default-entity-name="FixedAssetRegistration" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Fixed Asset Registration</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetRegistration" default-entity-name="FixedAssetRegistration" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Fixed Asset Registration</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <!-- FixedAsset Maintenance Create/Update/Delete-->
+    <service name="createFixedAssetMaint" default-entity-name="FixedAssetMaint" engine="simple"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="createFixedAssetMaint" auth="true">
+        <description>Create a Fixed Asset Maintenance</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="estimatedStartDate" mode="IN" type="Timestamp" optional="true"/>
+        <attribute name="estimatedCompletionDate" mode="IN" type="Timestamp" optional="true"/>
+        <attribute name="maintTemplateWorkEffortId" mode="IN" type="String" optional="true"/>
+        <override name="maintHistSeqId" mode="OUT"/> <!-- make this OUT rather than IN, we will automatically generate the next sub-sequence ID -->
+    </service>
+    <service name="updateFixedAssetMaint" default-entity-name="FixedAssetMaint" engine="simple"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="updateFixedAssetMaint" auth="true">
+        <description>Update a Fixed Asset Maintenance</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="deleteFixedAssetMaint" default-entity-name="FixedAssetMaint" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Fixed Asset Maintenance</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createMaintsFromTimeInterval" engine="simple" use-transaction="false"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="createMaintsFromTimeInterval" auth="true">
+        <description>Create Fixed Asset Maintenances from ProductMaint time intervals. Currently works
+        with day, month, and year interval types. This service is intended to be run as a regularly
+        scheduled job.</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+    </service>
+    <!-- FixedAsset Maintenance Meter Create/Update/Delete-->
+    <service name="createFixedAssetMeter" default-entity-name="FixedAssetMeter" engine="simple"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="createFixedAssetMeter" auth="true">
+        <description>Create a Fixed Asset Maintenance Meter</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateFixedAssetMeter" default-entity-name="FixedAssetMeter" engine="simple"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="updateFixedAssetMeter" auth="true">
+        <description>Update a Fixed Asset Maintenance Meter</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetMeter" default-entity-name="FixedAssetMeter" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Fixed Asset Maintenance Meter</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <!-- FixedAsset Maintenance Order Create/Update/Delete-->
+    <service name="createFixedAssetMaintOrder" default-entity-name="FixedAssetMaintOrder" engine="simple"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="createFixedAssetMaintOrder" auth="true">
+        <description>Create a Fixed Asset Maintenance Order</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <attribute name="fixedAssetId" type="String" mode="IN" optional="false"/>
+        <attribute name="maintHistSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetMaintOrder" default-entity-name="FixedAssetMaintOrder" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Fixed Asset Maintenance Order</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- =========Party Fixed Asset Assignment Services========= -->
+    <service name="createPartyFixedAssetAssignment" default-entity-name="PartyFixedAssetAssignment" engine="entity-auto" invoke="create" auth="true">
+        <description>Add Party to a Fixed Asset</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updatePartyFixedAssetAssignment" default-entity-name="PartyFixedAssetAssignment" engine="entity-auto" invoke="update" auth="true">
+        <description>Update Party to Fixed Asset</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deletePartyFixedAssetAssignment" default-entity-name="PartyFixedAssetAssignment" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete Party to Fixed Asset</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Fixed Asset Depreciation Services -->
+    <service name="createFixedAssetDepMethod" default-entity-name="FixedAssetDepMethod" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Fixed Asset Depreciation Method</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateFixedAssetDepMethod" default-entity-name="FixedAssetDepMethod" engine="entity-auto" invoke="update" auth="true">
+        <description>Create a Fixed Asset Depreciation Method</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetDepMethod" default-entity-name="FixedAssetDepMethod" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Fixed Asset Depreciation Method</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="checkUpdateFixedAssetDepreciation" default-entity-name="AcctgTrans" engine="simple"
+              location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="checkUpdateFixedAssetDepreciation" auth="true">
+        <description>If the accounting transaction is a depreciation transaction for a fixed asset, update the depreciation amount in the FixedAsset entity.</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="fixedAssetDepCalcInterface" engine="interface">
+        <description>Interface to describe base parameters for Depreciation Calculation Services</description>
+        <attribute name="expEndOfLifeYear" type="Integer" mode="IN" optional="false"/>
+        <attribute name="assetAcquiredYear" type="Integer" mode="IN" optional="false"/>
+        <attribute name="purchaseCost" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="salvageValue" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="usageYears" type="Integer" mode="IN" optional="false"/>
+        <attribute name="assetDepreciationTillDate" type="List" mode="OUT" optional="false"/>
+        <attribute name="assetNBVAfterDepreciation" type="List" mode="OUT" optional="false"/>
+        <attribute name="assetDepreciationInfoList" type="List" mode="OUT" optional="false"/>
+        <attribute name="nextDepreciationAmount" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="plannedPastDepreciationTotal" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <service name="straightLineDepreciation" engine="simple" default-entity-name="FixedAsset"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="straightLineDepreciation" auth="true">
+        <description>Straight line depreciation service to Fixed Asset</description>
+        <implements service="fixedAssetDepCalcInterface"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="doubleDecliningBalanceDepreciation" engine="simple" default-entity-name="FixedAsset"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="doubleDecliningBalanceDepreciation" auth="true">
+        <description>Double declining balance depreciation service to Fixed Asset</description>
+        <implements service="fixedAssetDepCalcInterface"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="calculateFixedAssetDepreciation" engine="simple" default-entity-name="FixedAssetDepMethod"
+                location="component://accounting/minilang/fixedasset/FixedAssetServices.xml" invoke="calculateFixedAssetDepreciation" auth="true">
+        <description>Select the depreciation method according to the entry in FixedAssetDepMethod</description>
+        <attribute name="fixedAssetId" type="String" mode="IN"/>
+        <attribute name="assetDepreciationTillDate" type="List" mode="OUT" optional="true"/>
+        <attribute name="assetNBVAfterDepreciation" type="List" mode="OUT" optional="true"/>
+        <attribute name="assetDepreciationInfoList" type="List" mode="OUT" optional="true"/>
+        <attribute name="nextDepreciationAmount" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="plannedPastDepreciationTotal" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="createFixedAssetTypeGlAccount" default-entity-name="FixedAssetTypeGlAccount" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Fixed Asset Type Gl Account Mapping</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="fixedAssetTypeId" type="String" mode="IN" optional="true" default-value="_NA_"/>
+        <attribute name="fixedAssetId" type="String" mode="IN" optional="true" default-value="_NA_"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="updateFixedAssetTypeGlAccount" default-entity-name="FixedAssetTypeGlAccount" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Fixed Asset Type Gl Account Mapping</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteFixedAssetTypeGlAccount" default-entity-name="FixedAssetTypeGlAccount" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Fixed Asset Type Gl Account Mapping</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FixedAssetGeoPoint services -->
+    <service name="createFixedAssetGeoPoint" default-entity-name="FixedAssetGeoPoint" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FixedAssetGeoPoint</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateFixedAssetGeoPoint" default-entity-name="FixedAssetGeoPoint" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FixedAssetGeoPoint</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetGeoPoint" default-entity-name="FixedAssetGeoPoint" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FixedAssetGeoPoint</description>
+        <permission-service service-name="fixedAssetPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- AccommodationClass services -->
+    <service name="createAccommodationClass" default-entity-name="AccommodationClass" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an AccommodationClass</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateAccommodationClass" default-entity-name="AccommodationClass" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an AccommodationClass</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteAccommodationClass" default-entity-name="AccommodationClass" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an AccommodationClass</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createAccommodationMapType" default-entity-name="AccommodationMapType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a AccommodationMapType entry</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAccommodationMapType" default-entity-name="AccommodationMapType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a AccommodationMapType record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteAccommodationMapType" default-entity-name="AccommodationMapType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a AccommodationMapType record</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- AccommodationMap services -->
+    <service name="createAccommodationMap" default-entity-name="AccommodationMap" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a AccommodationMap</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAccommodationMap" default-entity-name="AccommodationMap" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a AccommodationMap</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteAccommodationMap" default-entity-name="AccommodationMap" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a AccommodationMap</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- FixedAssetAttribute services -->
+    <service name="createFixedAssetAttribute" default-entity-name="FixedAssetAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FixedAssetAttribute</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateFixedAssetAttribute" default-entity-name="FixedAssetAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FixedAssetAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetAttribute" default-entity-name="FixedAssetAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FixedAssetAttribute</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FixedAssetIdentType services -->
+    <service name="createFixedAssetIdentType" default-entity-name="FixedAssetIdentType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FixedAssetIdentType</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateFixedAssetIdentType" default-entity-name="FixedAssetIdentType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FixedAssetIdentType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetIdentType" default-entity-name="FixedAssetIdentType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FixedAssetIdentType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FixedAssetProductType services -->
+    <service name="createFixedAssetProductType" default-entity-name="FixedAssetProductType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FixedAssetProductType</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateFixedAssetProductType" default-entity-name="FixedAssetProductType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FixedAssetProductType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetProductType" default-entity-name="FixedAssetProductType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FixedAssetProductType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FixedAssetStdCostType services -->
+    <service name="createFixedAssetStdCostType" default-entity-name="FixedAssetStdCostType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FixedAssetStdCostType</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateFixedAssetStdCostType" default-entity-name="FixedAssetStdCostType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FixedAssetStdCostType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetStdCostType" default-entity-name="FixedAssetStdCostType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FixedAssetStdCostType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FixedAssetType services -->
+    <service name="createFixedAssetType" default-entity-name="FixedAssetType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FixedAssetType</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateFixedAssetType" default-entity-name="FixedAssetType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FixedAssetType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetType" default-entity-name="FixedAssetType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FixedAssetType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- FixedAssetTypeAttr services -->
+    <service name="createFixedAssetTypeAttr" default-entity-name="FixedAssetTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a FixedAssetTypeAttr</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateFixedAssetTypeAttr" default-entity-name="FixedAssetTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a FixedAssetTypeAttr</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteFixedAssetTypeAttr" default-entity-name="FixedAssetTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a FixedAssetTypeAttr</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Product Component Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Product Store Services -->
+    <service name="createProductStore" default-entity-name="ProductStore" engine="simple"
+            location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="createProductStore">
+        <description>Create a Product Store</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <override name="storeName" optional="false"/>
+    </service>
+    <service name="updateProductStore" default-entity-name="ProductStore" engine="simple"
+            location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="updateProductStore">
+        <description>Update a Product Store</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <service name="reserveStoreInventory" engine="simple"
+            location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="reserveStoreInventory">
+        <description>Reserve Inventory in a Product Store</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="productId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"></attribute>
+        <attribute name="orderId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="quantityNotReserved" type="BigDecimal" mode="OUT" optional="false"></attribute>
+    </service>
+
+    <service name="isStoreInventoryRequired" engine="simple"
+            location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="isStoreInventoryRequired" auth="false">
+        <description>Checks if Store Inventory is Required</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="productStore" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="true"></attribute>
+        <attribute name="productId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="product" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="true"></attribute>
+        <attribute name="requireInventory" type="String" mode="OUT" optional="false"><!-- Y/N --></attribute>
+    </service>
+    <service name="isStoreInventoryAvailable" engine="simple"
+            location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="isStoreInventoryAvailable" auth="false">
+        <description>Checks if Store Inventory is Required</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="productStore" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="true"></attribute>
+        <attribute name="productId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="product" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="true"></attribute>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"></attribute>
+        <attribute name="available" type="String" mode="OUT" optional="false"><!-- Y/N --></attribute>
+    </service>
+    <service name="isStoreInventoryAvailableOrNotRequired" engine="simple"
+            location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="isStoreInventoryAvailableOrNotRequired" auth="false">
+        <description>Checks if Store Inventory is Required</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="productStore" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="true"></attribute>
+        <attribute name="productId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="product" type="org.apache.ofbiz.entity.GenericValue" mode="IN" optional="true"></attribute>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"></attribute>
+        <attribute name="availableOrNotRequired" type="String" mode="OUT" optional="false"><!-- Y/N --></attribute>
+    </service>
+
+    <!-- Product Store Role Services -->
+    <service name="createProductStoreRole" default-entity-name="ProductStoreRole" engine="entity-auto" invoke="create" auth="true">
+        <description>Create ProductStoreRole</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateProductStoreRole" default-entity-name="ProductStoreRole" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Product Store Role</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeProductStoreRole" default-entity-name="ProductStoreRole" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove ProductStoreRole</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
+    <!-- Product Store Catalog Services -->
+    <service name="createProductStoreCatalog" default-entity-name="ProductStoreCatalog" engine="entity-auto" invoke="create" auth="true">
+        <description>Create ProductStoreCatalog</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateProductStoreCatalog" default-entity-name="ProductStoreCatalog" engine="entity-auto" invoke="update" auth="true">
+        <description>Update ProductStoreCatalog</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStoreCatalog" default-entity-name="ProductStoreCatalog" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete ProductStoreCatalog</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Product Store Payment Services -->
+    <service name="createProductStorePaymentSetting" default-entity-name="ProductStorePaymentSetting" engine="entity-auto" invoke="create" auth="true">
+        <description>Create ProductStorePaymentSetting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="all" mode="IN" optional="false"/>
+        <override name="paymentCustomMethodId" optional="true"/>
+        <override name="paymentGatewayConfigId" optional="true"/>
+        <override name="paymentPropertiesPath" optional="true"/>
+        <override name="paymentService" optional="true"/>
+    </service>
+    <service name="updateProductStorePaymentSetting" default-entity-name="ProductStorePaymentSetting" engine="entity-auto" invoke="update" auth="true">
+        <description>Update ProductStorePaymentSetting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="all" mode="IN" optional="false"/>
+        <override name="paymentCustomMethodId" optional="true"/>
+        <override name="paymentGatewayConfigId" optional="true"/>
+        <override name="paymentPropertiesPath" optional="true"/>
+        <override name="paymentService" optional="true"/>
+    </service>
+    <service name="deleteProductStorePaymentSetting" default-entity-name="ProductStorePaymentSetting" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete ProductStorePaymentSetting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Product Store Email Services -->
+    <service name="createProductStoreEmailSetting" default-entity-name="ProductStoreEmailSetting" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Product Store Email Setting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes entity-name="ProductStoreEmailSetting" include="all" mode="IN" optional="false"/>
+        <override name="xslfoAttachScreenLocation" optional="true"/>
+        <override name="ccAddress" optional="true"/>
+        <override name="bccAddress" optional="true"/>
+        <override name="contentType" optional="true"/>
+    </service>
+    <service name="updateProductStoreEmailSetting" default-entity-name="ProductStoreEmailSetting" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Product Store Email Setting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes entity-name="ProductStoreEmailSetting" include="all" mode="IN" optional="false"/>
+        <override name="xslfoAttachScreenLocation" optional="true"/>
+        <override name="ccAddress" optional="true"/>
+        <override name="bccAddress" optional="true"/>
+        <override name="contentType" optional="true"/>
+    </service>
+    <service name="removeProductStoreEmailSetting" default-entity-name="ProductStoreEmailSetting" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Product Store Email Setting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes entity-name="ProductStoreEmailSetting" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Product Store Shipping Method Services -->
+    <service name="createProductStoreShipMeth" default-entity-name="ProductStoreShipmentMeth" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Product Store Shipment Method</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="all" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <override name="productStoreId" optional="false"/>
+        <override name="shipmentMethodTypeId" optional="false"/>
+        <override name="partyId" optional="false"/>
+        <override name="roleTypeId" optional="false"/>
+    </service>
+    <service name="updateProductStoreShipMeth" default-entity-name="ProductStoreShipmentMeth" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Product Store Shipment Method</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeProductStoreShipMeth" default-entity-name="ProductStoreShipmentMeth" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Product Store Shipment Method</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Product Store Keyword Override services -->
+    <service name="createProductStoreKeywordOvrd" default-entity-name="ProductStoreKeywordOvrd" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Product Store Keyword Override</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="target" optional="false"/>
+        <override name="fromDate" optional="true"/>
+        <override name="targetTypeEnumId" optional="false"/>
+    </service>
+    <service name="updateProductStoreKeywordOvrd" default-entity-name="ProductStoreKeywordOvrd" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Product Store Keyword Override</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStoreKeywordOvrd" default-entity-name="ProductStoreKeywordOvrd" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Product Store Keyword Override</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ProductStoreSurveyAppl Services -->
+    <service name="createProductStoreSurveyAppl" default-entity-name="ProductStoreSurveyAppl" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Product Store Survey Appl</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+    </service>
+    <service name="deleteProductStoreSurveyAppl" default-entity-name="ProductStoreSurveyAppl" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a Product Store Survey Appl</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ProductStorePromoAppl Services -->
+    <service name="createProductStorePromoAppl" default-entity-name="ProductStorePromoAppl" engine="entity-auto" invoke="create" auth="true">
+        <description>Create ProductStorePromoAppl</description>
+        <permission-service service-name="productPriceGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateProductStorePromoAppl" default-entity-name="ProductStorePromoAppl" engine="entity-auto" invoke="update" auth="true">
+        <description>Update ProductStorePromoAppl</description>
+        <permission-service service-name="productPriceGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStorePromoAppl" default-entity-name="ProductStorePromoAppl" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete ProductStorePromoAppl</description>
+        <permission-service service-name="productPriceGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ProductStoreFinActSetting Services -->
+    <service name="createProductStoreFinActSetting" default-entity-name="ProductStoreFinActSetting" engine="entity-auto" invoke="create" auth="true">
+        <description>Create ProductStoreFinActSetting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProductStoreFinActSetting" default-entity-name="ProductStoreFinActSetting" engine="entity-auto" invoke="update" auth="true">
+        <description>Update ProductStoreFinActSetting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeProductStoreFinActSetting" default-entity-name="ProductStoreFinActSetting" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove ProductStoreFinActSetting</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!--ProductStoreVendorPayment Services -->
+    <service name="createProductStoreVendorPayment" engine="entity-auto" default-entity-name="ProductStoreVendorPayment" invoke="create" auth="true">
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteProductStoreVendorPayment" engine="entity-auto" default-entity-name="ProductStoreVendorPayment" invoke="delete" auth="true">
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!--ProductStoreVendorShipment Services -->
+    <service name="createProductStoreVendorShipment" default-entity-name="ProductStoreVendorShipment" engine="entity-auto" invoke="create" auth="true">
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteProductStoreVendorShipment" default-entity-name="ProductStoreVendorShipment" engine="entity-auto" invoke="delete" auth="true">
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!--ProductStoreFacility Services -->
+    <service name="createProductStoreFacility" default-entity-name="ProductStoreFacility" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ProductStoreFacility</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProductStoreFacility" default-entity-name="ProductStoreFacility" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ProductStoreFacility</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStoreFacility" default-entity-name="ProductStoreFacility" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ProductStoreFacility</description>
+        <permission-service service-name="productStoreGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!--ProductStoreGroup Services -->
+    <service name="createProductStoreGroup" default-entity-name="ProductStoreGroup" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ProductStoreGroup</description>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProductStoreGroup" default-entity-name="ProductStoreGroup" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ProductStoreGroup</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStoreGroup" default-entity-name="ProductStoreGroup" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ProductStoreGroup</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createProductStoreGroupMember" default-entity-name="ProductStoreGroupMember" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ProductStoreGroupMember</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProductStoreGroupMember" default-entity-name="ProductStoreGroupMember" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ProductStoreGroupMember</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="createProductStoreGroupRollup" default-entity-name="ProductStoreGroupRollup" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ProductStoreGroupRollup</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProductStoreGroupRollup" default-entity-name="ProductStoreGroupRollup" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ProductStoreGroupRollup</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStoreGroupRollup" default-entity-name="ProductStoreGroupRollup" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ProductStoreGroupRollup</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="checkProductStoreGroupRollup" engine="simple"
+            location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="checkProductStoreGroupRollup" auth="true">
+        <description>Check if a productStoreGroupId with a primaryParentGroupId has related productStoreGroupRollup or for first ProductStoreGroupRollup on a ProductStoreGroup set relation on primaryParentGroupId</description>
+        <attribute name="productStoreGroupId" mode="IN" type="String"/>
+        <attribute name="primaryParentGroupId" mode="IN" type="String" optional="true"/>
+        <attribute name="parentGroupId" mode="IN" type="String" optional="true"/>
+        <attribute name="fromDate" mode="IN" type="String" optional="true"/>
+    </service>
+
+    <!-- Permission Services -->
+    <service name="productStoreGenericPermission" engine="simple"
+        location="component://product/minilang/product/store/ProductStoreServices.xml" invoke="productStoreGenericPermission">
+        <implements service="permissionInterface"/>
+    </service>
+    <service name="createProductStoreGroupRole" default-entity-name="ProductStoreGroupRole" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ProductStoreGroupRole</description>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStoreGroupRole" default-entity-name="ProductStoreGroupRole" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ProductStoreGroupRole</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createProductStoreGroupType" default-entity-name="ProductStoreGroupType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ProductStoreGroupType</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateProductStoreGroupType" default-entity-name="ProductStoreGroupType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ProductStoreGroupType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteProductStoreGroupType" default-entity-name="ProductStoreGroupType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ProductStoreGroupType</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

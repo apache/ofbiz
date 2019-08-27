@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>WorkEffort WorkEffort Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- WorkEffort Services -->
+    <service name="createDeliverable" engine="entity-auto" invoke="create" default-entity-name="Deliverable" auth="true">
+        <description>Create a Deliverable record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateDeliverable" engine="entity-auto" invoke="update" default-entity-name="Deliverable" auth="true">
+        <description>Update a Deliverable record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteDeliverable" engine="entity-auto" invoke="delete" default-entity-name="Deliverable" auth="true">
+        <description>Delete a Deliverable record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- WorkEffort Services -->
+    <service name="createDeliverableType" engine="entity-auto" invoke="create" default-entity-name="DeliverableType" auth="true">
+        <description>Create a Deliverable Type record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateDeliverableType" engine="entity-auto" invoke="update" default-entity-name="DeliverableType" auth="true">
+        <description>Update a Deliverable Type record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteDeliverableType" engine="entity-auto" invoke="delete" default-entity-name="DeliverableType" auth="true">
+        <description>Delete a Deliverable Type record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- WorkEffortAssocAttribute Services -->
+    <service name="createWorkEffortAssocAttribute" engine="entity-auto" invoke="create" default-entity-name="WorkEffortAssocAttribute" auth="true">
+        <description>Create a WorkEffortAssocAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortAssocAttribute" engine="entity-auto" invoke="update" default-entity-name="WorkEffortAssocAttribute" auth="true">
+        <description>Update a WorkEffortAssocAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortAssocAttribute" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortAssocAttribute" auth="true">
+        <description>Delete a WorkEffortAssocAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- WorkEffortAssocType Services -->
+    <service name="createWorkEffortAssocType" engine="entity-auto" invoke="create" default-entity-name="WorkEffortAssocType" auth="true">
+        <description>Create a WorkEffortAssocType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortAssocType" engine="entity-auto" invoke="update" default-entity-name="WorkEffortAssocType" auth="true">
+        <description>Update a WorkEffortAssocType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortAssocType" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortAssocType" auth="true">
+        <description>Delete a WorkEffortAssocType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- WorkEffortAssocTypeAttr Services -->
+    <service name="createWorkEffortAssocTypeAttr" engine="entity-auto" invoke="create" default-entity-name="WorkEffortAssocTypeAttr" auth="true">
+        <description>Create a WorkEffortAssocTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortAssocTypeAttr" engine="entity-auto" invoke="update" default-entity-name="WorkEffortAssocTypeAttr" auth="true">
+        <description>Update a WorkEffortAssocTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortAssocTypeAttr" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortAssocTypeAttr" auth="true">
+        <description>Delete a WorkEffortAssocTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- WorkEffortBilling Services -->
+    <service name="createWorkEffortBilling" engine="entity-auto" invoke="create" default-entity-name="WorkEffortBilling" auth="true">
+        <description>Create a WorkEffortBilling record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortBilling" engine="entity-auto" invoke="update" default-entity-name="WorkEffortBilling" auth="true">
+        <description>Update a WorkEffortBilling record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortBilling" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortBilling" auth="true">
+        <description>Delete a WorkEffortBilling record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- WorkEffortContentType Services -->
+    <service name="createWorkEffortContentType" engine="entity-auto" invoke="create" default-entity-name="WorkEffortContentType" auth="true">
+        <description>Create a WorkEffortContentType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortContentType" engine="entity-auto" invoke="update" default-entity-name="WorkEffortContentType" auth="true">
+        <description>Update a WorkEffortContentType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortContentType" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortContentType" auth="true">
+        <description>Delete a WorkEffortContentType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <!-- WorkEffortGoodStandardType Services -->
+    <service name="createWorkEffortGoodStandardType" engine="entity-auto" invoke="create" default-entity-name="WorkEffortGoodStandardType" auth="true">
+        <description>Create a WorkEffortGoodStandardType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortGoodStandardType" engine="entity-auto" invoke="update" default-entity-name="WorkEffortGoodStandardType" auth="true">
+        <description>Update a WorkEffortGoodStandardType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortGoodStandardType" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortGoodStandardType" auth="true">
+        <description>Delete a WorkEffortGoodStandardType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <!-- WorkEffortPurposeType Services -->
+    <service name="createWorkEffortPurposeType" engine="entity-auto" invoke="create" default-entity-name="WorkEffortPurposeType" auth="true">
+        <description>Create a WorkEffortPurposeType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortPurposeType" engine="entity-auto" invoke="update" default-entity-name="WorkEffortPurposeType" auth="true">
+        <description>Update a WorkEffortPurposeType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortPurposeType" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortPurposeType" auth="true">
+        <description>Delete a WorkEffortPurposeType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <!-- WorkEffortType Services -->
+    <service name="createWorkEffortType" engine="entity-auto" invoke="create" default-entity-name="WorkEffortType" auth="true">
+        <description>Create a WorkEffortType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortType" engine="entity-auto" invoke="update" default-entity-name="WorkEffortType" auth="true">
+        <description>Update a WorkEffortType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortType" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortType" auth="true">
+        <description>Delete a WorkEffortType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+    <!-- WorkEffortTypeAttr Services -->
+    <service name="createWorkEffortTypeAttr" engine="entity-auto" invoke="create" default-entity-name="WorkEffortTypeAttr" auth="true">
+        <description>Create a WorkEffortTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateWorkEffortTypeAttr" engine="entity-auto" invoke="update" default-entity-name="WorkEffortTypeAttr" auth="true">
+        <description>Update a WorkEffortTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteWorkEffortTypeAttr" engine="entity-auto" invoke="delete" default-entity-name="WorkEffortTypeAttr" auth="true">
+        <description>Delete a WorkEffortTypeAttr record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- ApplicationSandbox Services -->
+    <service name="createApplicationSandbox" engine="entity-auto" invoke="create" default-entity-name="ApplicationSandbox" auth="true">
+        <description>Create ApplicationSandbox record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateApplicationSandbox" engine="entity-auto" invoke="update" default-entity-name="ApplicationSandbox" auth="true">
+        <description>Update ApplicationSandbox record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteApplicationSandbox" engine="entity-auto" invoke="delete" default-entity-name="ApplicationSandbox" auth="true">
+        <description>Delete ApplicationSandbox record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+</services>

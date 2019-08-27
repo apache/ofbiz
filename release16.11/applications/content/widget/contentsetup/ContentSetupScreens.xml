@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="EditContentType">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentType"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="type"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ContentTypePanel" title="${uiLabelMap.PageTitleEditContentType}" collapsible="true">
+                            <include-form name="AddContentType" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateContentType" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditContentTypeAttr">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentAttribute"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="typeAttr"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ContentTypeAttrPanel" title="${uiLabelMap.PageTitleEditContentAttribute}" collapsible="true">
+                            <include-form name="AddContentTypeAttr" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateContentTypeAttr" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditContentAssocType">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentAssoc"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="assocType"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ContentAssocTypePanel" title="${uiLabelMap.PageTitleEditContentAssoc}" collapsible="true">
+                            <include-form name="AddContentAssocType" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateContentAssocType" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditContentPurposeType">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentPurpose"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="purposeType"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ContentPurposeTypePanel" title="${uiLabelMap.PageTitleEditContentPurpose}" collapsible="true">
+                            <include-form name="AddContentPurposeType" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateContentPurposeType" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditContentAssocPredicate">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentAssocPredicate"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="assocPred"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ContentAssocPredicatePanel" title="${uiLabelMap.PageTitleEditContentAssocPredicate}" collapsible="true">
+                            <include-form name="AddContentAssocPredicate" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateContentAssocPredicate" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditContentPurposeOperation">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentPurposeOperation"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="contentPurposeOp"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ContentPurposeOperationPanel" title="${uiLabelMap.PageTitleEditContentPurposeOperation}" collapsible="true">
+                            <include-form name="AddContentPurposeOperation" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateContentPurposeOperation" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="UserPermissions">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentUserPermissions"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="userpermission"/>
+                <set field="webSitePublishPoint" from-field="parameters.webSitePublishPoint" default-value="OFBIZDOCROOT"/>
+                <script location="component://content/groovyScripts/contentsetup/UserPermPrep.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://content/template/contentsetup/UserPermissions.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditContentOperation">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditContentOperation"/>
+                <set field="headerItem" value="ContentSetupMenu"/>
+                <set field="currentMenuItemName" to-scope="user" value="contentOp"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonContentSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ContentOperationPanel" title="${uiLabelMap.PageTitleEditContentOperation}" collapsible="true">
+                            <include-form name="AddContentOperation" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="UpdateContentOperation" location="component://content/widget/contentsetup/ContentSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

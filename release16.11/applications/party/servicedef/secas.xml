@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+    <eca service="createPerson" event="commit">
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+    <eca service="createProductStoreRole" event="invoke">
+        <action service="ensurePartyRole" mode="sync" run-as-user="system"/>
+    </eca>
+    <eca service="createPartyGroup" event="commit">
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+    <eca service="createAffiliate" event="commit">
+        <action service="ensureNaPartyRole" mode="sync"/>
+    </eca>
+
+    <eca service="updatePerson" event="invoke">
+        <action service="savePartyNameChange" mode="sync"/>
+    </eca>
+    <eca service="updatePartyGroup" event="invoke">
+        <action service="savePartyNameChange" mode="sync"/>
+    </eca>
+
+    <!-- before running the createPartyRelationship service, make sure the party is in the _NA_ role if that is the desired roleTypeId for From or To -->
+    <eca service="createPartyRelationship" event="invoke">
+        <condition field-name="roleTypeIdFrom" operator="equals" value="_NA_"/>
+        <action service="ensurePartyRoleFrom" mode="sync"/>
+    </eca>
+    <eca service="createPartyRelationship" event="invoke">
+        <condition field-name="roleTypeIdTo" operator="equals" value="_NA_"/>
+        <action service="ensurePartyRoleTo" mode="sync"/>
+    </eca>
+
+    <!-- party contact mech service ECAs -->
+    <!-- NOTE: because we have an ECA on createPartyContactMech, we don't need to do it on createPartyPostalAddress, createPartyEmailAddress, createPartyTelecomNumber because those will call it -->
+    <eca service="createPartyContactMech" event="commit">
+        <condition field-name="contactMechPurposeTypeId" operator="is-not-empty"/>
+        <condition field-name="contactMechId" operator="is-not-empty"/>
+        <action service="createPartyContactMechPurpose" mode="sync"/>
+    </eca>
+
+    <eca service="createCommEventWorkEffort" event="invoke">
+        <condition field-name="workEffortId" operator="is-empty"/>
+        <action service="createWorkEffort" mode="sync"/>
+    </eca>
+
+    <!-- email : create communication event -->
+    <!-- not sure why this sendmailfrom screen is here because it will call sendmail below anyway.....
+        disabled for now, because the subject is rendered inside sendmailFromscreen and is not showing rendered in the generated comm event -->
+        <!--eca service="sendMailFromScreen" event="in-validate">
+        <condition field-name="partyId" operator="is-not-empty"/>
+        <condition field-name="communicationEventId" operator="is-empty"/>        
+        <action service="createCommEventFromEmail" mode="sync" run-as-user="system"/>
+    </eca-->
+    <eca service="sendMailMultiPart" event="in-validate">
+        <condition field-name="partyId" operator="is-not-empty"/>
+        <condition field-name="communicationEventId" operator="is-empty"/>        
+        <action service="createCommEventFromEmail" mode="sync" run-as-user="system"/>
+    </eca>
+    <eca service="sendMail" event="in-validate">
+        <condition field-name="partyId" operator="is-not-empty"/>
+        <condition field-name="communicationEventId" operator="is-empty"/>       
+        <action service="createCommEventFromEmail" mode="sync" run-as-user="system"/>
+    </eca>
+    <!-- email : update communication event -->
+    <eca service="sendMailMultiPart" event="commit">
+        <condition field-name="messageWrapper" operator="is-not-empty"/>
+        <condition field-name="communicationEventId" operator="is-not-empty"/>
+        <action service="updateCommEventAfterEmail" mode="sync" run-as-user="system"/>
+    </eca>
+    <eca service="sendMail" event="commit">
+        <condition field-name="messageWrapper" operator="is-not-empty"/>
+        <condition field-name="communicationEventId" operator="is-not-empty"/>
+        <action service="updateCommEventAfterEmail" mode="sync" run-as-user="system"/>
+    </eca>
+    
+    <!-- all these secas are now replaced by a sheduled job (sendEmailDated) which runs every 5 minutes -->
+
+    <!-- After all the emails have been sent to a contact list, mark it as complete. -->
+    <eca service="sendEmailToContactList" event="commit">
+        <action service="setCommEventComplete" mode="sync"/>
+    </eca>
+
+    <eca service="updatePassword" event="commit">
+        <action service="sendUpdatePersonalInfoEmailNotification" mode="async" persist="true"/>
+    </eca>
+
+    <eca service="createEmailAddressVerification" event="commit">
+        <action service="sendVerifyEmailAddressNotification" mode="async"/>
+    </eca>
+    
+    <!-- send a note when a communicationevent is created for a certain loginId when an 
+        existing comm event's status changes into status: entered-->
+    <eca service="updateCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_ENTERED"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="AUTO_EMAIL_COM"/>
+        <condition field-name="partyIdTo" operator="is-not-empty"/>
+        <set field-name="noteParty" env-name="partyIdTo"/>
+        <set field-name="noteInfo" env-name="subject"/>
+        <set field-name="moreInfoItemName" value="communicationEventId"/>
+        <set field-name="moreInfoItemId" env-name="communicationEventId"/>
+        <set field-name="moreInfoUrl" value="/partymgr/control/MyCommunicationEvents"/>
+        <action service="createSystemInfoNote" mode="sync"/>
+    </eca>
+    <eca service="updateCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_ENTERED"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="EMAIL_COMMUNICATION"/>
+        <condition field-name="partyIdTo" operator="is-not-empty"/>
+        <set field-name="noteParty" env-name="partyIdTo"/>
+        <set field-name="noteInfo" env-name="subject"/>
+        <set field-name="moreInfoItemName" value="communicationEventId"/>
+        <set field-name="moreInfoItemId" env-name="communicationEventId"/>
+        <set field-name="moreInfoUrl" value="/partymgr/control/MyCommunicationEvents"/>
+        <action service="createSystemInfoNote" mode="sync"/>
+    </eca>
+    <eca service="updateCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_ENTERED"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="COMMENT_NOTE"/>
+        <condition field-name="partyIdTo" operator="is-not-empty"/>
+        <set field-name="noteParty" env-name="partyIdTo"/>
+        <set field-name="noteInfo" env-name="subject"/>
+        <set field-name="moreInfoItemName" value="communicationEventId"/>
+        <set field-name="moreInfoItemId" env-name="communicationEventId"/>
+        <set field-name="moreInfoUrl" value="/partymgr/control/MyCommunicationEvents"/>
+        <action service="createSystemInfoNote" mode="sync"/>
+    </eca>
+    <!-- send a note when a communicationevent is created for a certain loginId 
+        with the status entered -->
+    <eca service="createCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_ENTERED"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="AUTO_EMAIL_COM"/>
+        <condition field-name="partyIdTo" operator="is-not-empty"/>
+        <set field-name="noteParty" env-name="partyIdTo"/>
+        <set field-name="noteInfo" env-name="subject"/>
+        <set field-name="moreInfoItemName" value="communicationEventId"/>
+        <set field-name="moreInfoItemId" env-name="communicationEventId"/>
+        <set field-name="moreInfoUrl" value="/partymgr/control/MyCommunicationEvents"/>
+        <action service="createSystemInfoNote" mode="sync"/>
+    </eca>
+     <eca service="createCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_ENTERED"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="EMAIL_COMMUNICATION"/>
+        <condition field-name="partyIdTo" operator="is-not-empty"/>
+        <set field-name="noteParty" env-name="partyIdTo"/>
+        <set field-name="noteInfo" env-name="subject"/>
+        <set field-name="moreInfoItemName" value="communicationEventId"/>
+        <set field-name="moreInfoItemId" env-name="communicationEventId"/>
+        <set field-name="moreInfoUrl" value="/partymgr/control/MyCommunicationEvents"/>
+        <action service="createSystemInfoNote" mode="sync"/>
+    </eca>
+     <eca service="createCommunicationEvent" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_ENTERED"/>
+        <condition field-name="communicationEventTypeId" operator="equals" value="COMMENT_NOTE"/>
+        <condition field-name="partyIdTo" operator="is-not-empty"/>
+        <set field-name="noteParty" env-name="partyIdTo"/>
+        <set field-name="noteInfo" env-name="subject"/>
+        <set field-name="moreInfoItemName" value="communicationEventId"/>
+        <set field-name="moreInfoItemId" env-name="communicationEventId"/>
+        <set field-name="moreInfoUrl" value="/partymgr/control/MyCommunicationEvents"/>
+        <action service="createSystemInfoNote" mode="sync"/>
+    </eca>
+</service-eca>

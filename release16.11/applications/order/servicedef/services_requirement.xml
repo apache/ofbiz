@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Order Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Requirement Services -->
+    <service name="requirementInterface" engine="interface" location="" invoke="">
+        <description>Requirement Interface</description>
+        <auto-attributes mode="IN" entity-name="Requirement" include="nonpk" optional="true">
+            <exclude field-name="createdDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedDate"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+    </service>
+    <service name="createRequirement" engine="simple"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="createRequirement">
+        <description>Create a new requirement</description>
+        <implements service="requirementInterface"/>
+        <attribute name="requirementTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="custRequestId" type="String" mode="IN" optional="true"/>
+        <attribute name="custRequestItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="requirementId" type="String" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateRequirement" engine="simple"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="updateRequirement">
+        <description>Update an existing requirement</description>
+        <implements service="requirementInterface"/>
+        <attribute name="requirementId" type="String" mode="IN" optional="false"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="deleteRequirement" engine="simple"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="deleteRequirement">
+        <description>Delete a requirement</description>
+        <attribute name="requirementId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createRequirementRole" default-entity-name="RequirementRole" engine="simple" auth="true"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="createRequirementRole">
+        <description>Creates a new party role for the requirement</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateRequirementRole" default-entity-name="RequirementRole" engine="simple"
+                location="component://order/minilang/requirement/RequirementServices.xml" invoke="updateRequirementRole" auth="true">
+        <description>Update a RequirementRole</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeRequirementRole" engine="simple" default-entity-name="RequirementRole"
+                location="component://order/minilang/requirement/RequirementServices.xml" invoke="removeRequirementRole" auth="true">
+        <description>Remove a RequirementRole</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createRequirementStatus" engine="entity-auto" default-entity-name="RequirementStatus" auth="true" invoke="create">
+        <description>Create Requirement Status </description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="associatedRequirementWithRequestItem" engine="simple"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="associateRequirementWithRequestItem">
+        <description>Creates a CustRequestItem/Requirement association</description>
+        <attribute name="requirementId" type="String" mode="IN" optional="false"/>
+        <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
+        <attribute name="custRequestItemSeqId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="addRequirementTask" engine="simple"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="addTaskToRequirement">
+        <description>Associate an existing task w/ a requirement</description>
+        <attribute name="requirementId" type="String" mode="IN" optional="false"/>
+        <attribute name="workEffortId" type="String" mode="IN" optional="false"/>
+        <attribute name="workReqFulfTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="getRequirementsForSupplier" engine="java"
+            location="org.apache.ofbiz.order.requirement.RequirementServices" invoke="getRequirementsForSupplier">
+        <description>Retrieves requirements information for suppliers</description>
+        <attribute mode="IN" name="requirementConditions" type="org.apache.ofbiz.entity.condition.EntityCondition" optional="true"/>
+        <attribute mode="IN" name="partyId" type="String" optional="true"/>
+        <attribute mode="IN" name="unassignedRequirements" type="String" optional="true"/>
+        <attribute mode="IN" name="currencyUomId" type="String" optional="true"/>
+        <attribute mode="IN" name="statusIds" type="List" optional="true"/> <!-- By default, this service looks for approved requirements.  To override this, pass in a list of requirement statusIds to search. -->
+        <attribute mode="OUT" name="requirementsForSupplier" type="java.util.List" optional="true"/>
+        <attribute mode="OUT" name="distinctProductCount" type="Integer" optional="true"/>
+        <attribute mode="OUT" name="quantityTotal" type="BigDecimal" optional="true"/>
+        <attribute mode="OUT" name="amountTotal" type="BigDecimal" optional="true"/>
+    </service>
+    <service name="createOrderRequirementCommitment" engine="entity-auto" auth="true" default-entity-name="OrderRequirementCommitment" invoke="create">
+        <auto-attributes entity-name="OrderRequirementCommitment" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OrderRequirementCommitment" include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="checkCreateOrderRequirement" engine="simple" auth="true"
+            location="component://order/minilang/order/OrderServices.xml" invoke="checkCreateOrderRequirement">
+        <description>Create OrderRequirementCommitment and Requirement for items with automatic requirement upon ordering</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="requirementId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="checkCreateStockRequirementQoh" engine="simple" auth="true" default-entity-name="ItemIssuance"
+            location="component://order/minilang/order/OrderServices.xml" invoke="checkCreateStockRequirementQoh">
+        <description>Create a Product Requirement based on QOH inventory</description>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="issuedDateTime"/>
+        </auto-attributes>
+        <attribute name="requirementId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="checkCreateStockRequirementAtp" engine="simple" auth="true"
+            location="component://order/minilang/order/OrderServices.xml" invoke="checkCreateStockRequirementAtp">
+        <description>Create a Product Requirement based on ATP inventory</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="requirementId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="createRequirementFromItemATP" engine="simple" auth="true"
+            location="component://order/minilang/order/OrderServices.xml" invoke="createRequirementFromItemATP">
+        <description>Create OrderRequirementCommitment and Requirement for items with requirement based on ATP stock levels</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="requirementId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="checkCreateProductRequirementForFacility" engine="simple" auth="true"
+            location="component://order/minilang/order/OrderServices.xml" invoke="checkCreateProductRequirementForFacility">
+        <description>Create Requirements for all the products in a facility with QOH under the minimum stock level</description>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="defaultRequirementMethodId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="approveRequirement" engine="java"
+            location="org.apache.ofbiz.manufacturing.jobshopmgt.ProductionRunServices" invoke="approveRequirement" auth="true">
+        <description>Approves a requirement.</description>
+        <attribute mode="IN" name="requirementId" optional="false" type="String"/>
+        <attribute mode="IN" name="quantity" optional="true" type="BigDecimal"/>
+    </service>
+
+    <service name="autoAssignRequirementToSupplier" engine="simple" auth="true"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="autoAssignRequirementToSupplier">
+        <description>If the requirement is a product requirement (purchasing) try to assign it to the primary supplier</description>
+        <attribute name="requirementId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createTransferFromRequirement" engine="simple" auth="true"
+            location="component://order/minilang/requirement/RequirementServices.xml" invoke="createTransferFromRequirement">
+        <description>Create the inventory transfers required to fulfill the requirement.</description>
+        <attribute mode="IN" name="requirementId" optional="false" type="String"/>
+        <attribute mode="IN" name="fromFacilityId" optional="false" type="String"/>
+        <attribute mode="IN" name="quantity" optional="true" type="BigDecimal"/>
+    </service>
+
+    <service name="createAutoRequirementsForOrder" engine="java"
+            location="org.apache.ofbiz.order.requirement.RequirementServices" invoke="createAutoRequirementsForOrder" auth="true">
+        <description>
+            Creates requirements for any products with requirementMethodEnumId PRODRQM_AUTO in the given sales order.
+        </description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="createATPRequirementsForOrder" engine="java"
+            location="org.apache.ofbiz.order.requirement.RequirementServices" invoke="createATPRequirementsForOrder" auth="true">
+        <description>
+            Creates requirements for any products with requirementMethodEnumId PRODRQM_ATP in the given sales order when
+            the ATP falls below or is below the minimum stock for the order facility.  ProductFacility.minimumStock must
+            be configured for requirements to be generated.  ProductFacility.reorderQuantity is not currently supported.
+        </description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="updateRequirementsToOrdered" engine="java"
+             location="org.apache.ofbiz.order.requirement.RequirementServices" invoke="updateRequirementsToOrdered" auth="true">
+        <description>
+            Update requirement's status to Ordered after PO is approved.
+        </description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+    <!-- DesiredFeature services -->
+    <service name="createDesiredFeature" default-entity-name="DesiredFeature" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a DesiredFeature record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateDesiredFeature" default-entity-name="DesiredFeature" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a DesiredFeature record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteDesiredFeature" default-entity-name="DesiredFeature" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a DesiredFeature record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <service name="createRequirementAttribute" default-entity-name="RequirementAttribute" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a RequirementAttribute record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateRequirementAttribute" default-entity-name="RequirementAttribute" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a RequirementAttribute record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteRequirementAttribute" default-entity-name="RequirementAttribute" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a RequirementAttribute record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <service name="createRequirementBudgetAllocation" default-entity-name="RequirementBudgetAllocation" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a RequirementBudgetAllocation record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateRequirementBudgetAllocation" default-entity-name="RequirementBudgetAllocation" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a RequirementBudgetAllocation record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteRequirementBudgetAllocation" default-entity-name="RequirementBudgetAllocation" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a RequirementBudgetAllocation record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <service name="createRequirementType" default-entity-name="RequirementType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a RequirementType record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateRequirementType" default-entity-name="RequirementType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a RequirementType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteRequirementType" default-entity-name="RequirementType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a RequirementType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <service name="createRequirementTypeAttr" default-entity-name="RequirementTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a RequirementTypeAttr record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateRequirementTypeAttr" default-entity-name="RequirementTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a RequirementTypeAttr record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteRequirementTypeAttr" default-entity-name="RequirementTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a RequirementTypeAttr record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+
+    <!-- RequirementCustRequest services -->
+    <service name="deleteRequirementCustRequest" default-entity-name="RequirementCustRequest" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a RequirementCustRequest record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+    <!-- WorkReqFulfType services -->
+    <service name="createWorkReqFulfType" default-entity-name="WorkReqFulfType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a WorkReqFulfType record</description>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateWorkReqFulfType" default-entity-name="WorkReqFulfType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a WorkReqFulfType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteWorkReqFulfType" default-entity-name="WorkReqFulfType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a WorkReqFulfType record</description>
+        <auto-attributes mode="IN" include="pk"/>
+    </service>
+</services>
+

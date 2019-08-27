@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="FindFinAccounts" type="single" target="FindFinAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="FinAccount" default-field-type="find"/>
+        <field name="finAccountId"><text-find ignore-case="true"/></field>
+        <field name="finAccountTypeId" title="${uiLabelMap.FormFieldTitle_finAccountType}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FinAccountType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="finAccountCode"><text-find ignore-case="true"/></field>
+        <field name="fromDate"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="displayAdvancedSearch"><hidden value="true"></hidden></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListFinAccounts" type="list" separate-columns="true" default-entity-name="FinAccount" list-name="listIt" paginate-target="FindFinAccount" paginate="true"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="FinAccount"/>
+                <field-map field-name="orderBy" value="finAccountId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="FinAccount" default-field-type="display"/>
+        <field name="finAccountId">
+            <hyperlink  description="${finAccountId}" target="EditFinAccount">
+                <parameter param-name="finAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="statusId"  title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="finAccountTypeId" title="${uiLabelMap.FormFieldTitle_finAccountType}"><display-entity entity-name="FinAccountType"/></field>
+        <field name="finAccountName">
+            <hyperlink description="${finAccountName}" target="EditFinAccount">
+                <parameter param-name="finAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="organizationPartyId">
+            <hyperlink description="${organizationPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="organizationPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="ownerPartyId">
+            <hyperlink description="${ownerPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="ownerPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteFinAccount" also-hidden="false">
+                <parameter param-name="finAccountId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditFinAccount" type="single" target="updateFinAccount" default-map-name="finAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="finAccount.statusId"/>
+            </entity-one>
+        </actions>
+        <alt-target use-when="finAccount==null" target="createFinAccount"/>
+        <auto-fields-service service-name="updateFinAccount"/>
+
+        <field name="finAccountId" use-when="finAccountId!=null"><display/></field>
+        <field name="finAccountId" use-when="finAccount==null&amp;&amp;finAccountId==null"><ignored/></field>
+        <field name="finAccountId" use-when="finAccount==null&amp;&amp;finAccountId!=null" tooltip="${uiLabelMap.CommonCannotBeFound}: [${finAccountId}]"><display also-hidden="false"/></field>
+
+        <field name="finAccountCode"><text size="20"/></field>
+        <field name="finAccountPin"><text size="10"/></field>
+        <field name="finAccountTypeId" title="${uiLabelMap.FormFieldTitle_finAccountType}">
+            <drop-down no-current-selected-key="DEPOSIT_ACCOUNT">
+                <entity-options entity-name="FinAccountType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="currencyUomId" title="${uiLabelMap.CommonCurrency}">
+            <drop-down no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="organizationPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="ownerPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="postToGlAccountId"><lookup target-form-name="LookupGlAccount"/></field>
+        <field name="statusId" use-when="finAccount==null" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" value="FINACCT_STATUS"/>
+
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="finAccount!=null" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="false" current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" env-name="finAccount.statusId"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="isRefundable">
+            <drop-down no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="submitButton" use-when="finAccountId==null" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="submitButton" use-when="finAccountId!=null" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="actualBalance"><display/></field>
+        <field name="availableBalance"><display/></field>
+    </form>
+
+    <form name="ListFinAccountRoles" type="list"  list-name="finAccountRoles"  target="updateFinAccountRole" separate-columns="true"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate-target="EditFinAccountRoles">
+        <actions>
+            <entity-condition entity-name="FinAccountRole">
+                <condition-expr field-name="finAccountId" from-field="finAccountId"/>
+                <order-by field-name="finAccountId"/>
+            </entity-condition>
+        </actions>
+        <field name="finAccountId"><hidden/></field>
+        <field name="roleTypeId"><display/></field>
+        <field name="partyId"> <display/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteFinAccountRole" also-hidden="false">
+                <parameter param-name="finAccountId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddFinAccountRole" type="single" target="createFinAccountRole"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createFinAccountRole"/>
+        <field name="finAccountId"><hidden/></field>
+        <field name="partyId"> <lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="RoleType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="AddFinAccountTrans" type="single" target="createFinAccountTrans"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <set field="statusId" value="FINACT_TRNS_CREATED"/>
+        </actions>
+        <auto-fields-service service-name="createFinAccountTrans"/>
+        <field name="finAccountId"><hidden/></field>
+        <field name="finAccountTransId"><hidden/></field>
+        <field name="finAccountTransTypeId">
+            <drop-down no-current-selected-key="ADJUSTMENT">
+                <entity-options entity-name="FinAccountTransType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="transactionDate"> <date-time/> </field>
+        <field name="entryDate"><date-time/></field>
+        <field name="paymentId"><lookup target-form-name="LookupPayment"/></field>
+        <field name="orderId"><lookup target-form-name="LookupOrderHeader"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down>
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" value="FINACT_TRNS_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccount}">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" key-field-name="glAccountId" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="defaultOrganizationPartyId"/>
+                    <entity-order-by field-name="glAccountId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListFinAccountAuths" type="list"  list-name="finAccountauths"  target="expireFinAccountAuth" separate-columns="true"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate-target="EditFinAccountAuths">
+        <actions>
+            <entity-condition entity-name="FinAccountAuth">
+                <condition-expr field-name="finAccountId" from-field="finAccountId"/>
+                <order-by field-name="finAccountAuthId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="FinAccountAuth" default-field-type="display"/>
+        <field name="finAccountAuthId"><display/></field>
+        <field name="finAccountId"><hidden/></field>
+        <field name="expireLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonExpire}" target="expireFinAccountAuth" also-hidden="false">
+                <parameter param-name="finAccountId"/>
+                <parameter param-name="finAccountAuthId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddFinAccountAuth" type="single" target="createFinAccountAuth"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createFinAccountAuth"/>
+        <field name="finAccountId"><hidden/></field>
+        <field name="finAccountAuthId"><hidden/></field>
+        <field name="amount"><text/></field>
+        <field name="authorizationDate"><date-time/></field>
+        <field name="fromDate"><date-time default-value="${nowTimestamp}"/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="PaymentsDepositWithdraw" type="single" target="FindPaymentsForDepositOrWithdraw" extends="FindBatchPayments" extends-resource="component://accounting/widget/ar/forms/ArPaymentForms.xml">
+        <field name="finAccountId"><hidden/></field>
+        <field name="noConditionFind"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="FindDepositSlips" type="single" target="FindDepositSlips" extends="FindPaymentGroup" extends-resource="component://accounting/widget/PaymentGroupForms.xml">
+        <field name="finAccountId"><hidden/></field>
+        <field name="paymentGroupTypeId"><hidden value="BATCH_PAYMENT"/></field>
+    </form>
+    <form name="ListDepositSlips" type="list" target="FindDepositSlips" extends="ListPaymentGroup" extends-resource="component://accounting/widget/PaymentGroupForms.xml" list-name="paymentGroupList"
+            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2" paginate-target="FindDepositSlips">
+        <field name="paymentGroupId" widget-style="buttontext">
+            <hyperlink description="${paymentGroupId}" target="EditDepositSlipAndMembers">
+                <parameter param-name="paymentGroupId"/>
+                <parameter param-name="finAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext" use-when="${paymentGroupTypeId == 'BATCH_PAYMENT'} @and ${paymentGroupMemberAndTransList[0].finAccountTransStatusId != 'FINACT_TRNS_APPROVED'} @and ${groovy:org.apache.ofbiz.base.util.UtilValidate.isNotEmpty(paymentGroupMembers)}">
+            <hyperlink description="${uiLabelMap.CommonCancel}" target="deleteDepositSlip" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+                <parameter param-name="finAccountId"/>
+                <parameter param-name="glReconciliationId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditDepositSlip" type="single" target="updateDepositSlip" extends="EditPaymentGroup" extends-resource="component://accounting/widget/PaymentGroupForms.xml">
+        <field name="paymentGroupTypeId" title="${uiLabelMap.CommonType}"><display-entity entity-name="PaymentGroupType"/></field>
+        <field name="finAccountId"><hidden value="${finAccountId}"/></field>
+    </form>
+    <form name="AddDepositSlipMember" type="single" target="addDepositSlipMember" extends="AddPaymentGroupMember" extends-resource="component://accounting/widget/PaymentGroupForms.xml">
+        <field name="finAccountId"><hidden value="${finAccountId}"/></field>
+    </form>
+    <form name="ListDepositSlipMember" type="list" target="updateDepositSlipMember" extends="ListPaymentGroupMember" extends-resource="component://accounting/widget/PaymentGroupForms.xml"
+            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2" paginate-target="EditDepositSlipAndMembers">
+        <actions>
+            <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers">
+                <field-map field-name="paymentGroupId"/>
+            </entity-and>
+        </actions>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonCancel}" target="expireDepositSlipMember" also-hidden="false">
+                <parameter param-name="paymentGroupId"/>
+                <parameter param-name="paymentId"/>
+                <parameter param-name="fromDate"/>
+                <parameter param-name="finAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="finAccountId"><hidden value="${finAccountId}"/></field>
+    </form>
+    <form name="QuickFindFinAccounts" type="single" target="FindFinAccount"
+            header-row-style="header-row" default-table-style="basic-table">
+        <field name="finAccountId"><text-find ignore-case="true"/></field>
+        <field name="finAccountTypeId" title="${uiLabelMap.FormFieldTitle_finAccountType}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FinAccountType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="finAccountName"><text-find ignore-case="true"/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="FindFinAccountTransactions" type="single" target="FindFinAccountTrans">
+        <actions>
+            <entity-and entity-name="GlReconciliation" list="glReconciliations">
+                <field-map field-name="glAccountId" from-field="finAccount.postToGlAccountId"/>
+                <order-by field-name="reconciledDate DESC"/>
+            </entity-and>
+        </actions>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="finAccountId"><hidden value="${finAccountId}"/></field>
+        <field name="finAccountTransTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FinAccountTransType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" value="FINACT_TRNS_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glReconciliationId" position="2">
+            <drop-down allow-empty="true">
+                <option key="_NA_" description="${uiLabelMap.CommonNotAssigned}"/>
+                <list-options list-name="glReconciliations" key-name="glReconciliationId" 
+                    description="${glReconciliationName}[[${glReconciliationId}] [${reconciledDate}] [${reconciledBalance}]]"/>
+            </drop-down>
+        </field>
+        <field name="fromTransactionDate" position="1"><date-time/></field>
+        <field name="thruTransactionDate" position="2"><date-time/></field>
+        <field name="fromEntryDate" position="1"><date-time/></field>
+        <field name="thruEntryDate" position="2"><date-time/></field>
+        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="FindBankReconciliationFinAcctTrans" target="BankReconciliation" 
+            extends="FindFinAccountTransactions">
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="glReconciliationId" position="2">
+            <drop-down>
+                <list-options list-name="glReconciliations" key-name="glReconciliationId" 
+                    description="${glReconciliationName}[[${glReconciliationId}] [${reconciledDate}] [${reconciledBalance}]]"/>
+            </drop-down>
+        </field>
+    </form>
+    <form name="EditDepositPayment" extends="EditPayment" 
+            extends-resource="component://accounting/widget/PaymentForms.xml" target="createDepositPayment">
+        <actions>
+            <entity-one entity-name="FinAccount" value-field="finAccount"/>
+            <set field="finAccountTypeId" from-field="finAccount.finAccountTypeId"/>
+        </actions>
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="PaymentType">
+                    <entity-constraint name="parentTypeId" operator="equals" env-name="parentTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="paymentMethodId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PaymentMethod" description="${paymentMethodTypeId} (${paymentMethodId})"/>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="partyIdTo" position="2"><lookup target-form-name="LookupInternalOrganization"/></field>
+        <field name="amount" position="2"><text size="6"/></field>
+        <field name="comments" position="2"><text size="35"/></field>
+        <field name="finAccountId"><hidden value="${finAccountId}"/></field>
+        <field name="finAccountTypeId"><hidden value="${finAccountTypeId}"/></field>
+        <field name="finAccountTransTypeId" position="1"><hidden/></field>
+        <field name="currencyUomId" position="2"><hidden value="${defaultOrganizationPartyCurrencyUomId}"/></field>
+        <field name="isDepositWithDrawPayment" title="${uiLabelMap.AccountingDepositPaymentInFinAccount}" ><check/></field>
+        <field name="paymentGroupTypeId"><hidden value="BATCH_PAYMENT"/></field>
+        <field name="updateButton"><ignored/></field>
+        <field name="createButton" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+
+    </form>
+    <form name="EditWithdrawalPayment" type="single" extends="EditDepositPayment" target="createWithdrawalPayment">
+        <field name="partyIdFrom" position="1"><lookup target-form-name="LookupInternalOrganization"/></field>
+        <field name="isDepositWithDrawPayment" title="${uiLabelMap.AccountingWithdrawalPaymentInFinAccount}" position="1"><check/></field>
+        <field name="paymentGroupTypeId"><ignored/></field>
+    </form>
+    <form name="EditFinAccountReconciliation" type="single" target="createGlReconciliation" default-map-name="glReconciliation" extends="EditGlReconciliation"
+            extends-resource="component://accounting/widget/GlForms.xml" header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="GlReconciliation" value-field="glReconciliation"/>
+        </actions>
+        <alt-target use-when="glReconciliationId != null" target="updateFinAccountGlReconciliation"/>
+        <field name="finAccountId"><hidden value="${finAccountId}"/></field>
+        <field name="glReconciliationId" use-when="glReconciliationId == null"><ignored/></field>
+        <field name="glReconciliationId" use-when="glReconciliationId != null"><display/></field>
+        <field name="glAccountId"><hidden value="${finAccount.postToGlAccountId}"/></field>
+        <field name="organizationPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="reconciledBalance" use-when="${reconciledBalance == null}"><hidden/></field>
+        <field name="reconciledBalance" use-when="&quot;GLREC_RECONCILED&quot;.equals(&quot;${glReconciliation.statusId}&quot;)"><display type="currency" currency="${defaultOrganizationPartyCurrencyUomId}"/></field>
+        <field name="reconciledDate" title="${uiLabelMap.AccountingReconciliationDate}"><date-time/></field>
+        <field name="createButton" use-when="glReconciliationId == null" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+        <field name="updateButton" use-when="glReconciliationId != null" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="ListFinAccountReconciliations" type="list" list-name="glReconciliations" list-entry-name="glReconciliation" separate-columns="true"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate-target="FindFinAccountReconciliations">
+        <row-actions>
+            <entity-one entity-name="PartyNameView" value-field="partyName">
+                <field-map field-name="partyId" from-field="glReconciliation.organizationPartyId"/>
+            </entity-one>
+            <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId"/>
+        </row-actions>
+        <auto-fields-service service-name="updateGlReconciliation" default-field-type="display" map-name="glReconciliation"/>
+        <field name="glReconciliationId">
+            <hyperlink description="${glReconciliation.glReconciliationId}" target="ViewGlReconciliationWithTransaction">
+                <parameter param-name="glReconciliationId" from-field="glReconciliation.glReconciliationId"/>
+                <parameter param-name="finAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
+        <field name="organizationPartyId" title="${uiLabelMap.PartyParty}">
+            <hyperlink description="${partyName.firstName} ${partyName.lastName}${partyName.groupName} [${partyName.partyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+                <parameter param-name="partyId" from-field="partyName.partyId"/>
+            </hyperlink>
+        </field>
+        <field name="cancelButton" title="${uiLabelMap.AccountingCancelBankReconciliation}" use-when="${glReconciliation.statusId == 'GLREC_CREATED'}" widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonCancel}" target="cancelReconciliation" also-hidden="false">
+                <parameter param-name="glReconciliationId" from-field="glReconciliation.glReconciliationId"/>
+                <parameter param-name="finAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="reconciledBalance"><display type="currency" currency="${currencyUomId}"></display></field>
+        <field name="openingBalance"><display type="currency" currency="${currencyUomId}"></display></field>
+    </form>
+    <form name="FindBankReconciliation" type="single" target="FindFinAccountReconciliations">
+        <field name="finAccountId"><hidden value="${parameters.finAccountId}"/></field>
+        <field name="glReconciliationId"><lookup target-form-name="LookupGlReconciliation"/></field>
+        <field name="glReconciliationName"><text/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="GLREC_STATUS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="organizationPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="glAccountId"><lookup target-form-name="LookupGlAccount"/></field>
+        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+</forms>

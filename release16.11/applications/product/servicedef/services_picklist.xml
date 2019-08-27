@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Common Application Components Shipment Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Picking Related Services -->
+    <service name="convertPickOrderIdListToHeaders" engine="java"
+            location="org.apache.ofbiz.shipment.picklist.PickListServices" invoke="convertOrderIdListToHeaders">
+        <description>Convert a list of order IDs to a list of headers</description>
+        <attribute name="orderIdList" type="List" mode="IN" optional="true"/>
+        <attribute name="orderHeaderList" type="List" mode="INOUT" optional="true"/>
+    </service>
+
+    <service name="findOrdersToPickMove" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="findOrdersToPickMove">
+        <description>Gets Picklist Data</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="VIEW"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentMethodTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="isRushOrder" type="String" mode="IN" optional="true"/>
+        <attribute name="maxNumberOfOrders" type="Long" mode="IN" optional="true"/>
+        <attribute name="orderHeaderList" type="List" mode="IN" optional="true"/>
+        <attribute name="pickMoveInfoList" type="List" mode="OUT" optional="true"/>
+        <attribute name="rushOrderInfo" type="Map" mode="OUT" optional="true"/>
+        <attribute name="groupByNoOfOrderItems" type="String" mode="IN" optional="true"/>
+        <attribute name="groupByWarehouseArea" type="String" mode="IN" optional="true"/>
+        <attribute name="groupByShippingMethod" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <!-- Persisted Picklist Services -->
+    <service name="createPicklistFromOrders" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="createPicklistFromOrders" transaction-timeout="600">
+        <description>Create Picklist From Orders</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="CREATE"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentMethodTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="maxNumberOfOrders" type="Long" mode="IN" optional="true"/>
+        <attribute name="isRushOrder" type="String" mode="IN" optional="true"/>
+        <attribute name="orderIdList" type="List" mode="IN" optional="true"/>
+        <attribute name="orderHeaderList" type="List" mode="INOUT" optional="true"/>
+        <attribute name="picklistId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="printPickSheets" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="printPickSheets">
+        <description>Print pick sheets for orders</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="maxNumberOfOrdersToPrint" type="Long" mode="IN" optional="true"/>
+        <attribute name="printGroupName" type="String" mode="IN" optional="true"/>
+        <attribute name="groupByNoOfOrderItems" type="String" mode="IN" optional="true"/>
+        <attribute name="groupByWarehouseArea" type="String" mode="IN" optional="true"/>
+        <attribute name="groupByShippingMethod" type="String" mode="IN" optional="true"/>
+        <attribute name="pickMoveInfoList" type="List" mode="OUT" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="getPicklistDisplayInfo" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="getPicklistDisplayInfo">
+        <description>Create Picklist From Orders</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="VIEW"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="viewIndex" mode="INOUT" type="Integer" optional="true"/>
+        <attribute name="viewSize" mode="INOUT" type="Integer" optional="true"/>
+        <attribute name="highIndex" mode="OUT" type="Integer" optional="true"/>
+        <attribute name="lowIndex" mode="OUT" type="Integer" optional="true"/>
+        <attribute name="picklistCount" mode="OUT" type="Long" optional="true"/>
+        <attribute name="picklistInfoList" type="List" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="getPickAndPackReportInfo" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="getPickAndPackReportInfo">
+        <description>Get Pick And Pack Report Info</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="VIEW"/>
+        <attribute name="picklistId" type="String" mode="IN" optional="false"/>
+        <attribute name="picklistInfo" type="Map" mode="OUT" optional="false"/>
+        <attribute name="facilityLocationInfoList" type="List" mode="OUT" optional="true"/>
+        <attribute name="noLocationProductInfoList" type="List" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- Picklist -->
+    <service name="createPicklist" default-entity-name="Picklist" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="createPicklist" auth="true">
+        <description>Create Picklist</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="picklistDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+    </service>
+    <service name="updatePicklist" default-entity-name="Picklist" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="updatePicklist" auth="true">
+        <description>Update Picklist</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="picklistDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="deletePicklist" default-entity-name="Picklist" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="deletePicklist" auth="true">
+        <description>Delete Picklist</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- PicklistBin -->
+    <service name="createPicklistBin" default-entity-name="PicklistBin" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="createPicklistBin" auth="true">
+        <description>Create PicklistBin</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="updatePicklistBin" default-entity-name="PicklistBin" engine="entity-auto" invoke="update" auth="true">
+        <description>Update PicklistBin</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deletePicklistBin" default-entity-name="PicklistBin" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="deletePicklistBin" auth="true">
+        <description>Delete PicklistBin</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="checkPicklistBinItemStatuses" default-entity-name="PicklistBin" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="checkPicklistBinItemStatuses" auth="true">
+        <description>Update Picklist based on Item Status</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- PicklistItem -->
+    <service name="createPicklistItem" default-entity-name="PicklistItem" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="createPicklistItem" auth="true">
+        <description>Create PicklistItem</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <override name="itemStatusId" optional="true"/>
+    </service>
+    <service name="updatePicklistItem" default-entity-name="PicklistItem" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="updatePicklistItem" auth="true">
+        <description>Update PicklistItem</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="oldItemStatusId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="deletePicklistItem" default-entity-name="PicklistItem" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="deletePicklistItem" auth="true">
+        <description>Delete PicklistItem</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="editPicklistItem" default-entity-name="PicklistItem" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="editPicklistItem" auth="true">
+        <description>Edit PicklistItem</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="lotId" mode="IN" type="String" optional="false" />
+        <attribute name="quantity" mode="IN" type="BigDecimal" optional="false" />
+        <attribute name="productId" mode="IN" type="String" optional="false" />
+        <attribute name="facilityId" mode="IN" type="String" optional="false" />
+        <attribute name="oldLotId" mode="IN" type="String" optional="true" />
+    </service>
+    <service name="setPicklistItemToComplete" default-entity-name="PicklistItem" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="setPicklistItemToComplete" auth="true">
+        <description>Update PicklistItem's Status to COMPLETE</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+    <service name="cancelPicklistAndItems" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="cancelPicklistAndItems" auth="true">
+        <description>If Picklist is Cancelled then cancel all the PicklistItems.</description>
+        <attribute name="picklistId" type="String" mode="IN"/>
+    </service>
+
+    <!-- PicklistRole -->
+    <service name="createPicklistRole" default-entity-name="PicklistRole" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="createPicklistRole" auth="true">
+        <description>Create PicklistRole</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updatePicklistRole" default-entity-name="PicklistRole" engine="entity-auto" invoke="update" auth="true">
+        <description>Update PicklistRole</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+    </service>
+    <service name="deletePicklistRole" default-entity-name="PicklistRole" engine="simple"
+            location="component://product/minilang/shipment/picklist/PicklistServices.xml" invoke="deletePicklistRole" auth="true">
+        <description>Delete PicklistRole</description>
+        <permission-service service-name="facilityPermissionCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

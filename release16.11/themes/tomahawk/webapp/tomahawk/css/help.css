@@ -1,0 +1,94 @@
+/***********************************************
+APACHE OFBIZ
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+***********************************************/
+body {
+    background: none;
+    font-size: 105%;
+}
+
+p {
+    margin-top: 10px;
+}
+
+.left-border {
+    float: left;
+    width: 35%;
+}
+
+.leftonly {
+    float: none;
+    min-height: 25em;
+}
+
+#column-container .leftonly {
+    width: auto;
+}
+
+div.screenlet-body {
+    border: none;
+    overflow: hidden;
+}
+
+#Document .contentarea {
+    background: none;
+}
+
+#Document #column-container {
+    background: none;
+}
+
+#content-main-section h1 {
+    display: block;
+    font-weight: bold;
+}
+
+#content-main-section h2 {
+    background: none;
+    font-weight: bold;
+}
+
+ol.numbers {
+    list-style: decimal;
+    padding-left: 20px;
+}
+
+ul.dots {
+    list-style: circle;
+    padding-left: 20px;
+}
+
+span.caution {
+    color: yellow;
+}
+
+span.important {
+    color: #ff4500;
+}
+
+span.note {
+    color: #adff2f;
+}
+
+span.tip {
+    color: blue;
+}
+
+span.warning {
+    color: red;
+}

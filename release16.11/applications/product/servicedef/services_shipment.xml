@@ -1,0 +1,1130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Common Application Components Shipment Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Shipment Services -->
+    <service name="createCarrierShipmentMethod" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createCarrierShipmentMethod" auth="true">
+        <description>Creates A CarrierShipmentMethod</description>
+        <auto-attributes entity-name="CarrierShipmentMethod" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="CarrierShipmentMethod" include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateCarrierShipmentMethod" engine="entity-auto" default-entity-name="CarrierShipmentMethod" invoke="update" auth="true">
+        <description>Updates A CarrierShipmentMethod</description>
+        <auto-attributes entity-name="CarrierShipmentMethod" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="CarrierShipmentMethod" include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCarrierShipmentMethod" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteCarrierShipmentMethod" auth="true">
+        <description>Deletes A CarrierShipmentMethod</description>
+        <auto-attributes entity-name="CarrierShipmentMethod" include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createShipmentMethodType" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentMethodType" auth="true">
+        <description>Creates A ShipmentMethodType</description>
+        <auto-attributes entity-name="ShipmentMethodType" mode="IN" optional="false"/>
+        <override name="sequenceNum" optional="true"/>
+    </service>
+    <service name="updateShipmentMethodType" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="updateShipmentMethodType" auth="true">
+        <description>Updates A ShipmentMethodType</description>
+        <auto-attributes entity-name="ShipmentMethodType" mode="IN" optional="false"/>
+        <override name="sequenceNum" optional="true"/>
+    </service>
+    <service name="deleteShipmentMethodType" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteShipmentMethodType" auth="true">
+        <description>Deletes A ShipmentMethodType</description>
+        <auto-attributes entity-name="ShipmentMethodType" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createOrderShipmentPlan" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createOrderShipmentPlan" auth="true">
+        <description>Create Shipment, ShipmentItems and OrderShipment</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="quickShipEntireOrder" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="quickShipEntireOrder" auth="true" transaction-timeout="600">
+        <description>Quick Ships An Entire Order Creating One Shipment Per Facility and Ship Group.  All approved order items are
+          automatically issued in full and put into one package.  The shipment is created in the INPUT status and then updated to
+          PACKED and SHIPPED.
+        </description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="originFacilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="setPackedOnly" type="String" mode="IN" optional="true"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="true"/>
+        <!-- A List of Maps, each with a shipmentId,a facilityId, and a shipGroupSeqId for each shipment created -->
+        <attribute name="shipmentShipGroupFacilityList" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="quickShipOrderByItem" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="quickShipOrderByItem" auth="true">
+        <description>Quick Ships An Order By Item</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="itemShipList" type="List" mode="IN" optional="false"/>
+        <attribute name="originFacilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="setPackedOnly" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="quickShipPurchaseOrder" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="quickShipPurchaseOrder" auth="true">
+        <description>The mirror of quickShipEntireOrder, this service automatically creates shipments for an entire purchase order.
+          All order items on each ship group is created as a Shipment.  All items on a Shipment are automatically issued to a Package.
+          The shipment's status is first set to CREATED and then set as SHIPPED.  The facilityId is used to set the destinationFacilityId
+          of the Shipment.
+        </description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="createShipmentForReturn" default-entity-name="ReturnHeader" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentForReturn">
+        <description>Create a Return Shipment with information from ReturnHeader fields</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="shipmentId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="createShipmentAndItemsForReturn" default-entity-name="ReturnHeader" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentAndItemsForReturn">
+        <description>Create a Return Shipment and ShipmentItems with information from ReturnHeader and ReturnItems</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="shipmentId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="createShipmentAndItemsForVendorReturn" default-entity-name="Shipment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentAndItemsForVendorReturn">
+        <description>Create a Return Shipment and ShipmentItems with primaryReturnId</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="OUT" optional="false"/>
+        <override name="primaryReturnId" optional="false"/>
+    </service>
+
+    <service name="createShipment" default-entity-name="Shipment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipment" auth="true">
+        <description>Create Shipment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="createdDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedDate"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+    </service>
+    <service name="updateShipment" default-entity-name="Shipment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="updateShipment" auth="true">
+        <description>Update Shipment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="shipmentTypeId"/>
+            <exclude field-name="createdDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedDate"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+        <attribute name="shipmentTypeId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldPrimaryOrderId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldOriginFacilityId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldDestinationFacilityId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="deleteShipment" default-entity-name="Shipment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteShipment" auth="true">
+        <description>Delete Shipment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createShipmentStatus" default-entity-name="ShipmentStatus" engine="entity-auto" invoke="create" auth="true">
+        <description>Create Shipment Status</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="statusDate" mode="IN" optional="true"/>
+    </service>
+    <service name="setShipmentSettingsFromPrimaryOrder" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="setShipmentSettingsFromPrimaryOrder" auth="true">
+        <description>Set Shipment Settings From Primary Order</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="setShipmentSettingsFromFacilities" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="setShipmentSettingsFromFacilities" auth="true">
+        <description>Set Shipment Settings From Facilities</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="sendShipmentScheduledNotification" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="sendShipmentScheduledNotification" auth="true">
+        <description>Send Shipment Scheduled Notification</description>
+        <required-permissions join-type="OR">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="balanceItemIssuancesForShipment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="balanceItemIssuancesForShipment" auth="true">
+        <description>
+            Release the purchase order's items assigned to the shipment but not
+            actually received; it is invoked as a seca when the purchase shipment
+            is marked as 'received'
+        </description>
+        <required-permissions join-type="OR">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="checkCancelItemIssuanceAndOrderShipmentFromShipment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="checkCancelItemIssuanceAndOrderShipmentFromShipment" auth="true">
+        <description>Check Shipment Items and cancel Item Issuance and Order Shipment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="quickDropShipOrder" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="quickDropShipOrder" auth="true">
+        <description>Creates a drop shipment for a ship group and calls updateShipment twice in succession to set
+            shipment status to PURCH_SHIP_SHIPPED and then to PURCH_SHIP_RECEIVED</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- ShipmentItem Services -->
+    <service name="createShipmentItem" default-entity-name="ShipmentItem" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentItem" auth="true">
+        <description>Create ShipmentItem</description>
+         <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="shipmentItemSeqId" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateShipmentItem" default-entity-name="ShipmentItem" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="updateShipmentItem" auth="true">
+        <description>Update ShipmentItem</description>
+         <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentItem" default-entity-name="ShipmentItem" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteShipmentItem" auth="true">
+        <description>Delete ShipmentItem</description>
+         <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="splitShipmentItemByQuantity" engine="simple"
+        location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="splitShipmentItemByQuantity">
+        <description>Splits the specified ShipmentItem creating a new ShipmentItem with the given newItemQuantity.
+            NOTE that this does manage OrderShipment records, but NOTHING else, so it is only to be used for Shipment
+            Plan stuff BEFORE the items are issued, shipment packed, etc.</description>
+        <auto-attributes entity-name="ShipmentItem" include="pk" mode="IN" optional="false"/>
+        <attribute name="newItemQuantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="newShipmentItemSeqId" type="String" mode="OUT" optional="true"/>
+    </service>
+
+    <!-- ShipmentPackage Services -->
+    <service name="createShipmentPackage" default-entity-name="ShipmentPackage" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentPackage" auth="true">
+        <description>Create ShipmentPackage</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="dateCreated"/>
+        </auto-attributes>
+        <override name="shipmentPackageSeqId" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateShipmentPackage" default-entity-name="ShipmentPackage" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="updateShipmentPackage" auth="true">
+        <description>Update ShipmentPackage</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentPackage" default-entity-name="ShipmentPackage" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteShipmentPackage" auth="true">
+        <description>Delete ShipmentPackage</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ShipmentPackageContent Services -->
+    <service name="createShipmentPackageContent" default-entity-name="ShipmentPackageContent" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentPackageContent" auth="true">
+        <description>Create ShipmentPackageContent</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="shipmentPackageSeqId" mode="INOUT" optional="false"/>
+    </service>
+    <service name="updateShipmentPackageContent" default-entity-name="ShipmentPackageContent" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="updateShipmentPackageContent" auth="true">
+        <description>Update ShipmentPackageContent</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentPackageContent" default-entity-name="ShipmentPackageContent" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteShipmentPackageContent" auth="true">
+        <description>Delete ShipmentPackageContent</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="addShipmentContentToPackage" default-entity-name="ShipmentPackageContent" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="addShipmentContentToPackage" auth="true">
+        <description>Add Shipment Content To Package</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="quantity" mode="IN" optional="false"/>
+        <override name="shipmentPackageSeqId" mode="INOUT" optional="false"/>
+    </service>
+
+    <!-- ShipmentPackageRouteSeg Services -->
+    <service name="createShipmentPackageRouteSeg" default-entity-name="ShipmentPackageRouteSeg" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentPackageRouteSeg" auth="true">
+        <description>Create ShipmentPackageRouteSeg</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShipmentPackageRouteSeg" default-entity-name="ShipmentPackageRouteSeg" engine="entity-auto" invoke="update" auth="true">
+        <description>Update ShipmentPackageRouteSeg</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentPackageRouteSeg" default-entity-name="ShipmentPackageRouteSeg" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteShipmentPackageRouteSeg" auth="true">
+        <description>Delete ShipmentPackageRouteSeg</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ShipmentContactMech Services -->
+    <service name="createShipmentContactMech" default-entity-name="ShipmentContactMech" engine="entity-auto" invoke="create" auth="true">
+        <description>Create ShipmentContactMech</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShipmentContactMech" default-entity-name="ShipmentContactMech" engine="entity-auto" invoke="update" auth="true">
+        <description>Update ShipmentContactMech</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentContactMech" default-entity-name="ShipmentContactMech" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete ShipmentContactMech</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ShipmentRouteSegment Services -->
+    <service name="createShipmentRouteSegment" default-entity-name="ShipmentRouteSegment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createShipmentRouteSegment" auth="true">
+        <description>Create ShipmentRouteSegment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="shipmentRouteSegmentId" mode="INOUT" optional="true"/>
+    </service>
+    <service name="updateShipmentRouteSegment" default-entity-name="ShipmentRouteSegment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="updateShipmentRouteSegment" auth="true">
+        <description>Update ShipmentRouteSegment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentRouteSegment" default-entity-name="ShipmentRouteSegment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteShipmentRouteSegment" auth="true">
+        <description>Delete ShipmentRouteSegment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="duplicateShipmentRouteSegment" default-entity-name="ShipmentRouteSegment" engine="java"
+            location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="duplicateShipmentRouteSegment" auth="true">
+        <description>Duplicates a shipment route segment and creates the new route segment in the NOT_STARTED status</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="newShipmentRouteSegmentId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="quickScheduleShipmentRouteSegment" default-entity-name="ShipmentRouteSegment" engine="java"
+            location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="quickScheduleShipmentRouteSegment" auth="true">
+        <description>Schedules a shipment route segment with the carrier and service level in the ShipmentRouteSegment entity.
+          Actual scheduling is done by an async service, and this does not return an error, so it can be called in a multi-form,
+          and one failed shipment scheduling does not cause other shipments to be rolled back.
+        </description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ============================================================== -->
+    <!-- ItemIssuance Services -->
+    <service name="createItemIssuance" default-entity-name="ItemIssuance" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="createItemIssuance" auth="true">
+        <description>Create ItemIssuance</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="affectAccounting" type="Boolean" mode="OUT" optional="true"/>
+    </service>
+    <service name="updateItemIssuance" default-entity-name="ItemIssuance" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="updateItemIssuance" auth="true">
+        <description>Update ItemIssuance</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteItemIssuance" default-entity-name="ItemIssuance" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="deleteItemIssuance" auth="true">
+        <description>Delete ItemIssuance</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- ItemIssuanceRole Services -->
+    <service name="createItemIssuanceRole" default-entity-name="ItemIssuanceRole" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="createItemIssuanceRole" auth="true">
+        <description>Create ItemIssuanceRole</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <!-- Will check if OK to change status of shipment, so Shipment PK is needed -->
+        <auto-attributes entity-name="Shipment" include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="deleteItemIssuanceRole" default-entity-name="ItemIssuanceRole" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="deleteItemIssuanceRole" auth="true">
+        <description>Delete ItemIssuanceRole</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <!-- Will check if OK to change status of shipment, so Shipment PK is needed -->
+        <auto-attributes entity-name="Shipment" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="issueOrderItemToShipment" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="issueOrderItemToShipment" auth="true">
+        <description>Issue an OrderItem to a Shipment - only for non-sales orders</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <auto-attributes entity-name="Shipment" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OrderItemShipGroupAssoc" include="pk" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="shipmentItemSeqId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="issueOrderItemShipGrpInvResToShipment" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="issueOrderItemShipGrpInvResToShipment" auth="true">
+        <description>Add an OrderItemShipGrpInvRes to a Shipment - only for sales orders</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <auto-attributes entity-name="Shipment" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OrderItemShipGrpInvRes" include="pk" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="shipmentItemSeqId" type="String" mode="OUT" optional="false"/>
+        <attribute name="itemIssuanceId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="issueInventoryItemToFixedAssetMaint" engine="simple"
+        location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="issueInventoryItemToFixedAssetMaint" auth="true">
+        <description>Issue an InventoryItem to a FixedAssetMaint - for conversion to use as supples/parts</description>
+        <auto-attributes entity-name="InventoryItem" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="FixedAssetMaint" include="pk" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="itemIssuanceId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="returnInventoryItemIssuedToFixedAssetMaint" engine="simple"
+        location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="returnInventoryItemIssuedToFixedAssetMaint" auth="true">
+        <description>Return InventoryItem Issued to a FixedAssetMaint - for conversion to use as supples/parts</description>
+        <attribute name="itemIssuanceId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="cancelOrderItemIssuanceFromSalesShipment" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="cancelOrderItemIssuanceFromSalesShipment" auth="true">
+        <description>Cancel an ItemIssuance from Sales Shipment</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <attribute name="itemIssuanceId" type="String" mode="IN" optional="false"/>
+        <attribute name="cancelQuantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="canceledQuantity" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="issueInventoryItemToShipment" engine="simple"
+            location="component://product/minilang/shipment/issuance/IssuanceServices.xml" invoke="issueInventoryItemToShipment" auth="true">
+        <description>Issue an InventoryItem to a Shipment</description>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="totalIssuedQty" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="itemIssuanceId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <!-- Pick Verify Services -->
+    <service name="verifySingleItem" engine="java"
+            location="org.apache.ofbiz.shipment.verify.VerifyPickServices" invoke="verifySingleItem" auth="true">
+        <description>Verify Single Item</description>
+        <attribute name="verifyPickSession" type="org.apache.ofbiz.shipment.verify.VerifyPickSession" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+    </service>
+
+    <service name="verifyBulkItem" engine="java"
+            location="org.apache.ofbiz.shipment.verify.VerifyPickServices" invoke="verifyBulkItem" auth="true">
+        <description>Verify Multiple Items</description>
+        <attribute name="verifyPickSession" type="org.apache.ofbiz.shipment.verify.VerifyPickSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="pickerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="productMap" type="Map" string-map-prefix="prd_" mode="IN" optional="true"/>
+        <attribute name="originGeoIdMap" type="Map" string-map-prefix="geo_" mode="IN" optional="true"/>
+        <attribute name="quantityMap" type="Map" string-map-prefix="qty_" mode="IN" optional="true"/>
+        <attribute name="selectedMap" type="Map" string-map-prefix="sel_" mode="IN" optional="true"/>
+        <attribute name="itemMap" type="Map" string-map-prefix="ite_" mode="IN" optional="true"/>
+    </service>
+
+    <service name="cancelAllRows" engine="java"
+            location="org.apache.ofbiz.shipment.verify.VerifyPickServices" invoke="cancelAllRows" auth="true">
+        <description>Clear the current picking session</description>
+        <attribute name="verifyPickSession" type="org.apache.ofbiz.shipment.verify.VerifyPickSession" mode="IN" optional="false"/>
+    </service>
+
+    <service name="completeVerifiedPick" engine="java"
+             location="org.apache.ofbiz.shipment.verify.VerifyPickServices" invoke="completeVerifiedPick" auth="true">
+        <description>Complete the picking and set the shipment to PICKED</description>
+        <attribute name="verifyPickSession" type="org.apache.ofbiz.shipment.verify.VerifyPickSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="pickerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="INOUT" optional="true"/>
+    </service>
+
+    <!-- Weight Package Only Services -->
+    <service name="setPackageInfo" engine="java"
+            location="org.apache.ofbiz.shipment.weightPackage.WeightPackageServices" invoke="setPackageInfo" auth="true">
+        <description>Set the weight, dimensions/shipmentBoxType of package in SESSION</description>
+        <attribute name="weightPackageSession" type="org.apache.ofbiz.shipment.weightPackage.WeightPackageSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="packageWeight" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="packageLength" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="packageWidth" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="packageHeight" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="shipmentBoxTypeId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="updatePackedLine" engine="java"
+            location="org.apache.ofbiz.shipment.weightPackage.WeightPackageServices" invoke="updatePackedLine" auth="true">
+        <description>Update the weight, dimensions/shipmentBoxType of package</description>
+        <attribute name="weightPackageSession" type="org.apache.ofbiz.shipment.weightPackage.WeightPackageSession" mode="IN" optional="false"/>
+        <attribute name="packageWeight" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="packageLength" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="packageWidth" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="packageHeight" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="shipmentBoxTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="weightPackageSeqId" type="Integer" mode="IN" optional="false"/>
+    </service>
+
+    <service name="deletePackedLine" engine="java"
+            location="org.apache.ofbiz.shipment.weightPackage.WeightPackageServices" invoke="deletePackedLine" auth="true">
+        <description>Delete the weight, dimensions/shipmentBoxType of package</description>
+        <attribute name="weightPackageSession" type="org.apache.ofbiz.shipment.weightPackage.WeightPackageSession" mode="IN" optional="false"/>
+        <attribute name="weightPackageSeqId" type="Integer" mode="IN" optional="false"/>
+    </service>
+
+    <service name="completePackage" engine="java"
+            location="org.apache.ofbiz.shipment.weightPackage.WeightPackageServices" invoke="completePackage" auth="true">
+        <description>Complete the packging and set the shipment to packed</description>
+        <attribute name="weightPackageSession" type="org.apache.ofbiz.shipment.weightPackage.WeightPackageSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="dimensionUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="weightUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="estimatedShippingCost" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="newEstimatedShippingCost" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="showWarningForm" type="Boolean" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="completeShipment" engine="java"
+            location="org.apache.ofbiz.shipment.weightPackage.WeightPackageServices" invoke="completeShipment" auth="true">
+        <description>Complete the packaging set the shipment to packed</description>
+        <attribute name="weightPackageSession" type="org.apache.ofbiz.shipment.weightPackage.WeightPackageSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="INOUT" optional="true"/>
+    </service>
+
+    <service name="savePackagesInfo" engine="java"
+            location="org.apache.ofbiz.shipment.weightPackage.WeightPackageServices" invoke="savePackagesInfo" auth="true">
+        <description>Save the package(s) information in ShipmentPackage entity from session</description>
+        <attribute name="weightPackageSession" type="org.apache.ofbiz.shipment.weightPackage.WeightPackageSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <!-- Pack Order Services -->
+    <service name="packSingleItem" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="addPackLine" auth="true">
+        <description>Pack Single Item</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="packageSeq" type="Integer" mode="IN" optional="false"/>
+        <attribute name="pickerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="handlingInstructions" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="packBulkItems" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="packBulk" auth="true">
+        <description>Pack Multiple Items</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="updateQuantity" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="pickerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="handlingInstructions" type="String" mode="IN" optional="true"/>
+        <attribute name="nextPackageSeq" type="Integer" mode="INOUT" optional="true"/>
+        <attribute name="prdInfo" type="Map" string-map-prefix="prd_" mode="IN" optional="true"/>
+        <attribute name="qtyInfo" type="Map" string-map-prefix="qty_" mode="IN" optional="true"/>
+        <attribute name="pkgInfo" type="Map" string-map-prefix="pkg_" mode="IN" optional="true"/>
+        <attribute name="selInfo" type="Map" string-map-prefix="sel_" mode="IN" optional="true"/>
+        <attribute name="iteInfo" type="Map" string-map-prefix="ite_" mode="IN" optional="true"/>
+        <attribute name="wgtInfo" type="Map" string-map-prefix="wgt_" mode="IN" optional="true"/>
+        <attribute name="numPackagesInfo" type="Map" string-map-prefix="numPackages_" mode="IN" optional="true"/>
+    </service>
+
+    <service name="setNextPackageSeq" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="incrementPackageSeq" auth="true">
+        <description>Increments the next package sequence</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+        <attribute name="nextPackageSeq" type="Integer" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="calcPackSessionAdditionalShippingCharge" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="calcPackSessionAdditionalShippingCharge" auth="true">
+        <description>Totals package weights and calls the calcShipmentCostEstimate via the PackingSession</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+        <attribute name="packageWeights" type="Map" string-map-prefix="packageWeight_" mode="IN" optional="true"/>
+        <attribute name="weightUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="shippingContactMechId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentMethodTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="carrierPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="carrierRoleTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="additionalShippingCharge" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="clearPackAll" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="clearPackAll" auth="true">
+        <description>Clear the current packing session</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+    </service>
+    <service name="clearLastPackage" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="clearLastPackage" auth="true">
+        <description>Clears the last package in the packing session</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+        <attribute name="nextPackageSeq" type="Integer" mode="OUT" optional="false"/>
+    </service>
+    <service name="clearPackLine" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="clearPackLine" auth="true">
+        <description>Clear a single line from the current packing session</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
+        <attribute name="packageSeqId" type="Integer" mode="IN" optional="false"/>
+    </service>
+
+    <service name="completePack" engine="java"
+            location="org.apache.ofbiz.shipment.packing.PackingServices" invoke="completePack" auth="true" transaction-timeout="7200">
+        <description>Complete the packaging set the shipment to PACKED</description>
+        <attribute name="packingSession" type="org.apache.ofbiz.shipment.packing.PackingSession" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="IN" optional="true"/>
+        <attribute name="handlingInstructions" type="String" mode="IN" optional="true"/>
+        <attribute name="pickerPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="additionalShippingCharge" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="forceComplete" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="packageWeights" type="Map" string-map-prefix="packageWeight_" mode="IN" optional="true"/>
+        <attribute name="dimensionUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="weightUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentId" type="String" mode="OUT" optional="false"/>
+        <attribute name="boxTypes" type="Map" string-map-prefix="boxType_" mode="IN" optional="true"/>
+    </service>
+
+    <!-- Shipment Plan Services -->
+    <service name="addOrderShipmentToShipment" engine="simple" default-entity-name="OrderShipment"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="addOrderShipmentToShipment" auth="true">
+        <description>Add an OrderShipment and a ShipmentItem - only for sales orders</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <override name="shipmentItemSeqId" mode="INOUT" optional="true"/>
+    </service>
+    <service name="removeOrderShipmentFromShipment" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="removeOrderShipmentFromShipment" auth="true">
+        <description>Delete an OrderShipment and updates the ShipmentItem</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <auto-attributes entity-name="OrderShipment" include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="getQuantityForShipment" engine="simple" default-entity-name="OrderItem"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="getQuantityForShipment" auth="true">
+        <description>get the order item quantity still not put in shipments</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="remainingQuantity" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <!-- ============================================================== -->
+    <!-- Receipt Services -->
+    <service name="interfaceShipmentReceipt" engine="interface" location="" invoke="">
+        <description>ShipmentReceipt Interface</description>
+        <auto-attributes entity-name="ShipmentReceipt" include="nonpk" mode="IN" optional="true"/>
+        <attribute name="inventoryItemDetailSeqId" type="String" mode="IN" optional="true"/>
+        <override name="inventoryItemId" optional="false"/>
+        <override name="productId" optional="false"/>
+        <override name="quantityAccepted" optional="false"/>
+        <override name="quantityRejected" optional="false"/>
+    </service>
+    <service name="createShipmentReceipt" engine="simple"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="createShipmentReceipt" auth="true">
+        <description>Creates a ShipmentReceipt Record</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <implements service="interfaceShipmentReceipt"/>
+        <attribute name="receiptId" type="String" mode="OUT" optional="false"/>
+        <attribute name="affectAccounting" type="Boolean" mode="OUT" optional="true"/>
+    </service>
+    <service name="updatePurchaseShipmentFromReceipt" engine="java"
+      location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="updatePurchaseShipmentFromReceipt" auth="true">
+        <description>
+          Whenever a ShipmentReceipt is generated, check the Shipment associated
+          with it to see if all items were received. If so, change its status to
+          PURCH_SHIP_RECEIVED. The check is accomplished by counting the
+          products shipped (from ShipmentAndItem) and matching them with the
+          products received (from ShipmentReceipt).
+        </description>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="receiveInventoryProduct" engine="simple" transaction-timeout="600"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="receiveInventoryProduct" auth="true">
+        <description>Receive Inventory In Warehouse</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes entity-name="InventoryItem" include="nonpk" mode="IN" optional="true">
+            <exclude field-name="availableToPromiseTotal"/>
+            <exclude field-name="quantityOnHandTotal"/>
+        </auto-attributes>
+        <auto-attributes entity-name="InventoryItemDetail" include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes entity-name="ShipmentReceipt" include="nonpk" mode="IN" optional="true"/>
+        <attribute name="inventoryItemDetailSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="priorityOrderId" type="String" mode="IN" optional="true"/>
+        <attribute name="priorityOrderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="currentInventoryItemId" type="String" mode="IN" optional="true"><!-- allow this to be passed in to update an existing InventoryItem, and all else is the same; if not passed in a new one will be created --></attribute>
+        <attribute name="inventoryItemId" type="String" mode="OUT" optional="true"></attribute>
+        <attribute name="orderCurrencyUnitPrice" type="String" mode="IN" optional="true"/>
+        <override name="quantityAccepted" optional="false"/>
+        <override name="quantityRejected" optional="false"/>
+        <override name="inventoryItemTypeId" optional="false"/>
+        <override name="productId" optional="false"/>
+        <override name="facilityId" optional="false"/>
+    </service>
+
+    <service name="issueOrderItemToShipmentAndReceiveAgainstPO" engine="simple" transaction-timeout="600"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="issueOrderItemToShipmentAndReceiveAgainstPO" auth="true">
+        <description>Issues order item quantity specified to the shipment, then receives inventory for that item and quantity</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        </required-permissions>
+        <implements service="issueOrderItemToShipment"/>
+        <implements service="receiveInventoryProduct"/>
+    </service>
+
+    <service name="quickReceiveReturn" engine="simple"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="quickReceiveReturn" auth="true">
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="statusId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="interfaceShipmentReceiptRole" engine="interface" location="" invoke="">
+        <description>Interface for ShipmentReceiptRole</description>
+        <attribute name="receiptId" type="String" mode="IN" optional="false"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="roleTypeId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="createShipmentReceiptRole" engine="simple"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="createShipmentReceiptRole" auth="true">
+        <description>Create a ShipmentReceipt Role entry</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <implements service="interfaceShipmentReceiptRole"/>
+    </service>
+    <service name="removeShipmentReceiptRole" engine="simple"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="removeShipmentReceiptRole" auth="true">
+        <description>Remove a ShipmentReceipt Role entry</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <implements service="interfaceShipmentReceiptRole"/>
+    </service>
+
+    <!-- Shipment Estimate (Rate) Services -->
+    <service name="createShipmentEstimate" engine="java"
+                location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="createShipmentEstimate" auth="true">
+        <description>Create Shipment Estimate</description>
+        <attribute name="productStoreShipMethId" type="String" mode="IN" optional="false"/>
+        <attribute name="toGeo" type="String" mode="IN" optional="true"/>
+        <attribute name="fromGeo" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="roleTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="flatPercent" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="flatPrice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="flatItemPrice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="shippingPricePercent" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="productFeatureGroupId" type="String" mode="IN" optional="true"/>
+        <attribute name="featurePercent" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="featurePrice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="oversizeUnit" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="oversizePrice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="weightBreakId" type="String" mode="IN" optional="true"/>
+        <attribute name="wmin" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="wmax" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="wprice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="wuom" type="String" mode="IN" optional="true"/>
+        <attribute name="quantityBreakId" type="String" mode="IN" optional="true"/>
+        <attribute name="qmin" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="qmax" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="qprice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="quom" type="String" mode="IN" optional="true"/>
+        <attribute name="priceBreakId" type="String" mode="IN" optional="true"/>
+        <attribute name="pmin" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="pmax" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="pprice" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="puom" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentCostEstimateId" type="String" mode="OUT"/>
+    </service>
+
+    <service name="removeShipmentEstimate" engine="java"
+            location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="removeShipmentEstimate" auth="true">
+        <description>Remove Shipment Estimate</description>
+        <attribute name="shipmentCostEstimateId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="calcShipmentEstimateInterface" engine="interface" location="" invoke="">
+        <description>Interface for shipment estimate calc service</description>
+        <attribute name="serviceConfigProps" type="String" mode="IN" optional="true"/>
+        <attribute name="initialEstimateAmt" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="shippingContactMechId" type="String" mode="IN" optional="true"/>
+        <attribute name="shippingOriginContactMechId" type="String" mode="IN" optional="true"/>
+        <attribute name="shippingPostalCode" type="String" mode="IN" optional="true"/>
+        <attribute name="shippingCountryCode" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentMethodTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="carrierPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="carrierRoleTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="productStoreShipMethId" type="String" mode="IN" optional="true"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="shippableItemInfo" type="List" mode="IN" optional="false"/>
+        <attribute name="shippableWeight" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="shippableQuantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="shippableTotal" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentCustomMethodId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentGatewayConfigId" type="String" mode="IN" optional="true"/>
+        <attribute name="shippingEstimateAmount" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="calcShipmentCostEstimate" engine="java"
+            location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="calcShipmentCostEstimate" auth="false" use-transaction="false">
+        <description>Generic Shipment Cost Estimate Calc Service - Use ShipmentCostEstimate Entities</description>
+        <implements service="calcShipmentEstimateInterface"/>
+    </service>
+
+    <service name="cancelReceivedItems" engine="simple"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="cancelReceivedItems" auth="true">
+        <description>Cancel Received Items against a purchase order if received something incorrectly</description>
+        <attribute name="receiptId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <!-- QuantityBreak services -->
+    <service name="createQuantityBreak" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="createQuantityBreak" auth="true">
+        <description>Create a QuantityBreak</description>
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <auto-attributes entity-name="QuantityBreak" include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateQuantityBreak" engine="entity-auto" invoke="update" default-entity-name="QuantityBreak" auth="true">
+        <description>Update a QuantityBreak</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <auto-attributes entity-name="QuantityBreak" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="QuantityBreak" include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteQuantityBreak" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="deleteQuantityBreak" auth="true">
+        <description>Delete a QuantityBreak</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes entity-name="QuantityBreak" include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="getShipmentPackageValueFromOrders" engine="java"
+            location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="getShipmentPackageValueFromOrders" auth="true" use-transaction="false">
+        <description>Calculates the total value of a shipment package by totalling the results of the getOrderItemInvoicedAmountAndQuantity
+            service for the orderItem related to each ShipmentPackageContent, prorated by the quantity of the orderItem issued to the
+            ShipmentPackageContent. Value is converted according to the incoming currencyUomId.</description>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentPackageSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="false"/>
+        <attribute name="packageValue" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="issueSerializedInvToShipmentPackageAndSetTracking" engine="simple"
+            location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="issueSerializedInvToShipmentPackageAndSetTracking" auth="true">
+        <description></description>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="reservedDatetime" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="requireInventory" type="String" mode="IN" optional="true"/>
+        <attribute name="reserveOrderEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="sequenceId" type="Long" mode="IN" optional="true"/>
+        <attribute name="serialNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="trackingNum" type="String" mode="IN" optional="true"/>
+        <attribute name="originFacilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantityNotReserved" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="promisedDatetime" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="shipmentPackageSeqId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="setShipmentStatusPackedAndShipped" engine="simple"
+        location="component://product/minilang/shipment/shipment/ShipmentServices.xml" invoke="setShipmentStatusPackedAndShipped" auth="true">
+        <description>Move a shipment into Packed status and then to Shipped status</description>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="sendShipmentCompleteNotification" engine="java" require-new-transaction="true" max-retry="3"
+        location="org.apache.ofbiz.shipment.shipment.ShipmentServices" invoke="sendShipmentCompleteNotification" auth="true">
+        <description>Send a notification on Shipment Complete</description>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+        <attribute name="sendTo" type="String" mode="IN" optional="true"/>
+        <attribute name="screenUri" type="String" mode="IN" optional="true"/>
+        <attribute name="comments" type="String" mode="IN" optional="true"/>
+        <attribute name="body" type="String" mode="OUT" optional="true"/>
+        <attribute name="subject" type="String" mode="OUT" optional="true"/>
+        <attribute name="orderId" type="String" mode="OUT" optional="true"/>
+        <attribute name="messageWrapper" type="org.apache.ofbiz.service.mail.MimeMessageWrapper" mode="OUT" optional="true"/>
+        <attribute name="communicationEventId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="updateIssuanceShipmentAndPoOnReceiveInventory" engine="simple"
+            location="component://product/minilang/shipment/receipt/ShipmentReceiptServices.xml" invoke="updateIssuanceShipmentAndPoOnReceiveInventory">
+        <description>Update issuance, shipment and order items if quantity received is higher than quantity on purchase order</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantityAccepted"  type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="shipmentId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipmentItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="unitCost" type="String" mode="IN" optional="true"/>
+        <attribute name="orderCurrencyUnitPrice" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="createCarrierShipmentBoxType" default-entity-name="CarrierShipmentBoxType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a new Carrier Shipment Box Type Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateCarrierShipmentBoxType" default-entity-name="CarrierShipmentBoxType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Carrier Shipment Box Type</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteCarrierShipmentBoxType" default-entity-name="CarrierShipmentBoxType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete an existing Carrier Shipment Box Type Record</description>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+
+    <!-- Shipment services -->
+    <service name="createDelivery" engine="entity-auto" invoke="create" default-entity-name="Delivery" auth="true">
+        <description>Create a Delivery record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateDelivery" engine="entity-auto" invoke="update" default-entity-name="Delivery" auth="true">
+        <description>Update a Delivery record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteDelivery" engine="entity-auto" invoke="delete" default-entity-name="Delivery" auth="true">
+        <description>Delete a Delivery record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createRejectionReason" engine="entity-auto" invoke="create" default-entity-name="RejectionReason" auth="true">
+        <description>Create a RejectionReason record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateRejectionReason" engine="entity-auto" invoke="update" default-entity-name="RejectionReason" auth="true">
+        <description>Update a RejectionReason record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteRejectionReason" engine="entity-auto" invoke="delete" default-entity-name="RejectionReason" auth="true">
+        <description>Delete a RejectionReason record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <!-- ShipmentItemFeature services -->
+    <service name="createShipmentItemFeature" default-entity-name="ShipmentItemFeature" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ShipmentItemFeature</description>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+    </service>
+    <service name="deleteShipmentItemFeature" default-entity-name="ShipmentItemFeature" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ShipmentItemFeature</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <service name="createShipmentAttribute" engine="entity-auto" invoke="create" default-entity-name="ShipmentAttribute" auth="true">
+        <description>Create a ShipmentAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShipmentAttribute" engine="entity-auto" invoke="update" default-entity-name="ShipmentAttribute" auth="true">
+        <description>Update a ShipmentAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentAttribute" engine="entity-auto" invoke="delete" default-entity-name="ShipmentAttribute" auth="true">
+        <description>Delete a ShipmentAttribute record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createShipmentBoxType" engine="entity-auto" invoke="create" default-entity-name="ShipmentBoxType" auth="true">
+        <description>Create a ShipmentBoxType record</description>
+        <auto-attributes include="pk" mode="INOUT"  optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShipmentBoxType" engine="entity-auto" invoke="update" default-entity-name="ShipmentBoxType" auth="true">
+        <description>Update a ShipmentBoxType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentBoxType" engine="entity-auto" invoke="delete" default-entity-name="ShipmentBoxType" auth="true">
+        <description>Delete a ShipmentBoxType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createShipmentContactMechType" engine="entity-auto" invoke="create" default-entity-name="ShipmentContactMechType" auth="true">
+        <description>Create a ShipmentContactMechType record</description>
+        <auto-attributes include="pk" mode="INOUT"  optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShipmentContactMechType" engine="entity-auto" invoke="update" default-entity-name="ShipmentContactMechType" auth="true">
+        <description>Update a ShipmentContactMechType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentContactMechType" engine="entity-auto" invoke="delete" default-entity-name="ShipmentContactMechType" auth="true">
+        <description>Delete a ShipmentContactMechType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createShipmentCostEstimate" engine="entity-auto" invoke="create" default-entity-name="ShipmentCostEstimate" auth="true">
+        <description>Create a ShipmentCostEstimate record</description>
+        <auto-attributes include="pk" mode="INOUT"  optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShipmentCostEstimate" engine="entity-auto" invoke="update" default-entity-name="ShipmentCostEstimate" auth="true">
+        <description>Update a ShipmentCostEstimate record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentCostEstimate" engine="entity-auto" invoke="delete" default-entity-name="ShipmentCostEstimate" auth="true">
+        <description>Delete a ShipmentCostEstimate record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="updateShipmentReceipt" engine="entity-auto" invoke="update" default-entity-name="ShipmentReceipt" auth="true">
+        <description>Update a ShipmentReceipt record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentReceipt" engine="entity-auto" invoke="delete" default-entity-name="ShipmentReceipt" auth="true">
+        <description>Delete a ShipmentReceipt record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createShipmentTypeAttr" default-entity-name="ShipmentTypeAttr" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ShipmentTypeAttr Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShipmentTypeAttr" default-entity-name="ShipmentTypeAttr" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ShipmentTypeAttr Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShipmentTypeAttr" default-entity-name="ShipmentTypeAttr" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ShipmentTypeAttr Record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+
+    <service name="createShippingDocument" default-entity-name="ShippingDocument" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ShippingDocument</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateShippingDocument" default-entity-name="ShippingDocument" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a ShippingDocument</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteShippingDocument" default-entity-name="ShippingDocument" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ShippingDocument</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+</services>

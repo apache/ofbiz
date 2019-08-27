@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="EditInventoryItem" type="single" target="UpdateInventoryItem" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <set field="inventoryItemTypeId" from-field="inventoryItem.inventoryItemTypeId"/>
+            <set field="productId" from-field="inventoryItem.productId"/>
+            <set field="facilityId" from-field="inventoryItem.facilityId"/>
+            <set field="locationSeqId" from-field="inventoryItem.locationSeqId"/>
+            <set field="statusId" from-field="inventoryItem.statusId"/>
+            <entity-one entity-name="FacilityLocation" value-field="facilityLocation">
+                <field-map field-name="locationSeqId" from-field="locationSeqId"/>
+                <field-map field-name="facilityId" from-field="facilityId"/>
+            </entity-one>
+        </actions>
+        <alt-target use-when="inventoryItemId==null" target="CreateInventoryItem"/>
+        <auto-fields-service service-name="updateInventoryItem" map-name="inventoryItem"/>        
+
+        <!-- ignored fields -->
+        <field name="oldAvailableToPromise"><ignored/></field>
+        <field name="oldQuantityOnHand"><ignored/></field>
+        
+        <!-- custom formatted fields -->
+        <field name="inventoryItemId" tooltip="${uiLabelMap.ProductNotModificationRecrationInventoryItem}"><display/></field>
+        <field name="inventoryItemTypeId" title="${uiLabelMap.ProductInventoryItemTypeId}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="InventoryItemType" key-field-name="inventoryItemTypeId"/>
+            </drop-down>
+        </field>
+        <field name="productId" required-field="true" position="1">
+            <lookup target-form-name="LookupProduct">
+                <sub-hyperlink target="/catalog/control/EditProduct" target-type="inter-app" description="${uiLabelMap.ProductEditProduct} [${productId}]">
+                    <parameter param-name="productId"/>
+                </sub-hyperlink>
+            </lookup>
+        </field>
+        <field name="statusId" use-when="inventoryItem==null">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INV_NON_SER_STTS"/>
+                </entity-options>
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INV_SERIALIZED_STTS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="inventoryItem!=null&amp;&amp;&quot;SERIALIZED_INV_ITEM&quot;.equals(inventoryItem.getString(&quot;inventoryItemTypeId&quot;))">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INV_SERIALIZED_STTS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="inventoryItem!=null&amp;&amp;&quot;NON_SERIAL_INV_ITEM&quot;.equals(inventoryItem.getString(&quot;inventoryItemTypeId&quot;))">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INV_NON_SER_STTS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="expireDate" title="${uiLabelMap.ProductExpireDate}"/>
+        <field name="facilityId" required-field="true">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName}">
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+                <sub-hyperlink use-when="facilityId!=null" target="EditFacility" description="${uiLabelMap.ProductEditFacility} [${facilityId}]">
+                <parameter param-name="facilityId"/>
+            </sub-hyperlink>
+            </drop-down>
+        </field>
+        <field name="lotId" title="${uiLabelMap.ProductLotId}"/>
+        <field name="uomId" title="${uiLabelMap.ProductUomId}"/>
+        <field name="binNumber" title="${uiLabelMap.ProductBinNumber}"/>
+        <field name="locationSeqId" title="${uiLabelMap.ProductFacilityLocation}">
+            <lookup target-form-name="LookupFacilityLocation">
+                <sub-hyperlink use-when="locationSeqId!=null" target="EditFacilityLocation">
+                <parameter param-name="facilityId"/>
+                <parameter param-name="locationSeqId"/>
+            </sub-hyperlink>
+            </lookup>
+        </field>
+        <field name="partyId">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="ownerPartyId">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="unitCost"><text/></field>
+
+        <field name="accountingQuantityTotal">
+            <display/>
+        </field>
+        <field name="totals" use-when="inventoryItem!=null" title="${uiLabelMap.ProductAvailablePromiseQuantityHand}">
+            <display description="${inventoryItem.availableToPromiseTotal} / ${inventoryItem.quantityOnHandTotal}"/>
+        </field>
+
+        <field use-when="inventoryItem!=null" name="submit" title="${uiLabelMap.CommonUpdate}">
+            <submit/>
+        </field>
+        <field use-when="inventoryItem==null" name="submit" title="${uiLabelMap.CommonCreate}">
+            <submit/>
+        </field>
+        <sort-order>
+            <sort-field name="inventoryItemId"/>
+            <sort-field name="inventoryItemTypeId"/>
+            <sort-field name="productId"/>
+            <sort-field name="partyId"/>
+            <sort-field name="ownerPartyId"/>
+            <sort-field name="statusId"/>
+            <sort-field name="datetimeReceived"/>
+            <sort-field name="datetimeManufactured"/>
+            <sort-field name="expireDate"/>
+            <sort-field name="facilityId"/>
+            <sort-field name="containerId"/>
+            <sort-field name="lotId"/>
+            <sort-field name="uomId"/>
+            <sort-field name="binNumber"/>
+            <sort-field name="locationSeqId"/>
+            <sort-field name="comments"/>
+            <sort-field name="accountingQuantityTotal"/>
+            <sort-field name="serialNumber"/>
+            <sort-field name="softIdentifier"/>
+            <sort-field name="activationNumber"/>
+            <sort-field name="activationValidThru"/>
+            <sort-field name="unitCost"/>
+            <sort-field name="currencyUomId"/>
+            <sort-field name="fixedAssetId"/>
+            <sort-field name="totals"/>
+            <sort-field name="submit"/>
+        </sort-order>
+    </form>
+
+    <form name="CreatePhysicalInventoryAndVariance" type="single" target="createPhysicalInventoryAndVariance" title=""
+        default-table-style="basic-table">
+        <auto-fields-service service-name="createPhysicalInventoryAndVariance"/>
+        <field name="physicalInventoryId"><ignored/></field>
+        <field name="physicalInventoryDate"><ignored/></field>
+        <field name="partyId"><ignored/></field>
+        <field name="generalComments"><ignored/></field>
+        <field name="inventoryItemId" map-name="inventoryItem"><hidden/></field>
+        <field name="varianceReasonId">
+            <drop-down>
+                <entity-options entity-name="VarianceReason">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="comments"/>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ViewPhysicalInventoryAndVariance" type="list" target="" title="" list-name="physicalInventoryAndVarianceDatas"
+        header-row-style="header-row-2" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="PhysicalInventoryAndVariance" map-name="physicalInventoryAndVariance" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field>
+        <field name="partyId"><display description="${person.firstName} ${person.lastName} ${partyGroup.groupName} [${physicalInventoryAndVariance.partyId}]"/></field>
+        <field name="varianceReasonId"><display description="${varianceReason.description}"/></field>
+    </form>
+    <form name="ViewInventoryItemShipmentReceipts" type="list" target="" title="" list-name="shipmentReceiptList"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="ShipmentReceipt" list="shipmentReceiptList">
+                <field-map field-name="inventoryItemId"/>
+            </entity-and>
+        </actions>
+        <auto-fields-entity entity-name="ShipmentReceipt" map-name="shipmentReceipt" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field>
+    </form>
+
+    <form name="ListInventoryItemDetail" type="list" target="" title="" list-name="inventoryItemDetails"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="InventoryItemDetail" map-name="inventoryItemDetail" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field> <!-- this field is redundant -->
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink description="${orderId}" target="/ordermgr/control/orderview" target-type="inter-app" >
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="shipmentId" widget-style="buttontext">
+            <hyperlink description="${shipmentId}" target="ViewShipment" >
+                <parameter param-name="shipmentId"/>
+            </hyperlink>
+        </field>
+        <field name="reasonEnumId">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <!-- workEffortId - not sure if it's better to show manufacturing or workeffort app
+        itemIssuanceId, receiptId, physicalInventoryId - no natural screens to show these -->
+    </form>
+    <form name="InventoryItemReservations" type="list" target="" title="" list-name="inventoryItemReservations"
+        header-row-style="header-row-2" odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-entity entity-name="OrderItemShipGrpInvRes" default-field-type="display"/>
+        <field name="inventoryItemId"><hidden/></field>
+        <field name="orderId" widget-style="buttontext">
+            <hyperlink description="${orderId}" target="/ordermgr/control/orderview" target-type="inter-app" >
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <!-- Inventory Item Labels -->
+    <form name="UpdateInventoryItemLabelAppls" type="list" target="updateInventoryItemLabelApplFromItem" title="" list-name="inventoryItemLabelAppls"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <auto-fields-service service-name="updateInventoryItemLabelAppl"/>
+        <field name="inventoryItemLabelId" title=" " widget-style="buttontext">
+            <hyperlink description="${inventoryItemLabelId}" target="EditInventoryItemLabel" also-hidden="true">
+                <parameter param-name="inventoryItemLabelId"/>
+            </hyperlink>
+        </field>
+        <field name="facilityId"><hidden/></field>
+        <field name="inventoryItemId"><hidden/></field>
+        <field name="inventoryItemLabelTypeId">
+            <display-entity entity-name="InventoryItemLabelType" description="${description} [${inventoryItemLabelTypeId}]"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteInventoryItemLabelApplFromItem" also-hidden="false">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="inventoryItemLabelTypeId"/>
+                <parameter param-name="inventoryItemLabelId"/>
+                <parameter param-name="facilityId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddInventoryItemLabelAppl" type="single" target="createInventoryItemLabelApplFromItem" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createInventoryItemLabelAppl"/>
+        <field name="facilityId"><hidden/></field>
+        <field name="inventoryItemId"><hidden/></field>
+        <field name="inventoryItemLabelId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="InventoryItemLabel" description="${inventoryItemLabelTypeId} ${inventoryItemLabelId} ${description}">
+                    <entity-order-by field-name="inventoryItemLabelTypeId"/>
+                    <entity-order-by field-name="inventoryItemLabelId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
+    </form>
+
+</forms>

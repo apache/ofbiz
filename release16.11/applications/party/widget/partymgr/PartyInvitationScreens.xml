@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="CommonPartyInvitationDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="partyinv"/>
+                <set field="partyInvitationId" from-field="parameters.partyInvitationId"/>
+                <entity-one entity-name="PartyInvitation" value-field="partyInvitation"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                                    <not><if-empty field="partyInvitation"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="PartyInvitationTabBar" location="component://party/widget/partymgr/PartyMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for PARTYMGR, _VIEW permission -->
+                            <condition>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="partyInvitation"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <container style="button-bar">
+                                            <link target="editPartyInvitation" text="${uiLabelMap.PartyInvitationNewPartyInvitation}" style="buttontext create"/>
+                                            <link target="/ordermgr/control/orderentry?partyId=${partyInvitation.partyIdFrom}" text="${uiLabelMap.PartyInvitationNewOrder}" style="buttontext create" url-mode="inter-app"/>
+                                        </container>
+                                        <container style="button-bar"><label style="h1">${uiLabelMap[titleProperty]}</label><label style="h2"> ${uiLabelMap.CommonFor} "${partyInvitation.partyIdFrom}" [${partyInvitationId}]</label></container>
+                                    </widgets>
+                                </section>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindPartyInvitations">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PartyFindPartyInvitations"/>
+                <set field="headerItem" value="partyinv"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="/editPartyInvitation" text="${uiLabelMap.PartyInvitationNewPartyInvitation}" style="buttontext create"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindPartyInvitations" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListPartyInvitations" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PartyInvitations">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitlePartyInvitation"/>
+                <set field="headerItem" value="partyinv"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap[titleProperty]}}">
+                                    <container style="button-bar"><link target="/editPartyInvitation" text="${uiLabelMap.PartyInvitationNewPartyInvitation}" style="buttontext"/></container>
+                                    <include-form name="ListPartyInvitations" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditPartyInvitation">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitlePartyInvitation"/>
+                <set field="headerItem" value="partyinv"/>
+                <set field="tabButtonItem" value="EditPartyInvitation"/>
+                <set field="partyInvitationId" from-field="parameters.partyInvitationId"/>
+                <entity-one entity-name="PartyInvitation" value-field="partyInvitation"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyInvitationDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitlePartyInvitation}">
+                            <include-form name="EditPartyInvitation" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditPartyInvitationsGroupAssocs">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditPartyInvitationGroupAssoc"/>
+                <set field="tabButtonItem" value="PartyInvitationGroupAssocs"/>
+                <set field="partyInvitationId" from-field="parameters.partyInvitationId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyInvitationDecorator">
+                    <decorator-section name="body">
+                        <screenlet id="AddPartyInvitationsGroupAssocsPanel" title="${uiLabelMap.PageTitleAddPartyInvitationGroupAssoc}" collapsible="true">
+                            <include-form name="AddPartyInvitationGroupAssoc" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListPartyInvitationGroupAssocs" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditPartyInvitationsRoleAssocs">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditPartyInvitationRoleAssoc"/>
+                <set field="tabButtonItem" value="PartyInvitationRoleAssocs"/>
+                <set field="partyInvitationId" from-field="parameters.partyInvitationId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyInvitationDecorator">
+                    <decorator-section name="body">
+                        <screenlet id="AddPartyInvitationRoleAssocsPanel" title="${uiLabelMap.PageTitleAddPartyInvitationRoleAssoc}" collapsible="true">
+                            <include-form name="AddPartyInvitationRoleAssoc" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListPartyInvitationRoleAssocs" location="component://party/widget/partymgr/PartyInvitationForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

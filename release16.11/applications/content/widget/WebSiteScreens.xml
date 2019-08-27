@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="FindWebSite">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindWebSite"/>
+                <set field="headerItem" value="websites"/>
+                <set field="labelTitleProperty" value="PageTitleFindWebSite"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="component://content/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="CONTENTMGR" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleListWebSite}">
+                                    <container style="button-bar">
+                                        <link  text="${uiLabelMap.ContentCreateNewWebSite}" target="EditWebSite" style="buttontext create"/>
+                                    </container>
+                                    <include-form name="ListWebSites" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.ContentViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWebSite">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWebSite"/>
+                <set field="tabButtonItem" value="EditWebSite"/>
+                <set field="labelTitleProperty" value="PageTitleEditWebSite"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSiteDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleEditWebSite}">
+                                    <include-form name="EditWebSite" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebSiteContent">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWebSiteContent"/>
+                <set field="tabButtonItem" value="ListWebSiteContent"/>
+                <set field="labelTitleProperty" value="PageTitleEditWebSiteContent"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+                <entity-and entity-name="WebSiteContent" list="webSiteContent">
+                    <field-map field-name="webSiteId" from-field="webSiteId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSiteDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleWebSiteContent}">
+                                    <include-form name="ListWebSiteContent" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                                <screenlet title="${uiLabelMap.PageTitleCreateWebSiteContent}">
+                                    <include-form name="CreateWebSiteContent" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                                <screenlet title="${uiLabelMap.PageTitleAutoCreateContentPublishPoints}">
+                                    <include-form name="AutoCreateWebsiteContent" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditWebSiteParties">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWebSiteParties"/>
+                <set field="tabButtonItem" value="EditWebSiteParties"/>
+                <set field="labelTitleProperty" value="PageTitleEditWebSiteParties"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <property-map map-name="uiLabelMap" resource="PartyUiLabels"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+                <script location="component://content/groovyScripts/website/EditWebSiteParties.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSiteDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet id="AddWebSiteRolePanel" title="${uiLabelMap.PageTitleCreateWebSiteParties}" collapsible="true">
+                                    <include-form name="CreateWebSiteRole" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                                <include-form name="UpdateWebSiteRole" location="component://content/widget/website/WebSiteForms.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebSiteCMS">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWebSiteCMS"/>
+                <set field="tabButtonItem" value="WebSiteCMS"/>
+                <set field="labelTitleProperty" value="PageTitleEditWebSiteCMS"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+
+                <script location="component://content/groovyScripts/website/WebSitePublishPoint.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSiteDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not>
+                                    <if-empty field="contentRoot"/>
+                                </not>
+                            </condition>
+                            <widgets>
+                                <container id="cmsnav" style="left">
+                                    <include-screen name="WebSiteCMSNav"/>
+                                </container>
+                                <container id="cmsmain" style="leftonly">
+                                    <include-screen name="WebSiteCMSContent"/>
+                                </container>
+                            </widgets>
+                            <fail-widgets>
+                                <container id="norender" style="tableheadtext">
+                                    <label text="${uiLabelMap.ContentCMSNotExist}"/>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebSiteCMSNav">
+        <section>
+            <widgets>
+                <screenlet title="${uiLabelMap.PageTitleWebSiteCMSNav}">
+                    <platform-specific><html><html-template location="component://content/template/website/WebSiteCMSNav.ftl"/></html></platform-specific>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebSiteCMSContent">
+        <section>
+            <actions>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <set field="dataResourceTypeId" from-field="parameters.dataResourceTypeId"/>
+                <set field="newContentId" from-field="contentId" />
+                <set field="contentIdFrom" from-field="parameters.contentIdFrom"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <set field="contentId" from-field="parameters.contentId"/>
+                <set field="mimeTypeId" value="text/html"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+                <entity-one entity-name="Content" value-field="content"/>
+                <entity-one entity-name="DataResource" value-field="dataResource">
+                    <field-map field-name="dataResourceId" from-field="content.dataResourceId"/>
+                </entity-one>
+                <entity-one entity-name="ElectronicText" value-field="dataText">
+                    <field-map field-name="dataResourceId" from-field="content.dataResourceId"/>
+                </entity-one>
+                <set field="parameters.fromDate" type="Timestamp" from-field="parameters.fromDate"/>
+                <entity-condition entity-name="ContentAssoc" list="assocs">
+                    <condition-list>
+                        <condition-expr field-name="contentId" from-field="parameters.contentIdFrom" ignore-if-empty="true"/>
+                        <condition-expr field-name="contentIdTo" from-field="parameters.contentId"/>
+                        <condition-expr field-name="fromDate" from-field="parameters.fromDate" ignore-if-empty="true"/>
+                        <condition-expr field-name="contentAssocTypeId" from-field="parameters.contentAssocTypeId" ignore-if-empty="true"/>
+                    </condition-list>
+                    <order-by field-name="-fromDate"/>
+                </entity-condition>
+                <set field="assoc" value="${assocs[0]}"/>
+                <entity-and entity-name="ContentPurpose" list="currentPurposes">
+                    <field-map field-name="contentId" from-field="contentId"/>
+                </entity-and>
+                <entity-condition entity-name="ContentPurposeType" list="purposeTypes">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-and entity-name="DataResource" list="templates">
+                    <field-map field-name="dataCategoryId" value="TEMPLATE"/>
+                    <order-by field-name="dataResourceName"/>
+                </entity-and>
+                <entity-and entity-name="StatusItem" list="statuses">
+                    <field-map field-name="statusTypeId" value="CONTENT_STATUS"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-and>
+                <entity-condition entity-name="DataTemplateType" list="templateTypes"/>
+                <entity-and entity-name="Content" list="decorators">
+                    <field-map field-name="contentTypeId" value="DECORATOR"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <container id="cmscontent" style="no-clear">
+                    <screenlet title="${uiLabelMap.PageTitleWebSiteCMSContent}">
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://content/template/website/WebSiteCMSContent.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </screenlet>
+               </container>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebSiteCMSEditor">
+        <section>
+            <actions>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <set field="contentId" from-field="parameters.contentId"/>
+                <set field="mimeTypeId" value="text/html"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+                <entity-one entity-name="Content" value-field="content"/>
+                <entity-one entity-name="DataResource" value-field="dataResource">
+                    <field-map field-name="dataResourceId" from-field="content.dataResourceId"/>
+                </entity-one>
+                <entity-one entity-name="ElectronicText" value-field="dataText">
+                    <field-map field-name="dataResourceId" from-field="content.dataResourceId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+                        <html-template location="component://content/template/website/WebSiteCMSEditor.ftl"/>
+                    </html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebSiteCMSMetaInfo">
+        <section>
+            <actions>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <set field="contentId" from-field="parameters.contentId"/>
+                <entity-one entity-name="Content" value-field="content"/>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap"/>
+                <script location="component://content/groovyScripts/website/WebSiteCMSMetaInfo.groovy"/>
+            </actions>
+            <widgets>
+                <container id="cmscontent" style="no-clear">
+                    <screenlet title="${uiLabelMap.PageTitleWebSiteCMSContent}">
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://content/template/website/WebSiteCMSMeta.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </screenlet>
+                </container>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="WebSiteCMSPathAlias">
+        <section>
+            <actions>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <set field="contentId" from-field="parameters.contentId"/>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+                <entity-one entity-name="Content" value-field="content"/>
+                <entity-and entity-name="WebSitePathAlias" list="aliases">
+                    <field-map field-name="webSiteId" from-field="webSiteId"/>
+                    <field-map field-name="contentId" from-field="contentId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <container id="cmscontent" style="no-clear">
+                    <screenlet title="${uiLabelMap.PageTitleWebSiteCMSContent}">
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://content/template/website/WebSiteCMSPathAlias.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </screenlet>
+                </container>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditWebSitePathAlias">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWebSitePathAlias"/>
+                <set field="tabButtonItem" value="PathAlias"/>
+                <set field="labelTitleProperty" value="PageTitleEditWebSitePathAlias"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <entity-one entity-name="WebSitePathAlias" value-field="webSitePathAlias"/>
+                 <entity-one entity-name="WebSite" value-field="webSite"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSitePathAliasDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleEditWebSitePathAlias}">
+                                    <include-form name="EditWebSitePathAlias" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> 
+      
+    <screen name="WebSiteAliases">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditWebSitePathAlias"/>
+                <set field="labelTitleProperty" value="PageTitleEditWebSitePathAlias"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <set field="tabButtonItem" value="PathAlias"/>
+                <set field="viewIndex" from-field="requestParameters.VIEW_INDEX" type="Integer"/>
+                <set field="viewSize" from-field="requestParameters.VIEW_SIZE" type="Integer" default-value="30"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSitePathAliasDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindWebSitePathAlias" location="component://content/widget/website/WebSiteForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListWebSitePathAlias" location="component://content/widget/website/WebSiteForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="WebSiteAliasesSearchResults">
+        <section>
+            <actions>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+            </actions>
+            <widgets>
+                <include-form name="ListWebSitePathAlias" location="component://content/widget/website/WebSiteForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebSiteSEO">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleWebSiteSEO"/>
+                <set field="tabButtonItem" value="WebSiteSEO"/>
+                <set field="labelTitleProperty" value="PageTitleWebSiteSEO"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSiteDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleWebSiteSEO}">
+                                    <include-form name="CreateWebsiteSEO" location="component://content/widget/website/WebSiteForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="WebSiteContactList">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ContentWebSiteContactList"/>
+                <set field="tabButtonItem" value="WebSiteContactList"/>
+                <set field="labelTitleProperty" value="ContentWebSiteContactList"/>
+                <set field="webSiteId" from-field="parameters.webSiteId"/>
+                <entity-one entity-name="WebSite" value-field="webSite"/>
+                <entity-and entity-name="WebSiteContactList" list="webSiteContactLists">
+                    <field-map field-name="webSiteId" from-field="webSiteId"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonWebSiteDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ContentWebSiteContactListCreate}">
+                            <include-form name="CreateWebSiteContactList" location="component://content/widget/website/WebSiteForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ContentWebSiteContactListView} of webSiteId[${webSiteId}]">
+                            <include-form name="ViewWebSiteContactList" location="component://content/widget/website/WebSiteForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

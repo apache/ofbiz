@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+
+    <simple-method method-name="setPaymentMethodAddress" short-description="Set the initial payment method address">
+        <make-value value-field="lookupPKMap" entity-name="PaymentMethod"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="PaymentMethod" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare field="lookedUpValue.paymentMethodTypeId" operator="equals" value="CREDIT_CARD">
+            <find-by-primary-key entity-name="CreditCard" map="lookupPKMap" value-field="mainValue"/>
+            <clone-value value-field="mainValue" new-value-field="savedValue"/>
+            <set-nonpk-fields map="parameters" value-field="mainValue"/>
+            <if-compare-field field="mainValue" to-field="savedValue" operator="not-equals" type="Object">
+                <store-value value-field="mainValue"/>
+            </if-compare-field>
+        </if-compare>
+        <if-compare field="lookedUpValue.paymentMethodTypeId" operator="equals" value="EFT_ACCOUNT">
+            <find-by-primary-key entity-name="CreditCard" map="lookupPKMap" value-field="mainValue"/>
+            <clone-value value-field="mainValue" new-value-field="savedValue"/>
+            <set-nonpk-fields map="parameters" value-field="mainValue"/>
+            <if-compare-field field="mainValue" to-field="savedValue" operator="not-equals" type="Object">
+                <store-value value-field="mainValue"/>
+            </if-compare-field>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="updatePaymentMethodAddress" short-description="Update payment method addresses" use-transaction="false">
+        <!-- find all CreditCard and EftAccount instances that use the current oldContactMechId and update them
+            through the updateCreditCard or updateEftAccount services to use the new contactMechId -->
+        <set field="lookupMap.contactMechId" from-field="parameters.oldContactMechId"/>
+
+        <find-by-and entity-name="CreditCard" map="lookupMap" list="creditCards"/>
+        <iterate list="creditCards" entry="creditCard">
+            <call-class-method class-name="org.apache.ofbiz.base.util.UtilValidate" method-name="isDateAfterToday" ret-field="isNotExpired">
+                <field field="creditCard.expireDate"/>
+            </call-class-method>
+            <if-compare field="isNotExpired" operator="equals" type="Boolean" value="true">
+                <set-service-fields service-name="updateCreditCard" map="creditCard" to-map="uccMap"/>
+                <set field="uccMap.contactMechId" from-field="parameters.contactMechId"/>
+                <set field="uccMap.partyId" from-field="parameters.partyId"/>
+                <!-- use the service so it will expire the old card and create a new one; don't break on error since this is a background process, just get whatever we can done... -->
+                <call-service service-name="updateCreditCard" in-map-name="uccMap" break-on-error="false"/>
+            </if-compare>
+        </iterate>
+
+        <find-by-and entity-name="EftAccount" map="lookupMap" list="eftAccounts"/>
+        <iterate list="eftAccounts" entry="eftAccount">
+            <get-related-one relation-name="PaymentMethod" to-value-field="paymentMethod" value-field="eftAccount"/>
+            <if-empty field="paymentMethod.thruDate">
+                <set-service-fields service-name="updateEftAccount" map="eftAccount" to-map="ueaMap"/>
+                <set field="ueaMap.contactMechId" from-field="parameters.contactMechId"/>
+                <set field="ueaMap.partyId" from-field="parameters.partyId"/>
+                <!-- use the service so it will expire the old account and create a new one; don't break on error since this is a background process, just get whatever we can done... -->
+                <call-service service-name="updateEftAccount" in-map-name="ueaMap" break-on-error="false"/>
+            </if-empty>
+        </iterate>
+    </simple-method>
+
+    <simple-method method-name="expirePaymentGroupMember" short-description="expire a Payment Group Member">
+        <entity-one entity-name="PaymentGroupMember" value-field="paymentGroupMember"/>
+        <set-service-fields service-name="updatePaymentGroupMember" map="paymentGroupMember" to-map="updatePaymentGroupMemberMap"/>
+        <now-timestamp field="updatePaymentGroupMemberMap.thruDate"/>
+        <call-service service-name="updatePaymentGroupMember" in-map-name="updatePaymentGroupMemberMap"/>
+    </simple-method>
+
+    <simple-method method-name="createPayPalPaymentMethod" short-description="Create a PayPal Payment Method">
+        <make-value value-field="newPaymentMethod" entity-name="PaymentMethod"/>
+        <set-pk-fields value-field="newPaymentMethod" map="parameters"/>
+        <if-empty field="newPaymentMethod.paymentMethodId">
+            <sequenced-id sequence-name="PaymentMethod" field="newPaymentMethod.paymentMethodId"/>
+        </if-empty>
+        <set-nonpk-fields map="parameters" value-field="newPaymentMethod"/>
+        <set field="newPaymentMethod.paymentMethodTypeId" value="EXT_PAYPAL"/>
+        <create-value value-field="newPaymentMethod"/>
+
+        <make-value value-field="newPayPalPaymentMethod" entity-name="PayPalPaymentMethod"/>
+        <set field="newPayPalPaymentMethod.paymentMethodId" from-field="newPaymentMethod.paymentMethodId"/>
+        <set-nonpk-fields map="parameters" value-field="newPayPalPaymentMethod"/>
+        <create-value value-field="newPayPalPaymentMethod"/>
+        <field-to-result field="newPaymentMethod.paymentMethodId" result-name="paymentMethodId"/>
+    </simple-method>
+
+    <simple-method method-name="createPaymentGroupMember" short-description="Check For Outgoing/Incoming Payment And Create Payment Group Member">
+        <make-value entity-name="PaymentGroupMember" value-field="newPaymentGroupMember"/>
+        <set-pk-fields map="parameters" value-field="newPaymentGroupMember"/>
+        <set-nonpk-fields map="parameters" value-field="newPaymentGroupMember"/>
+        <if-empty field="parameters.fromDate">
+            <now-timestamp field="newPaymentGroupMember.fromDate"/>
+        </if-empty>
+        <entity-one entity-name="PaymentGroup" value-field="paymentGroup"/>
+        <entity-one entity-name="Payment" value-field="payment"/>
+        <if-compare field="paymentGroup.paymentGroupTypeId" operator="equals" value="CHECK_RUN">
+            <set field="isDisbursement" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.isDisbursement(payment)}" type="Boolean"/>
+            <if-compare field="isDisbursement" operator="equals" value="true" type="Boolean">
+                <create-value value-field="newPaymentGroupMember"/>
+            <else>
+                <add-error><fail-property resource="AccountingUiLabels" property="AccountingCannotCreateIncomingPaymentError"/></add-error>
+            </else>
+            </if-compare>
+        <else>
+            <if-compare field="paymentGroup.paymentGroupTypeId" operator="equals" value="BATCH_PAYMENT" type="Boolean">
+                <set field="isReceipt" value="${groovy:org.apache.ofbiz.accounting.util.UtilAccounting.isReceipt(payment)}" type="Boolean"/>
+                <if-compare field="isReceipt" operator="equals" value="true">
+                    <create-value value-field="newPaymentGroupMember"/>
+                <else>
+                    <add-error><fail-property resource="AccountingUiLabels" property="AccountingCannotCreateOutgoingPaymentError"/></add-error>
+                </else>
+                </if-compare>
+            </if-compare>
+        </else>
+        </if-compare>
+        <check-errors/>
+    </simple-method>
+</simple-methods>

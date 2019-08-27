@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+    
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
+    <property key="PageTitleEditProductCategory">
+        <value xml:lang="en">Edit Product Category</value>
+        <value xml:lang="fr">Edition de la catégorie produit</value>
+        <value xml:lang="it">Aggiorna categoria prodotti</value>
+        <value xml:lang="ja">製品カテゴリを編集</value>
+        <value xml:lang="pt-BR">Editar Categoria de Produto</value>
+        <value xml:lang="vi">Sửa đổi chuyên mục sản phẩm</value>
+        <value xml:lang="zh">编辑产品分类</value>
+        <value xml:lang="zh-TW">編輯產品分類</value>
+    </property>
+    <property key="PageTitleProductInfomation">
+        <value xml:lang="en">Product Infomation</value>
+        <value xml:lang="fr">Information produit</value>
+        <value xml:lang="it">Informazione prodotti</value>
+        <value xml:lang="ja">製品情報</value>
+        <value xml:lang="pt-BR">Informações do produto</value>
+        <value xml:lang="vi">Thông tin sản phẩm</value>
+        <value xml:lang="zh">产品信息</value>
+        <value xml:lang="zh-TW">產品資訊</value>
+    </property>
+    <property key="SetupApp">
+        <value xml:lang="en">Setup Application</value>
+        <value xml:lang="fr">Configuration de l'application</value>
+        <value xml:lang="it">Applicazione di configurazione</value>
+        <value xml:lang="ja">設定アプリケーション</value>
+        <value xml:lang="pt-BR">Aplicativo de configuração</value>
+        <value xml:lang="vi">Cấu hình hệ thống ERP</value>
+        <value xml:lang="zh">安装程序</value>
+        <value xml:lang="zh-TW">設置應用程式</value>
+    </property>
+    <property key="SetupCompanyName">
+        <value xml:lang="en">OFBiz: Setup Application </value>
+        <value xml:lang="fr">Nom de l'organisation</value>
+        <value xml:lang="it">OFBiz: componente di configurazione</value>
+        <value xml:lang="ja">OFBiz: 設定アプリケーション</value>
+        <value xml:lang="pt-BR">OFBiz: Aplicativo de instalação</value>
+        <value xml:lang="vi">OFBiz: Khởi tạo Ứng dụng</value>
+        <value xml:lang="zh">OFBiz：安装程序</value>
+        <value xml:lang="zh-TW">OFBiz: 設置應用程式</value>
+    </property>
+    <property key="SetupCompanySubtitle">
+        <value xml:lang="ar">جزء من عائلة أوفبيز للتطبيقات الحرة للتسيير</value>
+        <value xml:lang="de">Teil der Apache OFBiz Familie von Open Source Software</value>
+        <value xml:lang="en">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="es">Parte de la familia de software Apache OFBiz de código abierto</value>
+        <value xml:lang="fr">Un module de la famille Apache OFBiz, logiciel libre de gestion d'entreprise.</value>
+        <value xml:lang="it">Un modulo della famiglia di software open source Apache OFBiz</value>
+        <value xml:lang="ja">Part of the Apache OFBiz Family of Open Source Software</value>
+        <value xml:lang="nl">Deel van de Apache OFBiz-suite van Open Source Software</value>
+        <value xml:lang="pt-BR">Parte da família OfBiz de software de fonte aberta</value>
+        <value xml:lang="pt-PT">Parte da família OfBiz de software de fonte aberta</value>
+        <value xml:lang="ro">Partea de Deschidere Pentru Afaceri Familiale din Open Source Software</value>
+        <value xml:lang="ru">Входит в состав семейства Apache OFBiz</value>
+        <value xml:lang="th">ส่วนหนึ่งของธุรกิจแบบครอบครัวที่เป็นซอฟต์แวร์โอเพนซอส</value>
+        <value xml:lang="vi">Thành viên của gia đình 'Apache OFBiz Family' của 'Open Source Software'</value>
+        <value xml:lang="zh">开源软件OFBiz家族的一部分</value>
+        <value xml:lang="zh-CN">OFBiz的一部分</value>
+        <value xml:lang="zh-TW">開放源碼軟體OFBiz家族一份子</value>
+    </property>
+    <property key="SetupCreateNewOrganization">
+        <value xml:lang="en">Create New Organization</value>
+        <value xml:lang="fr">Créer une nouvelle organisation</value>
+        <value xml:lang="it">Creare nuova organizzazione</value>
+        <value xml:lang="ja">新規組織を作成</value>
+        <value xml:lang="pt-BR">Criar Nova Organização</value>
+        <value xml:lang="vi">Thêm Doanh nghiệp</value>
+        <value xml:lang="zh">新建组织</value>
+        <value xml:lang="zh-TW">建立新的組織</value>
+    </property>
+    <property key="SetupEditOrganizationInformation">
+        <value xml:lang="en">Edit Organization Information</value>
+        <value xml:lang="fr">Configuration de l'information sur l'organisation</value>
+        <value xml:lang="it">Aggiorna informazioni organizzazione</value>
+        <value xml:lang="ja">組織情報を編集</value>
+        <value xml:lang="pt-BR">Editar informações da Organização</value>
+        <value xml:lang="vi">Thêm thông tin Doanh nghiệp</value>
+        <value xml:lang="zh">编辑组织信息</value>
+        <value xml:lang="zh-TW">編輯組織資訊</value>
+    </property>
+    <property key="SetupEditProductStore">
+        <value xml:lang="en">Edit Product Store</value>
+        <value xml:lang="fr">Configuration du centre de profit</value>
+        <value xml:lang="it">Aggiorna negozio prodotti</value>
+        <value xml:lang="ja">製品店舗を編集</value>
+        <value xml:lang="nl">Wijzigen winkel</value>
+        <value xml:lang="pt-BR">Editar Loja de Produtos</value>
+        <value xml:lang="vi">Cập nhật Cửa hàng</value>
+        <value xml:lang="zh">编辑产品店铺</value>
+        <value xml:lang="zh-TW">編輯產品商店</value>
+    </property>
+    <property key="SetupEventMessage">
+        <value xml:lang="en">Setup only works if there are no organizations defined yet</value>
+        <value xml:lang="fr">Setup n'est activé que si il n'y a pas encore d'organisation définie</value>
+        <value xml:lang="it">Configura solo i lavori se non c'è ancora nessuna organizzazione definita</value>
+        <value xml:lang="ja">組織がまだ定義されていない場合のみ設定できます</value>
+        <value xml:lang="pt-BR">Instalação só funciona se não houver organizações definidas</value>
+        <value xml:lang="vi">Khởi tạo có tác dụng chỉ khi chưa có Doanh nghiệp nào được thiết lập</value>
+        <value xml:lang="zh">只有在没有定义组织时才能安装</value>
+        <value xml:lang="zh-TW">只有當沒有相關組織時才能設置</value>
+    </property>
+    <property key="SetupFacility">
+        <value xml:lang="en">Facility</value>
+        <value xml:lang="fr">Lieu de stockage</value>
+        <value xml:lang="it">Stabilimento</value>
+        <value xml:lang="ja">拠点</value>
+        <value xml:lang="pt-BR">Instalação</value>
+        <value xml:lang="vi">Cơ sở (Facility)</value>
+        <value xml:lang="zh">场所</value>
+        <value xml:lang="zh-TW">場所</value>
+    </property>
+    <property key="SetupFacilityDescription">
+        <value xml:lang="en">Description</value>
+        <value xml:lang="fr">Description du lieu de stockage</value>
+        <value xml:lang="it">Descrizione stabilimento</value>
+        <value xml:lang="ja">詳細</value>
+        <value xml:lang="pt-BR">Descrição</value>
+        <value xml:lang="vi">Miêu tả</value>
+        <value xml:lang="zh">说明</value>
+        <value xml:lang="zh-TW">說明</value>
+    </property>
+    <property key="SetupFacilityNameIsMissing">
+        <value xml:lang="en">Facility Name is missing</value>
+        <value xml:lang="fr">Le nom du lieu de stockage est absent</value>
+        <value xml:lang="it">Stabilimento mancante</value>
+        <value xml:lang="pt-BR">Nome da Instalação está faltando</value>
+        <value xml:lang="vi">Bạn chưa nhập tên cơ sở (Facility Name)</value>
+        <value xml:lang="zh">缺少场所名称</value>
+        <value xml:lang="zh-TW">缺少場所名稱</value>
+    </property>
+    <property key="SetupFirstCustomer">
+        <value xml:lang="en">First Customer</value>
+        <value xml:lang="fr">Premier client</value>
+        <value xml:lang="it">Primo cliente</value>
+        <value xml:lang="ja">最初の顧客</value>
+        <value xml:lang="pt-BR">Primeiro Cliente</value>
+        <value xml:lang="vi">Khách hàng đầu tiên</value>
+        <value xml:lang="zh">第一个客户</value>
+        <value xml:lang="zh-TW">第一位客戶</value>
+    </property>
+    <property key="SetupFirstProduct">
+        <value xml:lang="en">First Product</value>
+        <value xml:lang="fr">Premier produit</value>
+        <value xml:lang="it">Primo prodotto</value>
+        <value xml:lang="ja">最初の製品</value>
+        <value xml:lang="pt-BR">Primeiro produto</value>
+        <value xml:lang="vi">Sản phẩm đầu tiên</value>
+        <value xml:lang="zh">第一个产品</value>
+        <value xml:lang="zh-TW">第一項產品</value>
+    </property>
+    <property key="SetupInitialSetup">
+        <value xml:lang="en">Initial Setup</value>
+        <value xml:lang="fr">Configuration initiale</value>
+        <value xml:lang="it">Configurazione iniziale</value>
+        <value xml:lang="ja">初期設定</value>
+        <value xml:lang="pt-BR">Configuração inicial</value>
+        <value xml:lang="vi">Khởi tạo thiết lập</value>
+        <value xml:lang="zh">初始设置</value>
+        <value xml:lang="zh-TW">初始設置</value>
+    </property>
+    <property key="SetupNewComponent">
+        <value xml:lang="en">Setup New Component</value>
+        <value xml:lang="fr">Configuration d'un nouveau composant</value>
+        <value xml:lang="it">Configura nuovo componente</value>
+        <value xml:lang="ja">新規コンポーネントを設定</value>
+        <value xml:lang="pt-BR">Configurar novo componente</value>
+        <value xml:lang="vi">Khởi tạo thành phần (component) mới</value>
+        <value xml:lang="zh">安装新的组件</value>
+        <value xml:lang="zh-TW">設置新的元件</value>
+    </property>
+    <property key="SetupOrganization">
+        <value xml:lang="en">Organization</value>
+        <value xml:lang="fr">Organisation</value>
+        <value xml:lang="it">Organizzazione</value>
+        <value xml:lang="ja">組織</value>
+        <value xml:lang="pt-BR">Organização</value>
+        <value xml:lang="vi">Doanh nghiệp</value>
+        <value xml:lang="zh">组织</value>
+        <value xml:lang="zh-TW">組織</value>
+    </property>
+    <property key="SetupOrganizationInformation">
+        <value xml:lang="en">Organization Information</value>
+        <value xml:lang="it">Informazioni organizzazione</value>
+        <value xml:lang="ja">組織情報</value>
+        <value xml:lang="pt-BR">Informação da Organização</value>
+        <value xml:lang="vi">Thông tin Doanh nghiệp</value>
+        <value xml:lang="zh">组织信息</value>
+        <value xml:lang="zh-TW">組織資訊</value>
+    </property>
+    <property key="SetupOrganizationName">
+        <value xml:lang="en">Organization name</value>
+        <value xml:lang="fr">Nom de l'organisation</value>
+        <value xml:lang="it">Nome organizzazione</value>
+        <value xml:lang="ja">組織名称</value>
+        <value xml:lang="pt-BR">Nome da organização</value>
+        <value xml:lang="vi">Tên Doanh nghiệp</value>
+        <value xml:lang="zh">组织名称</value>
+        <value xml:lang="zh-TW">組織名稱</value>
+    </property>
+    <property key="SetupOrganizationNameIsMissing">
+        <value xml:lang="en">Organization name is missing</value>
+        <value xml:lang="fr">Nom de l'organisation est absente</value>
+        <value xml:lang="it">Nome organizzazione è mancante</value>
+        <value xml:lang="pt-BR">Nome da organização está faltando</value>
+        <value xml:lang="vi">Bạn chưa nhập tên doanh nghiệp</value>
+        <value xml:lang="zh">缺少组织名称</value>
+        <value xml:lang="zh-TW">缺少組織名稱</value>
+    </property>
+    <property key="SetupOrganizationPartyId">
+        <value xml:lang="en">Organization Party Id</value>
+        <value xml:lang="it">Soggetto organizzazione</value>
+        <value xml:lang="ja">組織取引先ID</value>
+        <value xml:lang="pt-BR">Id da Organização</value>
+        <value xml:lang="vi">Id Doanh nghiệp</value>
+        <value xml:lang="zh">组织会员标识</value>
+        <value xml:lang="zh-TW">組織團體識別</value>
+    </property>
+    <property key="SetupPageError">
+        <value xml:lang="en">You do not have sufficient data to access this page.</value>
+        <value xml:lang="it">Tu non hai sufficienti diritti per accedere a questa pagina.</value>
+        <value xml:lang="ja">このページにアクセスする権限がありません</value>
+        <value xml:lang="pt-BR">Você não tem dados suficientes para acessar essa página.</value>
+        <value xml:lang="vi">Bạn chưa có đủ quyền để truy nhập vào trang này.</value>
+        <value xml:lang="zh">你没有足够的数据来访问这个页面。</value>
+        <value xml:lang="zh-TW">您沒有進入此頁面的權限.</value>
+    </property>
+    <property key="SetupProductCatalog">
+        <value xml:lang="en">Product Catalog</value>
+        <value xml:lang="it">Catalogo prodotti</value>
+        <value xml:lang="ja">製品カタログ</value>
+        <value xml:lang="pt-BR">Catálogo de Produtos</value>
+        <value xml:lang="vi">Catalog sản phẩm</value>
+        <value xml:lang="zh">产品目录</value>
+        <value xml:lang="zh-TW">產品型錄</value>
+    </property>
+    <property key="SetupProductStore">
+        <value xml:lang="en">Product Store</value>
+        <value xml:lang="it">Negozio prodotti</value>
+        <value xml:lang="ja">製品店舗</value>
+        <value xml:lang="pt-BR">Loja de Produtos</value>
+        <value xml:lang="vi">Cửa hàng sản phẩm</value>
+        <value xml:lang="zh">产品店铺</value>
+        <value xml:lang="zh-TW">產品商店</value>
+    </property>
+    <property key="SetupProductStoreName">
+        <value xml:lang="en">Product Store name</value>
+        <value xml:lang="it">Nome negozio prodotti</value>
+        <value xml:lang="ja">製品店舗名称</value>
+        <value xml:lang="pt-BR">Nome da Loja de Produtos</value>
+        <value xml:lang="vi">Tên cửa hàng sản phẩm</value>
+        <value xml:lang="zh">产品店铺名称</value>
+        <value xml:lang="zh-TW">產品商店名稱</value>
+    </property>
+    <property key="SetupProductStoreNameIsMissing">
+        <value xml:lang="en">Store Name is missing</value>
+        <value xml:lang="it">Nome negozio è mancante</value>
+        <value xml:lang="pt-BR">Nome da loja está faltando</value>
+        <value xml:lang="vi">Bạn chưa nhập tên cửa hàng</value>
+        <value xml:lang="zh">缺少店铺名称</value>
+        <value xml:lang="zh-TW">缺少店鋪名稱</value>
+    </property>
+    <property key="SetupResults">
+        <value xml:lang="en">Results</value>
+        <value xml:lang="it">Risultati</value>
+        <value xml:lang="ja">結果</value>
+        <value xml:lang="pt-BR">Resultados</value>
+        <value xml:lang="vi">Kết quả</value>
+        <value xml:lang="zh">结果</value>
+        <value xml:lang="zh-TW">結果</value>
+    </property>
+    <property key="SetupSetToComplete">
+        <value xml:lang="en">Set to complete</value>
+        <value xml:lang="it">Imposta a completato</value>
+        <value xml:lang="ja">完了設定</value>
+        <value xml:lang="pt-BR">Marcar como completo</value>
+        <value xml:lang="vi">Thiết lập để hoàn thành</value>
+        <value xml:lang="zh">设置为完成</value>
+        <value xml:lang="zh-TW">完成設定</value>
+    </property>
+    <property key="SetupTheFirstCustomerOf">
+        <value xml:lang="en">The First Customer of</value>
+        <value xml:lang="fr">Le premier client de</value>
+        <value xml:lang="it">Il primo cliente di</value>
+        <value xml:lang="ja">最初の顧客</value>
+        <value xml:lang="pt-BR">O primeiro cliente de</value>
+        <value xml:lang="vi">Khách hàng đầu tiên của</value>
+        <value xml:lang="zh">第一个客户属于</value>
+        <value xml:lang="zh-TW">第一個客戶屬於</value>
+    </property>
+    <property key="SetupWebSite">
+        <value xml:lang="en">Web Site</value>
+        <value xml:lang="it">Sito web</value>
+        <value xml:lang="ja">Webサイト</value>
+        <value xml:lang="pt-BR">Web Site</value>
+        <value xml:lang="vi">Trang thông tin</value>
+        <value xml:lang="zh">网站</value>
+        <value xml:lang="zh-TW">網站</value>
+    </property>
+</resource>

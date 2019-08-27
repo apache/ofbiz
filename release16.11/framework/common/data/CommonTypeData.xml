@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+    <DataSourceType dataSourceTypeId="PURCHASED_DATA" description="Purchased Data"/>
+    <DataSourceType dataSourceTypeId="WEBSITE_ENTRY" description="Website Data Entry"/>
+    <DataSourceType dataSourceTypeId="MAILING_LIST_SIGNUP" description="Mailing List Signup"/>
+    <DataSourceType dataSourceTypeId="CONTEST_SIGNUP" description="Contest Signup"/>
+    <DataSourceType dataSourceTypeId="ADMIN_ENTRY" description="Administrative Data Entry"/>
+    <DataSourceType dataSourceTypeId="ADVERTISEMENT" description="Advertisement"/>
+    <DataSourceType dataSourceTypeId="WEB" description="Web"/>
+    <DataSourceType dataSourceTypeId="PARTNER" description="Partner"/>
+    <DataSourceType dataSourceTypeId="MY_PORTAL" description="My Portal"/>
+
+    <DataSource dataSourceId="ECOMMERCE_SITE" dataSourceTypeId="WEBSITE_ENTRY" description="eCommerce Site Profile Maintenance"/>
+    <DataSource dataSourceId="MY_PORTAL" dataSourceTypeId="MY_PORTAL" description="My Portal Registration"/>
+    <DataSource dataSourceId="GENERAL_MAILING" dataSourceTypeId="MAILING_LIST_SIGNUP" description="General Interest Mailing List Signup"/>
+    <DataSource dataSourceId="CSR_ENTRY" dataSourceTypeId="ADMIN_ENTRY" description="Customer Service Rep Data Entry"/>
+    <DataSource dataSourceId="GEN_ADMIN" dataSourceTypeId="ADMIN_ENTRY" description="General Administrative Data Entry"/>
+
+    <DataSourceType dataSourceTypeId="CONTENT_CREATION" description="Content and Data Resource Creation"/>
+    <DataSource dataSourceId="USER_ENTRY" dataSourceTypeId="CONTENT_CREATION" description="User Entry"/>
+    <DataSource dataSourceId="CONTEXT_INDUCTION" dataSourceTypeId="CONTENT_CREATION" description="Context Induction"/>
+
+    <DataSourceType dataSourceTypeId="GEOPOINT_SUPPLIER" description="Name of GeoPoints publisher"/>
+    <DataSource dataSourceId="GEOPT_GOOGLE" dataSourceTypeId="GEOPOINT_SUPPLIER" description="Google as GeoPoint supplier"/>
+    <DataSource dataSourceId="GEOPT_YAHOO" dataSourceTypeId="GEOPOINT_SUPPLIER" description="Yahoo as GeoPoint supplier"/>
+    <DataSource dataSourceId="GEOPT_MICROSOFT" dataSourceTypeId="GEOPOINT_SUPPLIER" description="Microsoft as GeoPoint supplier"/>
+    <DataSource dataSourceId="GEOPT_MAPTP" dataSourceTypeId="GEOPOINT_SUPPLIER" description="MapTP a GeoPoint supplier"/>
+
+    <StatusType statusTypeId="_NA_" description="Not Applicable"/>
+    <StatusItem statusId="_NA_" statusTypeId="_NA_" statusCode="_NA_" sequenceId="0" description="Not Applicable"/>
+
+    <EnumerationType enumTypeId="_NA_" description="Not Applicable"/>
+    <Enumeration enumId="_NA_" enumTypeId="_NA_" enumCode="_NA_" sequenceId="0" description="Not Applicable"/>
+    <Enumeration enumId="_00_" enumTypeId="_NA_" enumCode="_00_" sequenceId="0" description="Not Applicable"/>
+
+    <EnumerationType description="Thesaurus Relationship Type" enumTypeId="KW_THES_REL" hasTable="N" parentTypeId=""/>
+    <Enumeration description="Used For" enumCode="UF" enumId="KWTR_UF" sequenceId="01" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Use Instead" enumCode="USE" enumId="KWTR_USE" sequenceId="02" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Correct Spelling" enumCode="CS" enumId="KWTR_CS" sequenceId="03" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Narrower Term" enumCode="NT" enumId="KWTR_NT" sequenceId="04" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Broader Term" enumCode="BT" enumId="KWTR_BT" sequenceId="05" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Micro-thesaurus Term" enumCode="MT" enumId="KWTR_MT" sequenceId="06" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Related Term" enumCode="RT" enumId="KWTR_RT" sequenceId="07" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Scope Notes" enumCode="SN" enumId="KWTR_SN" sequenceId="08" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Lang: Spanish" enumCode="LANG_SP" enumId="KWTR_LANG_SP" sequenceId="21" enumTypeId="KW_THES_REL"/>
+    <Enumeration description="Lang: French" enumCode="LANG_FR" enumId="KWTR_LANG_FR" sequenceId="22" enumTypeId="KW_THES_REL"/>
+
+    <!-- sync status -->
+    <StatusType description="Synchronize" hasTable="N" parentTypeId="" statusTypeId="SYNCHRONIZE_STATUS"/>
+    <StatusItem description="Not-Synchronized" sequenceId="01" statusCode="NOT_SYNCHRONIZED" statusId="NOT_SYNCHRONIZED" statusTypeId="SYNCHRONIZE_STATUS"/>
+    <StatusItem description="Synchronized" sequenceId="02" statusCode="SYNCHRONIZED" statusId="SYNCHRONIZED" statusTypeId="SYNCHRONIZE_STATUS"/>
+
+    <UomType description="Currency" hasTable="N" parentTypeId="" uomTypeId="CURRENCY_MEASURE"/>
+    <UomType description="Data Size" hasTable="N" parentTypeId="" uomTypeId="DATA_MEASURE"/>
+    <UomType description="Data Speed" hasTable="N" parentTypeId="" uomTypeId="DATASPD_MEASURE"/>
+    <UomType description="Time/Frequency" hasTable="N" parentTypeId="" uomTypeId="TIME_FREQ_MEASURE"/>
+    <UomType description="Length" hasTable="N" parentTypeId="" uomTypeId="LENGTH_MEASURE"/>
+    <UomType description="Area" hasTable="N" parentTypeId="" uomTypeId="AREA_MEASURE"/>
+    <UomType description="Liquid Volume" hasTable="N" parentTypeId="" uomTypeId="VOLUME_LIQ_MEASURE"/>
+    <UomType description="Dry Volume" hasTable="N" parentTypeId="" uomTypeId="VOLUME_DRY_MEASURE"/>
+    <UomType description="Weight" hasTable="N" parentTypeId="" uomTypeId="WEIGHT_MEASURE"/>
+    <UomType description="Energy" hasTable="N" parentTypeId="" uomTypeId="ENERGY_MEASURE"/>
+    <UomType description="Temperature" hasTable="N" parentTypeId="" uomTypeId="TEMP_MEASURE"/>
+    <UomType description="Other" hasTable="N" parentTypeId="" uomTypeId="OTHER_MEASURE"/>
+
+    <!-- User preferences seed data -->
+    <UserPrefGroupType userPrefGroupTypeId="GLOBAL_PREFERENCES" description="Global preferences"/>
+    <UserPreference userLoginId="_NA_" userPrefTypeId="VISUAL_THEME" userPrefGroupTypeId="GLOBAL_PREFERENCES" userPrefValue="DEFAULT"/><!-- will be overruled by the setting in general.properties (if present) -->
+
+    <!-- Visual Themes seed data -->
+    <EnumerationType description="Visual Theme Resource Type (stylesheet, javascript file, etc)" enumTypeId="VT_RES_TYPE" hasTable="N"/>
+    <Enumeration enumId="VT_NAME" description="Visual Theme name" enumTypeId="VT_RES_TYPE" sequenceId="00"/>
+    <Enumeration enumId="VT_STYLESHEET" description="Style Sheet URL" enumTypeId="VT_RES_TYPE" sequenceId="01"/>
+    <Enumeration enumId="VT_HELPSTYLESHEET" description="Help Style Sheet URL" enumTypeId="VT_RES_TYPE" sequenceId="02"/>
+    <Enumeration enumId="VT_DOCBOOKSTYLESHEET" description="Docbook Style Sheet URL" enumTypeId="VT_RES_TYPE" sequenceId="03"/>
+    <Enumeration enumId="VT_RTL_STYLESHEET" description="Right-to-Left (RTL) Style Sheet URL" enumTypeId="VT_RES_TYPE" sequenceId="04"/>
+    <Enumeration enumId="VT_SHORTCUT_ICON" description="Shortcut Icon URL" enumTypeId="VT_RES_TYPE" sequenceId="05"/>
+    <Enumeration enumId="VT_EXTRA_HEAD" description="Additional &lt;tt&gt;&lt;head&gt;&lt;/tt&gt; Element Markup" enumTypeId="VT_RES_TYPE" sequenceId="06"/>
+    <Enumeration enumId="VT_HDR_IMAGE_URL" description="Masthead/Branding Logo Image URL" enumTypeId="VT_RES_TYPE" sequenceId="07"/>
+    <Enumeration enumId="VT_HDR_TMPLT_LOC" description="Header Template Location" enumTypeId="VT_RES_TYPE" sequenceId="08"/>
+    <Enumeration enumId="VT_HDR_JAVASCRIPT" description="Header JavaScript File URL" enumTypeId="VT_RES_TYPE" sequenceId="09"/>
+    <Enumeration enumId="VT_FTR_TMPLT_LOC" description="Footer Template Location" enumTypeId="VT_RES_TYPE" sequenceId="10"/>
+    <Enumeration enumId="VT_FTR_JAVASCRIPT" description="Footer JavaScript File URL" enumTypeId="VT_RES_TYPE" sequenceId="11"/>
+    <Enumeration enumId="VT_NAV_TMPLT_LOC" description="Main Navigation Template Location" enumTypeId="VT_RES_TYPE" sequenceId="12"/>
+    <Enumeration enumId="VT_NAV_OPEN_TMPLT" description="Opening Navigation Template Location" enumTypeId="VT_RES_TYPE" sequenceId="13"/>
+    <Enumeration enumId="VT_NAV_CLOSE_TMPLT" description="Closing Navigation Template Location" enumTypeId="VT_RES_TYPE" sequenceId="14"/>
+    <Enumeration enumId="VT_MSG_TMPLT_LOC" description="Main Messages Template Location" enumTypeId="VT_RES_TYPE" sequenceId="15"/>
+    <Enumeration enumId="VT_SCREENSHOT" description="Theme Preview Screenshot" enumTypeId="VT_RES_TYPE" sequenceId="16"/>
+    <Enumeration enumId="VT_SCRN_MACRO_LIB" description="Theme Screen Macro Library Location" enumTypeId="VT_RES_TYPE" sequenceId="17"/>
+    <Enumeration enumId="VT_FORM_MACRO_LIB" description="Theme Form Macro Library Location" enumTypeId="VT_RES_TYPE" sequenceId="18"/>
+    <Enumeration enumId="VT_TREE_MACRO_LIB" description="Theme Tree Macro Library Location" enumTypeId="VT_RES_TYPE" sequenceId="19"/>
+    <Enumeration enumId="VT_MENU_MACRO_LIB" description="Theme Menu Macro Library Location" enumTypeId="VT_RES_TYPE" sequenceId="20"/>
+    <Enumeration enumId="VT_LOGIN_TMPLT_LOC" description="Login Template Location" enumTypeId="VT_RES_TYPE" sequenceId="21"/>
+    <Enumeration enumId="VT_CHPWD_TMPLT_LOC" description="Change Password Template Location" enumTypeId="VT_RES_TYPE" sequenceId="22"/>
+    <Enumeration enumId="VT_FGPWD_TMPLT_LOC" description="Forget Password Template Location" enumTypeId="VT_RES_TYPE" sequenceId="23"/>
+    <Enumeration enumId="VT_GSQUE_TMPLT_LOC" description="Security Question Template Location" enumTypeId="VT_RES_TYPE" sequenceId="24"/>
+    <Enumeration enumId="VT_STYLESHEET_LESS" description="Style Sheet Less URL" enumTypeId="VT_RES_TYPE" sequenceId="25"/>
+
+    <VisualThemeSet visualThemeSetId="BACKOFFICE" description="Themes to be used for backoffice applications"/>
+    <VisualThemeSet visualThemeSetId="ECOMMERCE"  description="Themes to be used for ECommerce applications"/>
+
+    <!-- Uom Conversion Purposes -->
+    <EnumerationType enumTypeId="CONVERSION_PURPOSE" description="Conversion Purpose"/>
+    <Enumeration enumId="INTERNAL_CONVERSION" enumTypeId="CONVERSION_PURPOSE" enumCode="INTERNAL" sequenceId="10" description="Internal Conversion"/>
+    <Enumeration enumId="EXTERNAL_CONVERSION" enumTypeId="CONVERSION_PURPOSE" enumCode="EXTERNAL" sequenceId="20" description="External Conversion"/>
+
+    <!-- Server Hit seed data -->
+    <ServerHitType description="Request" hitTypeId="REQUEST"/>
+    <ServerHitType description="Event" hitTypeId="EVENT"/>
+    <ServerHitType description="View" hitTypeId="VIEW"/>
+    <ServerHitType description="Entity" hitTypeId="ENTITY"/>
+    <ServerHitType description="Service" hitTypeId="SERVICE"/>
+
+    <!-- Keyword Type -->
+    <EnumerationType enumTypeId="KEYWORD_TYPE" hasTable="N" description="Keyword Type"/>
+    <Enumeration enumId="KWT_KEYWORD" enumTypeId="KEYWORD_TYPE" enumCode="KEYWORD" sequenceId="01" description="Keyword"/>
+    <Enumeration enumId="KWT_TAG" enumTypeId="KEYWORD_TYPE" enumCode="TAG" sequenceId="02" description="Tag"/>
+
+    <!-- Keyword Status -->
+    <StatusType statusTypeId="KEYWORD_STATUS" hasTable="N" description="Keyword"/>
+    <StatusItem statusId="KW_APPROVED" statusTypeId="KEYWORD_STATUS" statusCode="APPROVED" sequenceId="01" description="Approved"/>
+    <StatusItem statusId="KW_PENDING" statusTypeId="KEYWORD_STATUS" statusCode="PENDING" sequenceId="02" description="Pending"/>
+    <StatusItem statusId="KW_DISAPPROVED" statusTypeId="KEYWORD_STATUS" statusCode="DISAPPROVED" sequenceId="03" description="Disapproved"/>
+    <StatusValidChange statusId="KW_PENDING" statusIdTo="KW_APPROVED" transitionName="Review Approved"/>
+    <StatusValidChange statusId="KW_PENDING" statusIdTo="KW_DISAPPROVED" transitionName="Review Disapproved"/>
+
+    <!-- OFBiz Instance -->
+    <EnumerationType enumTypeId="JM_OFBIZ_INSTANCE" hasTable="N" description="OFBiz Instance"/>
+    <Enumeration enumId="JM_OFBIZ_INS_0" enumTypeId="JM_OFBIZ_INSTANCE" enumCode="_NA_" sequenceId="00" description="ALL instance"/>
+    <Enumeration enumId="JM_OFBIZ_INS_1" enumTypeId="JM_OFBIZ_INSTANCE" enumCode="ofbiz1" sequenceId="01" description="OFBiz instance 1"/>
+</entity-engine-xml>

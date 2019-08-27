@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="ListWorkEffortCommEvents" separate-columns="false" target="updateCommunicationEventWorkEff" title="" type="list"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="WorkEffortCommunicationEventView">
+                <condition-list combine="and">
+                    <condition-expr field-name="workEffortId" operator="equals" from-field="workEffortId"/>
+                </condition-list>
+                <order-by field-name="communicationEventId"/>
+            </entity-condition>
+        </actions>
+        <field name="workEffortId"><hidden/></field>
+        <field name="communicationEventId"  widget-style="buttontext">
+            <hyperlink description="${communicationEventId}" target="/partymgr/control/EditCommunicationEvent" target-type="inter-app">
+                <parameter param-name="communicationEventId"/>
+            </hyperlink>
+        </field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="contactMechTypeId"><display-entity entity-name="ContactMechType"/></field>
+        <field name="description"><text size="40"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="buttontext"><submit button-type="text-link"/></field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteCommunicationEventWorkEff" also-hidden="false">
+                <parameter param-name="workEffortId"/>
+                <parameter param-name="communicationEventId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddWorkEffortCommEvent" default-map-name="communicationEvent" target="createWorkEffortCommEvent" title="" type="single" extends="EditCommEvent"
+        extends-resource="component://party/widget/partymgr/CommunicationEventForms.xml" header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <set field="communicationEvent"/>
+        </actions>
+        <field name="workEffortId"><hidden/></field>
+        <field name="description"><textarea/></field>
+        <field name="communicationEventId"><lookup target-form-name="LookupCommEvent"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="buttontext"><submit button-type="text-link"/></field>
+        <sort-order>
+            <banner left-text="${uiLabelMap.WorkEffortBanner3}"/>
+            <sort-field name="workEffortId"/>
+            <sort-field name="communicationEventId"/>
+            <banner left-text="${uiLabelMap.WorkEffortBanner4}"/>
+            <sort-field name="description"/>
+        </sort-order>
+    </form>
+</forms>

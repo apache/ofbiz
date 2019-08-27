@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="FindPaymentGroup">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingFindPaymentGroup"/>
+                <set field="headerItem" value="PaymentGroup"/>
+                <set field="tabButtonItem" value="Find"/>
+                <entity-condition entity-name="PaymentGroup" list="paymentGroupList">
+                    <condition-expr field-name="paymentGroupId" from-field="parameters.paymentGroupId" ignore-if-empty="true"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="EditPaymentGroup" text="${uiLabelMap.AccountingCreateNewPaymentGroup}" style="buttontext create"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindPaymentGroup" location="component://accounting/widget/PaymentGroupForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListPaymentGroup"  location="component://accounting/widget/PaymentGroupForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditPaymentGroup">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingEditPaymentGroup"/>
+                <set field="tabButtonItem" value="EditPaymentGroup"/>
+                <set field="paymentGroupId" from-field="parameters.paymentGroupId"/>
+                <entity-one entity-name="PaymentGroup" value-field="paymentGroup"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPaymentGroupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingPaymentGroup}">
+                            <include-form name="EditPaymentGroup" location="component://accounting/widget/PaymentGroupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditPaymentGroupMember">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingEditPaymentGroupMember"/>
+                <set field="tabButtonItem" value="EditPaymentGroupMember"/>
+                <set field="paymentGroupId" from-field="parameters.paymentGroupId"/>
+                <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers">
+                    <field-map field-name="paymentGroupId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPaymentGroupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet name="listPaymentGroupMember" title="${uiLabelMap.AccountingPaymentGroupMembers}" collapsible="true">
+                            <include-form name="ListPaymentGroupMember" location="component://accounting/widget/PaymentGroupForms.xml"/>
+                        </screenlet>
+                        <screenlet name="addPaymentGroupMember" title="${uiLabelMap.AccountingAddPaymentGroupMember}" collapsible="true">
+                            <include-form name="AddPaymentGroupMember" location="component://accounting/widget/PaymentGroupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="PaymentGroupOverview">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingPaymentGroupOverview"/>
+                <set field="tabButtonItem" value="PaymentGroupOverview"/>
+                <set field="paymentGroupId" from-field="parameters.paymentGroupId"/>
+                <set field="display" type="Boolean" value="true"/>
+                <entity-one entity-name="PaymentGroup" value-field="paymentGroup"/>
+                <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers">
+                    <field-map field-name="paymentGroupId"/>
+                </entity-and>
+                <service service-name="getPaymentGroupReconciliationId" result-map="resultMap">
+                    <field-map field-name="paymentGroupId"/>
+                </service>
+                <set field="glReconciliationId" from-field="resultMap.glReconciliationId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPaymentGroupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet name="editPaymentGroup" title="${uiLabelMap.AccountingPaymentGroupOverview}" collapsible="true">
+                                    <include-form name="EditPaymentGroup" location="component://accounting/widget/PaymentGroupForms.xml"/>
+                                </screenlet>
+                                <screenlet name="paymentGroupMembers" title="${uiLabelMap.AccountingPaymentGroupMembers}" collapsible="true">
+                                    <include-form name="PaymentGroupMembers" location="component://accounting/widget/PaymentGroupForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="DepositSlipPdf">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <entity-one entity-name="PaymentGroup" value-field="paymentGroup"/>
+                <service service-name="getPayments" result-map="getPaymentsMap"/>
+                <set field="payments" from-field="getPaymentsMap.payments"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <xsl-fo><html-template location="component://accounting/template/reports/DepositSlip.fo.ftl"/></xsl-fo>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

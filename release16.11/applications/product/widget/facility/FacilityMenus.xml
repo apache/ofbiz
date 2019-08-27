@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://ofbiz.apache.org/Widget-Menu" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Menu http://ofbiz.apache.org/dtds/widget-menu.xsd">
+
+    <menu name="FacilityAppBar" title="${uiLabelMap.ProductFacilityManager}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="facility" title="${uiLabelMap.ProductFacilities}"><link target="FindFacility"/></menu-item>
+        <menu-item name="facilityGroup" title="${uiLabelMap.ProductFacilityGroups}"><link target="FindFacilityGroup"/></menu-item>
+        <menu-item name="inventoryItemLabel" title="${uiLabelMap.ProductInventoryItemLabels}"><link target="FindInventoryItemLabels"/></menu-item>
+        <menu-item name="ShipmentGatewayConfig" title="${uiLabelMap.FacilityShipmentGatewayConfig}">
+            <condition>
+                <if-has-permission permission="FACILITY" action="_ADMIN"/>
+            </condition>
+            <link target="FindShipmentGatewayConfig"/>
+        </menu-item>
+        <menu-item name="shipment" title="${uiLabelMap.ProductShipments}"><link target="FindShipment"/></menu-item>
+        <menu-item name="reports" title="${uiLabelMap.CommonReports}">
+            <condition>
+                <not><if-empty field="facilityId"/></not>
+            </condition>
+            <link target="InventoryReports">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="FacilityTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditFacility">
+        <menu-item name="EditFacility" title="${uiLabelMap.ProductFacility}">
+            <link target="EditFacility">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FacilityChildren" title="${uiLabelMap.CommonEntityChildren}">
+            <link target="FacilityChildren">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ViewContactMechs" title="${uiLabelMap.PartyContactMechs}">
+            <link target="ViewContactMechs">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityGroups" title="${uiLabelMap.ProductGroups}">
+            <link target="EditFacilityGroups">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindFacilityLocation" title="${uiLabelMap.ProductLocations}">
+            <link target="FindFacilityLocation">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityParties" title="${uiLabelMap.PartyRoles}">
+            <link target="EditFacilityParties">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ViewFacilityInventoryByProduct" title="${uiLabelMap.ProductInventory}">
+            <link target="ViewFacilityInventoryByProduct">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityInventoryItems" title="${uiLabelMap.ProductInventoryItems}">
+            <link target="EditFacilityInventoryItems">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ViewFacilityInventoryItemsDetails" title="${uiLabelMap.ProductInventoryItemsDetails}">
+            <link target="ViewFacilityInventoryItemsDetails">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ReceiveInventory" title="${uiLabelMap.ProductInventoryReceive}">
+            <link target="ReceiveInventory">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PhysicalInventory" title="${uiLabelMap.ProductPhysicalInventory}">
+            <link target="FindFacilityPhysicalInventory">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindFacilityTransfers" title="${uiLabelMap.ProductInventoryXfers}">
+            <link target="FindFacilityTransfers">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ReceiveReturn" title="${uiLabelMap.ProductReceiveReturn}">
+            <link target="ReceiveReturn">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PicklistOptions" title="${uiLabelMap.ProductPicking}">
+            <link target="PicklistOptions">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PickMoveStock" title="${uiLabelMap.ProductStockMoves}">
+            <link target="PickMoveStock">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PicklistManage" title="${uiLabelMap.ProductPicklistManage}">
+            <link target="PicklistManage">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="VerifyPick" title="${uiLabelMap.ProductVerifyPick}">
+            <link target="VerifyPick">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PackOrder" title="${uiLabelMap.ProductPacking}">
+            <link target="PackOrder">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Scheduling" title="${uiLabelMap.ProductScheduling}">
+            <link target="Scheduling">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindShipmentIn" title="${uiLabelMap.ProductIncomingShipments}">
+            <link target="FindShipment">
+                <parameter param-name="destinationFacilityId" from-field="facilityId"/>
+                <parameter param-name="lookupFlag" value="Y"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindShipmentOut" title="${uiLabelMap.ProductOutgoingShipments}">
+            <link target="FindShipment">
+                <parameter param-name="originFacilityId" from-field="facilityId"/>
+                <parameter param-name="lookupFlag" value="Y"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityContent" title="${uiLabelMap.ProductContent}">
+            <link target="EditFacilityContent">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityGeoPoint" title="${uiLabelMap.CommonGeoLocation}">
+            <link target="EditFacilityGeoPoint">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityAgreements" title="${uiLabelMap.PageTitleViewFacilityAgreements}">
+            <link target="EditFacilityAgreements">
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="InventoryItemLabelsTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="FindInventoryItemLabels">
+        <menu-item name="FindInventoryItemLabels" title="${uiLabelMap.ProductInventoryItemLabels}">
+            <link target="FindInventoryItemLabels"/>
+        </menu-item>
+        <menu-item name="EditInventoryItemLabelTypes" title="${uiLabelMap.ProductInventoryItemLabelTypes}">
+            <link target="EditInventoryItemLabelTypes"/>
+        </menu-item>
+    </menu>
+    <menu name="InventoryItemLabelTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditInventoryItemLabel" selected-menuitem-context-field-name="subTabButtonItem">
+        <menu-item name="EditInventoryItemLabel" title="${uiLabelMap.ProductInventoryItemLabel}">
+            <link target="EditInventoryItemLabel">
+                <parameter param-name="inventoryItemLabelId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditInventoryItemLabelAppls" title="${uiLabelMap.ProductInventoryItemLabelAppl}">
+            <link target="EditInventoryItemLabelAppls">
+                <parameter param-name="inventoryItemLabelId"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="InventoryItemTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditInventoryItem" selected-menuitem-context-field-name="subTabButtonItem">
+        <menu-item name="EditInventoryItem" title="${uiLabelMap.ProductInventoryItem}">
+            <link target="EditInventoryItem">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ViewInventoryItemDetail" title="${uiLabelMap.ProductInventoryDetails}">
+            <link target="ViewInventoryItemDetail">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditInventoryItemLabels" title="${uiLabelMap.ProductInventoryItemLabelAppl}">
+            <link target="EditInventoryItemLabels">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="facilityId"/>
+            </link>
+        </menu-item>
+    </menu>
+    
+    <menu name="ShipmentGatewayConfigTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="shipmentGatewayConfigTab" title="${uiLabelMap.FacilityShipmentGatewayConfig}">
+            <link target="FindShipmentGatewayConfig"/>
+        </menu-item>
+        <menu-item name="shipmentGatewayConfigTypesTab" title="${uiLabelMap.FacilityShipmentGatewayConfigTypes}">
+            <link target="FindShipmentGatewayConfigTypes"/>
+        </menu-item>
+    </menu>
+    
+    <menu name="ViewFacilityInventoryByProductTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+        selected-menuitem-context-field-name="tabButtonItem2">
+        <!--<menu-item name="ViewFacilityInventoryByProductSimpleTab" title="${uiLabelMap.CommonPrint}">
+            <link target="ViewFacilityInventoryByProductSimple">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item> -->
+        <menu-item name="ViewFacilityInventoryByProductReportTab" title="${uiLabelMap.CommonPrint}">
+            <link target="ViewFacilityInventoryByProductReport?${searchParameterString}"/>
+        </menu-item>
+        <menu-item name="ViewFacilityInventoryByProductExportTab" title="${uiLabelMap.CommonExport}">
+            <link target="ViewFacilityInventoryByProductExport?${searchParameterString}"/>
+        </menu-item>
+        <menu-item name="InventoryItemTotalsTab" title="${uiLabelMap.ProductInventoryItemTotals}">
+            <link target="InventoryItemTotals">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+                <parameter param-name="action" value="Y"/>
+            </link>
+        </menu-item>
+        <menu-item name="InventoryItemGrandTotalsTab" title="${uiLabelMap.ProductInventoryItemGrandTotals}">
+            <link target="InventoryItemGrandTotals">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+                <parameter param-name="action" value="Y"/>
+            </link>
+        </menu-item>
+        <menu-item name="InventoryItemTotalsExportTab" title="${uiLabelMap.ProductInventoryItemTotalsExport}">
+            <link target="InventoryItemTotalsExport.csv">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+                <parameter param-name="action" value="Y"/>
+            </link>
+        </menu-item>
+        <menu-item name="InventoryAverageCostsTab" title="${uiLabelMap.ProductInventoryAverageCosts}">
+            <link target="InventoryAverageCosts">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="FacilityGroupTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="EditFacilityGroup" title="${uiLabelMap.ProductFacilityGroup}">
+            <link target="EditFacilityGroup">
+                <parameter param-name="facilityGroupId" from-field="facilityGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityGroupRollup" title="${uiLabelMap.ProductRollups}">
+            <link target="EditFacilityGroupRollup">
+                <parameter param-name="facilityGroupId" from-field="facilityGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityGroupMembers" title="${uiLabelMap.ProductFacilities}">
+            <link target="EditFacilityGroupMembers">
+                <parameter param-name="facilityGroupId" from-field="facilityGroupId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFacilityGroupRoles" title="${uiLabelMap.PartyRoles}">
+            <link target="EditFacilityGroupRoles">
+                <parameter param-name="facilityGroupId" from-field="facilityGroupId"/>
+            </link>
+        </menu-item>
+    </menu>
+</menus>

@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Content Component Services</description>
+    <vendor>OFBiz</vendor>
+
+    <!-- Survey Services -->
+    <service name="createSurvey" default-entity-name="Survey" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a Survey</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSurvey" default-entity-name="Survey" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a Survey</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurvey" default-entity-name="Survey" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete Survey</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!--  TODO
+    <service name="cloneSurvey" auth="true" engine="simple"
+            location="component://content/minilang/survey/SurveyServices.xml" invoke="cloneSurvey">
+        <description>Clone a Survey; NOTE: not yet implemented</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <attribute name="surveyId" type="String" mode="IN"/>
+        <attribute name="newSurveyId" type="String" mode="OUT"/>
+    </service>
+    -->
+
+    <!-- SurveyMultiResp Services -->
+    <service name="createSurveyMultiResp" default-entity-name="SurveyMultiResp" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyMultiResp; surveyMultiRespId will be auto-sequenced</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="surveyId" mode="IN" type="String"/>
+        <attribute name="surveyMultiRespId" mode="OUT" type="String"/>
+    </service>
+    <service name="updateSurveyMultiResp" default-entity-name="SurveyMultiResp" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyMultiResp</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyMultiResp" default-entity-name="SurveyMultiResp" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyMultiResp</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyMultiRespColumn Services -->
+    <service name="createSurveyMultiRespColumn" default-entity-name="SurveyMultiRespColumn" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyMultiRespColumn; surveyMultiRespColId will be auto-sequenced</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="surveyId" mode="IN" type="String"/>
+        <attribute name="surveyMultiRespId" mode="IN" type="String"/>
+        <attribute name="surveyMultiRespColId" mode="OUT" type="String"/>
+    </service>
+    <service name="updateSurveyMultiRespColumn" default-entity-name="SurveyMultiRespColumn" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyMultiRespColumn</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyMultiRespColumn" default-entity-name="SurveyMultiRespColumn" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyMultiRespColumn</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyPage Services -->
+    <service name="createSurveyPage" default-entity-name="SurveyPage" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyPage; the surveyPageSeqId will be auto-generated</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="surveyId" mode="IN" type="String"/>
+        <attribute name="surveyPageSeqId" mode="OUT" type="String"/>
+    </service>
+    <service name="updateSurveyPage" default-entity-name="SurveyPage" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyPage</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyPage" default-entity-name="SurveyPage" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyPage</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyApplType Services -->
+    <service name="createSurveyApplType" default-entity-name="SurveyApplType" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyApplType</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSurveyApplType" default-entity-name="SurveyApplType" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyApplType</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyApplType" default-entity-name="SurveyApplType" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyApplType</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyQuestion Services -->
+    <service name="createSurveyQuestion" default-entity-name="SurveyQuestion" auth="true" engine="simple"
+            location="component://content/minilang/survey/SurveyServices.xml" invoke="createSurveyQuestion">
+        <description>Create a SurveyQuestion</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="surveyId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSurveyQuestion" default-entity-name="SurveyQuestion" auth="true" engine="simple"
+            location="component://content/minilang/survey/SurveyServices.xml" invoke="updateSurveyQuestion">
+        <description>Update a SurveyQuestion</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyQuestion" default-entity-name="SurveyQuestion" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyQuestion</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyQuestionOption Services -->
+    <service name="createSurveyQuestionOption" default-entity-name="SurveyQuestionOption" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyQuestionOption</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="surveyQuestionId" type="String" mode="IN"/>
+        <attribute name="surveyOptionSeqId" type="String" mode="OUT"/>
+    </service>
+    <service name="updateSurveyQuestionOption" default-entity-name="SurveyQuestionOption" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyQuestionOption</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyQuestionOption" default-entity-name="SurveyQuestionOption" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyQuestionOption</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyQuestionAppl Services -->
+    <service name="createSurveyQuestionAppl" default-entity-name="SurveyQuestionAppl" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyQuestionAppl</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateSurveyQuestionAppl" default-entity-name="SurveyQuestionAppl" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyQuestionAppl</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyQuestionAppl" default-entity-name="SurveyQuestionAppl" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyQuestionAppl</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyQuestionCategory Services -->
+    <service name="createSurveyQuestionCategory" default-entity-name="SurveyQuestionCategory" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyQuestionCategory</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSurveyQuestionCategory" default-entity-name="SurveyQuestionCategory" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyQuestionCategory</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyQuestionCategory" default-entity-name="SurveyQuestionCategory" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyQuestionCategory</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyQuestionType Services -->
+    <service name="createSurveyQuestionType" default-entity-name="SurveyQuestionType" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyQuestionType</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateSurveyQuestionType" default-entity-name="SurveyQuestionType" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyQuestionType</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyQuestionType" default-entity-name="SurveyQuestionType" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyQuestionType</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- SurveyTrigger Services -->
+    <service name="createSurveyTrigger" default-entity-name="SurveyTrigger" auth="true" engine="entity-auto" invoke="create">
+        <description>Create a SurveyTrigger</description>
+        <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateSurveyTrigger" default-entity-name="SurveyTrigger" auth="true" engine="entity-auto" invoke="update">
+        <description>Update a SurveyTrigger</description>
+        <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteSurveyTrigger" default-entity-name="SurveyTrigger" auth="true" engine="entity-auto" invoke="delete">
+        <description>Delete SurveyTrigger</description>
+        <permission-service service-name="contentManagerPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Survey Response Service -->
+    <service name="createSurveyResponse" engine="simple" auth="false"
+            location="component://content/minilang/survey/SurveyServices.xml" invoke="createSurveyResponse">
+        <description>Create a Survey Response w/ Response Answers</description>
+        <auto-attributes mode="IN" entity-name="SurveyResponse" include="nonpk" optional="true"/>
+        <attribute name="answers" type="Map" mode="IN" optional="false" string-map-prefix="answers_"/>
+        <attribute name="surveyResponseId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="productStoreSurveyId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="dataResourceId" type="String" mode="IN" optional="true"/>
+        <override name="surveyId" mode="INOUT" optional="false"/>
+    </service>
+
+    <service name="surveyResponseProcessInterface" engine="interface">
+        <description>Interface for Survey Response Processing services defined on the Survey</description>
+        <attribute name="surveyResponseId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="buildSurveyFromPdf" engine="java"
+            location="org.apache.ofbiz.content.survey.PdfSurveyServices" invoke="buildSurveyFromPdf" auth="false">
+        <description>Create a Survey and related entities from AcroForm</description>
+        <attribute name="pdfFileNameIn" type="String" mode="IN" optional="true"/>
+        <attribute name="contentId" type="String" mode="IN" optional="true"/>
+        <attribute name="inputByteBuffer" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="surveyName" type="String" mode="IN" optional="true"/>
+        <attribute name="surveyId" type="String" mode="INOUT" optional="true"/>
+    </service>
+
+    <service name="buildSurveyResponseFromPdf" engine="java"  transaction-timeout="7200"
+            location="org.apache.ofbiz.content.survey.PdfSurveyServices" invoke="buildSurveyResponseFromPdf" auth="false">
+        <description>Create a Survey and related entities from AcroForm</description>
+        <attribute name="pdfFileNameIn" type="String" mode="IN" optional="true"/>
+        <attribute name="contentId" type="String" mode="IN" optional="true"/>
+        <attribute name="inputByteBuffer" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="surveyId" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="surveyResponseId" type="String" mode="INOUT" optional="true"/>
+    </service>
+
+    <service name="getAcroFieldsFromPdf" engine="java"
+            location="org.apache.ofbiz.content.survey.PdfSurveyServices" invoke="getAcroFieldsFromPdf" auth="false">
+        <description>Get fields from AcroForm</description>
+        <attribute name="pdfFileNameIn" type="String" mode="IN" optional="true"/>
+        <attribute name="contentId" type="String" mode="IN" optional="true"/>
+        <attribute name="inputByteBuffer" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="acroFieldMap" type="Map" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="setAcroFieldsFromSurveyResponse" engine="java"
+            location="org.apache.ofbiz.content.survey.PdfSurveyServices" invoke="setAcroFieldsFromSurveyResponse" auth="false">
+        <description>Get fields from AcroForm</description>
+        <attribute name="pdfFileNameIn" type="String" mode="IN" optional="true"/>
+        <attribute name="contentId" type="String" mode="IN" optional="true"/>
+        <attribute name="inputByteBuffer" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="surveyResponseId" type="String" mode="IN" optional="false"/>
+        <attribute name="outByteBuffer" type="java.nio.ByteBuffer" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="setAcroFields" engine="java"
+            location="org.apache.ofbiz.content.survey.PdfSurveyServices" invoke="setAcroFields" auth="false">
+        <description>Get fields from AcroForm</description>
+        <attribute name="pdfFileNameIn" type="String" mode="IN" optional="true"/>
+        <attribute name="contentId" type="String" mode="IN" optional="true"/>
+        <attribute name="inputByteBuffer" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="acroFieldMap" type="Map" mode="IN" optional="false"/>
+        <attribute name="outByteBuffer" type="java.nio.ByteBuffer" mode="OUT" optional="true"/>
+    </service>
+
+    <service name="buildPdfFromSurveyResponse" engine="java"
+            location="org.apache.ofbiz.content.survey.PdfSurveyServices" invoke="buildPdfFromSurveyResponse" auth="false">
+        <description>Build Pdf From Survey Response</description>
+        <attribute name="surveyResponseId" type="String" mode="IN" optional="false"/>
+        <attribute name="outByteBuffer" type="java.nio.ByteBuffer" mode="OUT" optional="false"/>
+    </service>
+    <service name="buildSurveyQuestionsAndAnswers" engine="java"
+            location="org.apache.ofbiz.content.survey.PdfSurveyServices" invoke="buildSurveyQuestionsAndAnswers" auth="false">
+        <description>Build list of questions and answers From Survey Response</description>
+        <attribute name="surveyResponseId" type="String" mode="IN" optional="false"/>
+        <attribute name="questionsAndAnswers" type="List" mode="OUT" optional="false"/>
+    </service>
+</services>

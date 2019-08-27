@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    <simple-method method-name="createEntitySync" short-description="Create a EntitySync">
+        <make-value value-field="newEntity" entity-name="EntitySync"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <sequenced-id sequence-name="EntitySync" field="entitySyncId"/>
+        <set field="newEntity.entitySyncId" from-field="entitySyncId"/>
+        <field-to-result field="entitySyncId" result-name="entitySyncId"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="resetEntitySyncStatusToNotStarted" short-description="Update a EntitySync, set the Status to ESR_NOT_STARTED, but ONLY if running (ie in ESR_RUNNING)">
+        <!-- TODO: add some code to make sure, as much as possible, that this really isn't running -->
+        <set field="lookupPKMap.entitySyncId" from-field="parameters.entitySyncId"/>
+        <find-by-primary-key entity-name="EntitySync" map="lookupPKMap" value-field="valueToStore"/>
+        <if-compare field="valueToStore.runStatusId" operator="equals" value="ESR_RUNNING">
+            <set field="valueToStore.runStatusId" value="ESR_NOT_STARTED"/>
+            <store-value value-field="valueToStore"/>
+        </if-compare>
+    </simple-method>
+
+    <!-- EntitySyncHistory services -->
+    <simple-method method-name="createEntitySyncHistory" short-description="Create EntitySyncHistory">
+        <make-value value-field="newEntity" entity-name="EntitySyncHistory"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <now-timestamp field="newEntity.startDate"/>
+        <field-to-result field="newEntity.startDate" result-name="startDate"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+
+        <!-- also set the lastHistoryStartDate on the EntitySync -->
+        <entity-one entity-name="EntitySync" value-field="entitySync"/>
+        <set from-field="newEntity.startDate" field="entitySync.lastHistoryStartDate"/>
+        <store-value value-field="entitySync"/>
+    </simple-method>
+    <simple-method method-name="deleteEntitySyncHistory" short-description="Delete EntitySyncHistory">
+        <make-value value-field="lookupPKMap" entity-name="EntitySyncHistory"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- EntitySyncInclude services -->
+    <simple-method method-name="createEntitySyncInclude" short-description="Create EntitySyncInclude">
+        <make-value value-field="newEntity" entity-name="EntitySyncInclude"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="deleteEntitySyncInclude" short-description="Delete EntitySyncInclude">
+        <make-value value-field="lookupPKMap" entity-name="EntitySyncInclude"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <simple-method method-name="entitySyncPermissionCheck" short-description="Check user permission for entity sync.">
+        <set field="primaryPermission" value="ENTITY_SYNC"/>
+        <call-simple-method method-name="genericBasePermissionCheck" xml-resource="component://common/minilang/permission/CommonPermissionServices.xml"/>
+    </simple-method>
+</simple-methods>

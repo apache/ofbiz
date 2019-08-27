@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="ListPortalPages" type="list" list-name="portalPages" separate-columns="true"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="portalPageId" title="${uiLabelMap.CommonEdit}">
+            <hyperlink description="${uiLabelMap.CommonEdit}" target="ManagePortalPages">
+                <parameter param-name="portalPageId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+        <field name="top" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == 0)"><hyperlink target="" description=""/></field>
+        <field name="bot" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == listSize-1)"><hyperlink target="" description=""/></field>
+        <field name="up" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == 0)"><hyperlink target="" description=""/></field>
+        <field name="dwn" title=" " use-when="(ownerUserLoginId.equals(&quot;_NA_&quot;))||(itemIndex == listSize-1)"><hyperlink target="" description=""/></field>
+        <field name="top" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &gt; 0)">
+            <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-end-up-green.png">
+                <parameter param-name="mode" value="TOP"/>
+                <parameter param-name="portalPageId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+        <field name="bot" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &lt; listSize-1)">
+            <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-end-down-green.png">
+                <parameter param-name="mode" value="BOT"/>
+                <parameter param-name="portalPageId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+        <field name="up" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &gt; 0)">
+            <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-single-up-green.png">
+                <parameter param-name="mode" value="UP"/>
+                <parameter param-name="portalPageId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+        <field name="dwn" title=" " use-when="(!ownerUserLoginId.equals(&quot;_NA_&quot;))&amp;&amp;(itemIndex &lt; listSize-1)">
+            <hyperlink target="updatePortalPageSeq" image-location="/images/arrow-single-down-green.png">
+                <parameter param-name="mode" value="DWN"/>
+                <parameter param-name="portalPageId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+        <field name="portalPageName" use-when="ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonName}"><display/></field>
+        <field name="portalPageName" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonName}" id-name="portalPageName">
+            <display>
+                <in-place-editor url="updatePortalPage" cancel-control="button" saving-text="Updating..." text-between-controls=" ">
+                    <simple-editor/>
+                    <field-map field-name="portalPageId" from-field="portalPageId"/>
+                </in-place-editor>
+            </display>
+        </field>
+        <field name="description" use-when="ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonDescription}"><display/></field>
+        <field name="description" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title="${uiLabelMap.CommonDescription}" id-name="portalDescription">
+            <display>
+                <in-place-editor url="updatePortalPage" cancel-control="button" saving-text="Updating..." text-between-controls=" ">
+                    <simple-editor/>
+                    <field-map field-name="portalPageId" from-field="portalPageId"/>
+                </in-place-editor>
+            </display>
+        </field>
+        <field name="originalPortalPageId"><display-entity entity-name="PortalPage" description="${portalPageName} [${portalPageId}]" key-field-name="portalPageId"/></field>
+        <field name="deleteLink" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)" title=" " widget-style="buttontext" >
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deletePortalPage">
+                <parameter param-name="portalPageId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" use-when="!ownerUserLoginId.equals(&quot;_NA_&quot;)&amp;&amp;originalPortalPageId!=null" title=" " widget-style="buttontext" >
+            <hyperlink description="${uiLabelMap.CommonRevertPortalPage}" target="deletePortalPage">
+                <parameter param-name="portalPageId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="NewPortalPage" type="single" target="createPortalPage">
+        <field name="parentPortalPageId"><hidden value="${parameters.parentPortalPageId}"/></field>
+        <field name="sequenceNum"><hidden value="${parameters.portalPagesSize+1}"/></field>
+        <field name="portalPageName"><text/></field>
+        <field name="description"><text/></field>
+        <field name="createButton"><submit button-type="button"/></field>
+    </form>
+
+    <form name="PortletCategoryAndPortlet" type="list" list-name="portletCat" paginate-target="addPortlet" separate-columns="true"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="portletCategoryId" title="Category">
+            <hyperlink description="${portletCategoryId}" target="addPortlet">
+                <parameter param-name="portletCategoryId"/>
+                <parameter param-name="portalPortletId"/>
+                <parameter param-name="portalPageId" from-field="parameters.portalPageId"/>
+                <parameter param-name="columnSeqId" from-field="parameters.columnSeqId"/>
+                <parameter param-name="parentPortalPageId" from-field="parameters.parentPortalPageId"/>
+            </hyperlink>
+        </field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display/></field>
+    </form>
+
+    <form name="PortletList" type="list" separate-columns="true" list-name="portlets"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="PortalPagePortletView" list="portlets">
+                <field-map field-name="portalPageId" from-field="parameters.portalPageId"/>
+            </entity-and>
+        </actions>
+        <field name="portletName">
+            <hyperlink also-hidden="false" target="showHelp?helpTopic=HELP_${portalPortletId}" description="${portletName}" ></hyperlink>
+        </field>
+        <field name="description"><display/></field>
+    </form>
+
+    <form name="FindGenericEntity" type="single" target="list${entity}" title="" focus-field-name="idName">
+        <field name="idName" title="${uiLabelMap.FormFieldTitle_${pkIdName}"><text size="16"/></field>
+        <field name="idName_op" ><hidden value="contains"/></field>
+        <field name="idName_ic" ><hidden value="Y"/></field>
+        <field name="description" ><text size="16"/></field>
+        <field name="description_op" ><hidden value="contains"/></field>
+        <field name="description_ic" ><hidden value="Y"/></field>
+        <field name="submitButton" title=" " widget-style="smallSubmit">
+            <hyperlink target="javascript:ajaxUpdateArea('List${entity}Area', 'list${entity}', $(FindGenericEntity).serialize());" target-type="plain"  description="${uiLabelMap.CommonSearch}"/>
+        </field>
+    </form>
+
+    <form name="EditPortalPageColumnWidth" type="single" target="updatePortalPageColumnWidth" default-map-name="portalPageColumn">
+        <field name="portalPageId"><hidden/></field>
+        <field name="columnSeqId"><hidden/></field>
+        <field name="columnWidthPixels"><text/></field>
+        <field name="columnWidthPercentage"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+    </form>
+</forms>

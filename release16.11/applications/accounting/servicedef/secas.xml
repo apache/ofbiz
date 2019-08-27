@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+
+    <eca service="createPaymentApplication" event="commit">
+        <condition field-name="invoiceId" operator="is-not-empty"/>
+        <action service="checkInvoicePaymentApplications" mode="sync"/>
+    </eca>
+
+    <!--  Uncomment this if you want commission invoices to be set to READY automatically, which means they are official
+    <eca service="createCommissionInvoices" event="commit">
+        <condition field-name="invoicesCreated" operator="is-not-empty"/>
+        <action service="readyInvoices" mode="sync"/>
+    </eca>
+    -->
+
+    <eca service="createPartyPostalAddress" event="commit">
+        <condition field-name="paymentMethodId" operator="is-not-empty"/>
+        <action service="setPaymentMethodAddress" mode="sync"/>
+    </eca>
+    <!-- do the updatePostalAddress before the return and after the commit so it can use its own transaction and not effect the updating of the PostalAddress -->
+    <eca service="updatePostalAddress" event="return">
+        <action service="updatePaymentMethodAddress" mode="sync"/>
+    </eca>
+
+    <eca service="createBillingAccount" event="return">
+        <condition field-name="roleTypeId" operator="is-not-empty"/>
+        <condition field-name="partyId" operator="is-not-empty"/>
+        <action service="createBillingAccountRole" mode="sync"/>
+    </eca>
+    <eca service="createBillingAccountRole" event="invoke">
+        <condition field-name="roleTypeId" operator="is-not-empty"/>
+        <condition field-name="partyId" operator="is-not-empty"/>
+        <action service="ensurePartyRole" mode="sync"/>
+    </eca>
+
+    <eca service="createCreditCard" event="in-validate">
+        <condition field-name="expMonth" operator="is-not-empty"/>
+        <condition field-name="expYear" operator="is-not-empty"/>
+        <action service="buildCcExpireDate" mode="sync"/>
+    </eca>
+    <eca service="updateCreditCard" event="in-validate">
+        <condition field-name="expMonth" operator="is-not-empty"/>
+        <condition field-name="expYear" operator="is-not-empty"/>
+        <action service="buildCcExpireDate" mode="sync"/>
+    </eca>
+    <eca service="createCreditCard" event="commit">
+        <set field-name="mode" value="CREATE"/>
+        <action service="verifyCreditCard" mode="sync" run-as-user="system"/>
+    </eca>
+    <eca service="updateCreditCard" event="commit">
+        <condition-field field-name="oldPaymentMethodId" operator="not-equals" to-field-name="paymentMethodId"/>
+        <set field-name="mode" value="UPDATE"/>
+        <action service="verifyCreditCard" mode="sync" run-as-user="system"/>
+    </eca>
+
+    <eca service="createCreditCardAndAddress" event="in-validate">
+        <condition field-name="expMonth" operator="is-not-empty"/>
+        <condition field-name="expYear" operator="is-not-empty"/>
+        <action service="buildCcExpireDate" mode="sync"/>
+    </eca>
+    <eca service="updateCreditCardAndAddress" event="in-validate">
+        <condition field-name="expMonth" operator="is-not-empty"/>
+        <condition field-name="expYear" operator="is-not-empty"/>
+        <action service="buildCcExpireDate" mode="sync"/>
+    </eca>
+
+    <eca service="createGiftCard" event="in-validate">
+        <condition field-name="expMonth" operator="is-not-empty"/>
+        <condition field-name="expYear" operator="is-not-empty"/>
+        <action service="buildCcExpireDate" mode="sync"/>
+    </eca>
+    <eca service="updateGiftCard" event="in-validate">
+        <condition field-name="expMonth" operator="is-not-empty"/>
+        <condition field-name="expYear" operator="is-not-empty"/>
+        <action service="buildCcExpireDate" mode="sync"/>
+    </eca>
+
+    <eca service="authOrderPayments" event="global-rollback">
+        <action service="releaseOrderPayments" mode="sync"/>
+    </eca>
+
+    <eca service="retryFailedOrderAuth" event="commit">
+        <condition field-name="processResult" operator="not-equals" value="ERROR"/>
+        <action service="sendOrderPayRetryNotification" mode="async" persist="true"/>
+    </eca>
+
+    <!-- budget role ecas -->
+    <eca service="createBudgetRole" event="invoke">
+        <action service="ensurePartyRole" mode="sync" run-as-user="system"/>
+    </eca>
+
+    <!-- financial account role ecas -->
+    <eca service="createFinAccountRole" event="invoke">
+        <action service="ensurePartyRole" mode="sync" run-as-user="system"/>
+    </eca>
+
+    <!-- financial account transaction ecas -->
+    <eca service="finAccountWithdraw" event="return" run-on-error="true">
+        <condition field-name="productStoreId" operator="is-not-empty"/>
+        <action service="finAccountReplenish" mode="async" persist="true" run-as-user="system"/>
+    </eca>
+
+    <!-- attempt replenish when payment method is updated -->
+    <eca service="updateFinAccount" event="commit" run-on-error="false">
+        <condition-field field-name="oldReplenishPaymentId" operator="not-equals" to-field-name="replenishPaymentId"/>
+        <condition field-name="replenishLevel" operator="is-not-empty"/>
+        <action service="finAccountReplenish" mode="sync" run-as-user="system"/>
+    </eca>
+
+    <!-- attempt replenish when replenish level is updated -->
+    <eca service="updateFinAccount" event="commit" run-on-error="false">
+        <condition-field field-name="oldReplenishLevel" operator="not-equals" to-field-name="replenishLevel"/>
+        <condition field-name="replenishPaymentId" operator="is-not-empty"/>
+        <action service="finAccountReplenish" mode="sync" run-as-user="system"/>
+    </eca>
+
+    <eca service="createFinAccountTrans" event="commit">
+        <condition field-name="glAccountId" operator="is-not-empty"/>
+        <action service="postFinAccountTransToGl" mode="sync"/>
+    </eca>
+
+    <!-- sample ECA rules for the sampleInvoiceAffiliateCommission service triggering
+    <eca service="createPayment" event="commit">
+        <condition field-name="statusId" operator="equals" value="PMNT_RECEIVED"/>
+        <action service="sampleInvoiceAffiliateCommission" mode="sync"/>
+    </eca>
+    <eca service="setPaymentStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="PMNT_RECEIVED"/>
+        <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="PMNT_CONFIRMED"/>
+        <action service="sampleInvoiceAffiliateCommission" mode="sync"/>
+    </eca>
+    -->
+
+    <!--  automatically create a fixed asset when a 'asset usage' type product
+          is created and create the link between them -->
+    <eca service="createProduct" event="commit">
+        <condition field-name="productTypeId" operator="equals" value="ASSET_USAGE"/>
+        <action service="createFixedAssetAndLinkToProduct" mode="sync"/>
+    </eca>
+
+    <!-- automatically set company to user when create an accounting company -->
+    <eca service="createPartyAcctgPreference" event="return">
+        <set field-name="organizationPartyId" env-name="partyId"/>
+        <action service="setAcctgCompany" mode="sync"/>
+    </eca>
+</service-eca>

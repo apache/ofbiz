@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Widget-Screen" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Screen http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="GenericTransactionDecorator">
+        <section>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="headerItem" value="transaction"/>
+            </actions>
+            <widgets>
+                <!-- main defines the regions of the HTML page -->
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="TransactionsTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                    </decorator-section>
+
+                    <!-- body is the primary display for this page and is called recursively -->
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <label style="h1">${uiLabelMap[labelTitleProperty]}</label>
+
+                                <!-- Now call the SimpleScreen form -->
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- presents a lookup form and list of results -->
+    <screen name="FindGatewayResponses">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindGatewayResponses"/> <!-- shows up in browser title bar -->
+                <set field="tabButtonItem" value="gatewayresponsestab"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GenericTransactionDecorator">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindGatewayResponses" location="component://accounting/widget/TransactionForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListGatewayResponses" location="component://accounting/widget/TransactionForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- view a particular gateway response -->
+    <screen name="ViewGatewayResponse">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleViewGatewayResponse"/>
+                <set field="tabButtonItem" value="gatewayresponsestab"/>
+
+                <set field="paymentGatewayResponseId" from-field="parameters.paymentGatewayResponseId"/>
+                <set field="orderPaymentPreferenceId" from-field="parameters.orderPaymentPreferenceId"/>
+
+                <entity-one entity-name="PaymentGatewayResponse" value-field="paymentGatewayResponse" auto-field-map="true"/>
+
+                <script location="component://accounting/groovyScripts/transaction/ViewGatewayResponse.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GenericTransactionDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleViewGatewayResponse}">
+                            <include-form name="ViewGatewayResponseRelations" location="component://accounting/widget/TransactionForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingPaymentsMenu}">
+                            <include-form name="ViewGatewayResponsePayments" location="component://accounting/widget/TransactionForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleViewGatewayResponse}">
+                            <include-form name="ViewGatewayResponse" location="component://accounting/widget/TransactionForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- form to authorize a transaction -->
+    <screen name="AuthorizeTransaction">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingAuthorize"/>
+                <set field="tabButtonItem" value="authorizetransactiontab"/>
+
+                <set field="orderId" from-field="parameters.orderId"/>
+                <set field="orderPaymentPreferenceId" from-field="parameters.orderPaymentPreferenceId"/>
+
+                <entity-one entity-name="OrderPaymentPreference" value-field="opp">
+                    <field-map field-name="orderPaymentPreferenceId" from-field="orderPaymentPreferenceId"/>
+                </entity-one>
+                <set field="paymentMethodTypeId" from-field="opp.paymentMethodTypeId"/>
+
+                <script location="component://accounting/groovyScripts/transaction/AuthorizeTransaction.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GenericTransactionDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingAuthorize}">
+                            <include-form name="AuthorizeTransaction" location="component://accounting/widget/TransactionForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <!-- form to capture a transaction -->
+    <screen name="CaptureTransaction">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingCapture"/>
+                <set field="tabButtonItem" value="capturetransactiontab"/>
+
+                <set field="orderId" from-field="parameters.orderId"/>
+                <set field="orderPaymentPreferenceId" from-field="parameters.orderPaymentPreferenceId"/>
+
+                <entity-one entity-name="OrderPaymentPreference" value-field="opp">
+                    <field-map field-name="orderPaymentPreferenceId" from-field="orderPaymentPreferenceId"/>
+                </entity-one>
+                <set field="paymentMethodTypeId" from-field="opp.paymentMethodTypeId"/>
+
+                <script location="component://accounting/groovyScripts/transaction/CaptureTransaction.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GenericTransactionDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingCapture}">
+                            <include-form name="CaptureTransaction" location="component://accounting/widget/TransactionForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

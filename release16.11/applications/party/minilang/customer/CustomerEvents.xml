@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://ofbiz.apache.org/Simple-Method" xsi:schemaLocation="http://ofbiz.apache.org/Simple-Method http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    <simple-method method-name="createCustomer" short-description="Create Customer" login-required="false">
+        <set field="require_email" value="false"/>
+        <set field="require_phone" value="false"/>
+        <set field="create_allow_password" value="false"/>
+        <set field="default_customer_password" value="ungssblepsswd"/>
+
+        <property-to-field resource="security" property="username.lowercase" default="false" field="username_lowercase"/>
+        <property-to-field resource="security" property="password.lowercase" default="false" field="password_lowercase"/>
+
+        <now-timestamp field="nowStamp"/>
+        <set field="parameters.roleTypeId" value="CUSTOMER"/>
+
+        <if-compare field="create_allow_password" operator="not-equals" value="true">
+            <set field="parameters.PASSWORD" from-field="default_customer_password"/>
+            <set field="parameters.CONFIRM_PASSWORD" from-field="default_customer_password"/>
+            <set field="parameters.PASSWORD_HINT" value="No hint set, accout not yet enabled"/>
+        </if-compare>
+
+        <!-- if username and/or password should be lowercased, do that now -->
+        <if-compare field="username_lowercase" operator="equals" value="true">
+            <call-object-method obj-field="" method-name="" ></call-object-method>
+            <call-object-method obj-field="parameters.USERNAME" method-name="toLowerCase" ret-field="parameters.USERNAME"/>
+        </if-compare>
+        <if-compare field="password_lowercase" operator="equals" value="true">
+            <call-object-method obj-field="parameters.PASSWORD" method-name="toLowerCase" ret-field="parameters.PASSWORD"/>
+            <call-object-method obj-field="parameters.CONFIRM_PASSWORD" method-name="toLowerCase" ret-field="parameters.CONFIRM_PASSWORD"/>
+        </if-compare>
+
+        <!-- Create the UserLogin Record -->
+        <call-map-processor in-map-name="parameters" out-map-name="userLoginContext">
+            <simple-map-processor name="newUserLogin">
+                <process field="USERNAME"><copy to-field="userLoginId"/><not-empty><fail-property resource="PartyUiLabels" property="PartyUserNameMissing"/></not-empty></process>
+                <process field="PASSWORD"><copy to-field="currentPassword"/><not-empty><fail-property resource="PartyUiLabels" property="PartyPasswordMissing"/></not-empty></process>
+                <process field="CONFIRM_PASSWORD">
+                    <compare-field operator="equals" field="PASSWORD"><fail-property resource="PartyUiLabels" property="PartyPasswordMatchError"/></compare-field>
+                    <!-- This is checked below in the checkNewPassword method in the block: <not-empty><fail-property resource="PartyUiLabels" property="PartyEnterPasswordTwice"/></not-empty> -->
+                    <copy to-field="currentPasswordVerify"/>
+                </process>
+                <process field="PASSWORD_HINT"><copy to-field="passwordHint"/></process>
+            </simple-map-processor>
+        </call-map-processor>
+        <if-not-empty field="userLoginContext.userLoginId">
+            <set field="userLoginExistsMap.userLoginId" from-field="userLoginContext.userLoginId"/>
+            <find-by-primary-key entity-name="UserLogin" map="userLoginExistsMap" value-field="existingUserLogin"/>
+            <if-not-empty field="existingUserLogin">
+                <set field="tempErrorMessage" value="${uiLabelMap.PartyUserNameInUse}"/>
+                <field-to-list field="tempErrorMessage" list="error_list"/>
+            </if-not-empty>
+        </if-not-empty>
+
+        <make-value entity-name="UserLogin" value-field="newUserLogin"/>
+        <set field="newUserLogin.userLoginId" from-field="userLoginContext.userLoginId"/>
+        <set field="newUserLogin.currentPassword" from-field="userLoginContext.currentPassword"/>
+        <set field="newUserLogin.passwordHint" from-field="userLoginContext.passwordHint"/>
+
+        <!-- Check the password, etc for validity -->
+        <script>groovy:
+            String password = (String) userLoginContext.get("currentPassword");
+            String confirmPassword = (String) userLoginContext.get("currentPasswordVerify");
+            String passwordHint = (String) userLoginContext.get("passwordHint");
+            org.apache.ofbiz.common.login.LoginServices.checkNewPassword(newUserLogin, null, password, confirmPassword, passwordHint, error_list, true, locale);
+        </script>
+
+        <!-- Create the Person -->
+        <call-map-processor in-map-name="parameters" out-map-name="personContext">
+            <simple-map-processor name="newPerson">
+                <process field="USER_FIRST_NAME"><copy to-field="firstName"/><not-empty><fail-property resource="PartyUiLabels" property="PartyFirstNameMissing"/></not-empty></process>
+                <process field="USER_MIDDLE_NAME"><copy to-field="middleName"/></process>
+                <process field="USER_LAST_NAME"><copy to-field="lastName"/><not-empty><fail-property resource="PartyUiLabels" property="PartyLastNameMissingError"/></not-empty></process>
+                <process field="USER_TITLE"><copy to-field="personalTitle"/></process>
+                <process field="USER_SUFFIX"><copy to-field="suffix"/></process>
+                <process field="USER_BIRTHDATE"><convert type="Date" to-field="birthDate"><fail-property resource="PartyUiLabels" property="PartyBirthDateMissingError"/></convert></process>
+                <process field="USER_DECEASEDDATE"><convert type="Date" to-field="deceasedDate"><fail-property resource="PartyUiLabels" property="PartyDeceasedDateMissingError"/></convert></process>
+                <process field="USER_GENDER"><copy to-field="gender"/></process>
+            </simple-map-processor>
+        </call-map-processor>
+
+        <!-- Create the PartyRole -->
+        <set field="partyRoleContext.roleTypeId" from-field="parameters.roleTypeId"/>
+
+        <!-- Create the Postal Address -->
+        <if-compare field="parameters.USE_ADDRESS" operator="equals" value="false">
+            <!-- address not used, do nothing -->
+            <else>
+                <call-map-processor in-map-name="parameters" out-map-name="addressContext">
+                    <simple-map-processor name="newPerson">
+                        <make-in-string field="fullName">
+                            <in-field field="USER_FIRST_NAME"/><constant> </constant>
+                            <in-field field="USER_MIDDLE_NAME"/><constant> </constant>
+                            <in-field field="USER_LAST_NAME"/>
+                        </make-in-string>
+                        <process field="roleTypeId"><copy/></process>
+                        <process field="fullName"><copy to-field="toName"/></process>
+                        <process field="CUSTOMER_ADDRESS1"><copy to-field="address1"/><not-empty><fail-property resource="PartyUiLabels" property="PartyAddressLine1Missing"/></not-empty></process>
+                        <process field="CUSTOMER_ADDRESS2"><copy to-field="address2"/></process>
+                        <process field="CUSTOMER_CITY"><copy to-field="city"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCityMissing"/></not-empty></process>
+                        <process field="CUSTOMER_STATE"><copy to-field="stateProvinceGeoId"/></process>
+                        <process field="CUSTOMER_POSTAL_CODE"><copy to-field="postalCode"/><not-empty><fail-property resource="PartyUiLabels" property="PartyPostalCodeMissing"/></not-empty></process>
+                        <process field="CUSTOMER_COUNTRY"><copy to-field="countryGeoId"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty></process>
+                        <process field="CUSTOMER_ADDRESS_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
+                    </simple-map-processor>
+                </call-map-processor>
+                <if-compare value="USA" operator="equals" field="parameters.CUSTOMER_COUNTRY">
+                    <if-empty field="parameters.CUSTOMER_STATE">
+                        <property-to-field field="tempErrorMessage" resource="PartyUiLabels" property="PartyStateInUsMissing"/>
+                        <field-to-list field="tempErrorMessage" list="error_list"/>
+                    </if-empty>
+                </if-compare>
+                <if-compare value="CAN" operator="equals" field="parameters.CUSTOMER_COUNTRY">
+                    <if-empty field="parameters.CUSTOMER_STATE">
+                        <property-to-field field="tempErrorMessage" resource="PartyUiLabels" property="PartyStateInCanadaMissing"/>
+                        <field-to-list field="tempErrorMessage" list="error_list"/>
+                    </if-empty>
+                </if-compare>
+            </else>
+        </if-compare>
+
+        <!-- Create the Home Phone -->
+        <if-not-empty field="parameters.CUSTOMER_HOME_CONTACT">
+            <call-map-processor in-map-name="parameters" out-map-name="homePhoneContext">
+                <simple-map-processor name="newTelecomNumber">
+                    <process field="roleTypeId"><copy/></process>
+                    <process field="CUSTOMER_HOME_COUNTRY"><copy to-field="countryCode"/></process>
+                    <process field="CUSTOMER_HOME_AREA"><copy to-field="areaCode"/></process>
+                    <process field="CUSTOMER_HOME_CONTACT"><copy to-field="contactNumber"/></process>
+                    <process field="CUSTOMER_HOME_EXT"><copy to-field="extension"/></process>
+                    <process field="CUSTOMER_HOME_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
+                </simple-map-processor>
+            </call-map-processor>
+        </if-not-empty>
+
+        <!-- Create the Work Phone -->
+        <if-not-empty field="parameters.CUSTOMER_WORK_CONTACT">
+            <call-map-processor in-map-name="parameters" out-map-name="workPhoneContext">
+                <simple-map-processor name="newTelecomNumber">
+                    <process field="roleTypeId"><copy/></process>
+                    <process field="CUSTOMER_WORK_COUNTRY"><copy to-field="countryCode"/></process>
+                    <process field="CUSTOMER_WORK_AREA"><copy to-field="areaCode"/></process>
+                    <process field="CUSTOMER_WORK_CONTACT"><copy to-field="contactNumber"/></process>
+                    <process field="CUSTOMER_WORK_EXT"><copy to-field="extension"/></process>
+                    <process field="CUSTOMER_WORK_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
+                </simple-map-processor>
+            </call-map-processor>
+        </if-not-empty>
+
+        <!-- Create the Fax Phone -->
+        <if-not-empty field="parameters.CUSTOMER_FAX_CONTACT">
+            <call-map-processor in-map-name="parameters" out-map-name="faxPhoneContext">
+                <simple-map-processor name="newTelecomNumber">
+                    <process field="roleTypeId"><copy/></process>
+                    <process field="CUSTOMER_FAX_COUNTRY"><copy to-field="countryCode"/></process>
+                    <process field="CUSTOMER_FAX_AREA"><copy to-field="areaCode"/></process>
+                    <process field="CUSTOMER_FAX_CONTACT"><copy to-field="contactNumber"/></process>
+                    <process field="CUSTOMER_FAX_EXT"><copy to-field="extension"/></process>
+                    <process field="CUSTOMER_FAX_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
+                </simple-map-processor>
+            </call-map-processor>
+        </if-not-empty>
+
+        <!-- Create the Mobile Phone -->
+        <if-not-empty field="parameters.CUSTOMER_MOBILE_CONTACT">
+            <call-map-processor in-map-name="parameters" out-map-name="mobilePhoneContext">
+                <simple-map-processor name="newTelecomNumber">
+                    <process field="roleTypeId"><copy/></process>
+                    <process field="CUSTOMER_MOBILE_COUNTRY"><copy to-field="countryCode"/></process>
+                    <process field="CUSTOMER_MOBILE_AREA"><copy to-field="areaCode"/></process>
+                    <process field="CUSTOMER_MOBILE_CONTACT"><copy to-field="contactNumber"/></process>
+                    <process field="CUSTOMER_MOBILE_EXT"><copy to-field="extension"/></process>
+                    <process field="CUSTOMER_MOBILE_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
+                </simple-map-processor>
+            </call-map-processor>
+        </if-not-empty>
+
+        <!-- Check for required Phone -->
+        <if-compare field="require_phone" operator="equals" value="true">
+            <if-empty field="parameters.CUSTOMER_HOME_CONTACT">
+                <if-empty field="parameters.CUSTOMER_WORK_CONTACT">
+                    <if-empty field="parameters.CUSTOMER_MOBILE_CONTACT">
+                        <call-map-processor in-map-name="parameters" out-map-name="dummymap">
+                            <simple-map-processor name="checkRequiredPhone">
+                                <process field="REQUIRED_PHONE">
+                                    <not-empty><fail-property resource="PartyUiLabels" property="PartyContactTelephoneMissing"/></not-empty>
+                                </process>
+                            </simple-map-processor>
+                        </call-map-processor>
+                    </if-empty>
+                </if-empty>
+            </if-empty>
+        </if-compare>
+
+        <!-- Create the email address -->
+        <call-map-processor in-map-name="parameters" out-map-name="emailContext">
+            <simple-map-processor name="newEmail">
+                <process field="roleTypeId"><copy/></process>
+                <process field="CUSTOMER_EMAIL"><copy to-field="emailAddress"/></process>
+                <process field="CUSTOMER_EMAIL_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
+            </simple-map-processor>
+        </call-map-processor>
+
+        <!-- Check for required E-Mail -->
+        <if-compare field="require_email" operator="equals" value="true">
+            <if-empty field="emailContext.emailAddress">
+                <call-map-processor in-map-name="emailContext" out-map-name="dummymap">
+                    <simple-map-processor name="checkRequiredEmail">
+                        <process field="emailAddress">
+                            <not-empty><fail-property resource="PartyUiLabels" property="PartyEmailAddressMissing"/></not-empty>
+                        </process>
+                    </simple-map-processor>
+               </call-map-processor>
+           </if-empty>
+           <if-not-empty field="emailContext.emailAddress">
+                <call-map-processor in-map-name="emailContext" out-map-name="dummymap">
+                    <simple-map-processor name="checkRequiredEmailFormat">
+                        <process field="emailAddress">
+                            <validate-method method="isEmail">
+                                <fail-property resource="PartyUiLabels" property="PartyEmailAddressNotFormattedCorrectly"/>
+                            </validate-method>
+                        </process>
+                    </simple-map-processor>
+               </call-map-processor>
+           </if-not-empty>
+        </if-compare>
+
+        <!-- create the PartyDataSource entry to track where this info came from... -->
+        <make-value entity-name="PartyDataSource" value-field="partyDataSource"/>
+        <set field="partyDataSource.dataSourceId" value="ECOMMERCE_SITE"/>
+        <set field="partyDataSource.fromDate" from-field="nowStamp"/>
+        <set field="partyDataSource.isCreate" value="Y"/>
+        <!-- get the visit from the session to get the visitId -->
+        <session-to-field field="visit"/>
+    <set from-field="visit.visitId" field="partyDataSource.visitId"/>
+
+
+        <!-- now that everything is validated & setup, check to see if there are errors, then call the services -->
+        <check-errors/>
+
+        <set-service-fields map="personContext" service-name="createPersonAndUserLogin" to-map="personUserLoginContext"/>
+        <set-service-fields map="newUserLogin" service-name="createPersonAndUserLogin" to-map="personUserLoginContext"/>
+        <set field="personUserLoginContext.currentPasswordVerify" from-field="newUserLogin.currentPassword"/>
+        <!-- the above copy is okay since we checked already that they are the same -->
+        <call-service service-name="createPersonAndUserLogin" in-map-name="personUserLoginContext">
+            <result-to-field result-name="partyId" field="tempMap.partyId"/>
+            <result-to-field result-name="newUserLogin" field="createdUserLogin"/>
+        </call-service>
+        <set-current-user-login value-field="createdUserLogin"/>
+
+        <!-- now that we have the partyId, put it where it needs to go... -->
+        <set field="partyDataSource.partyId" from-field="tempMap.partyId"/>
+        <set field="userLoginContext.partyId" from-field="tempMap.partyId"/>
+        <set field="personContext.partyId" from-field="tempMap.partyId"/>
+        <set field="partyRoleContext.partyId" from-field="tempMap.partyId"/>
+        <set field="addressContext.partyId" from-field="tempMap.partyId"/>
+        <set field="homePhoneContext.partyId" from-field="tempMap.partyId"/>
+        <set field="workPhoneContext.partyId" from-field="tempMap.partyId"/>
+        <set field="faxPhoneContext.partyId" from-field="tempMap.partyId"/>
+        <set field="mobilePhoneContext.partyId" from-field="tempMap.partyId"/>
+        <set field="emailContext.partyId" from-field="tempMap.partyId"/>
+
+        <create-value value-field="partyDataSource"/>
+        <call-service service-name="createPartyRole" in-map-name="partyRoleContext"/>
+
+        <!-- shipping address -->
+        <if-compare field="parameters.USE_ADDRESS" operator="equals" value="false">
+            <!-- address not used, do nothing -->
+            <else>
+                <call-service service-name="createPartyPostalAddress" in-map-name="addressContext">
+                    <result-to-field result-name="contactMechId" field="addressPurposeContext.contactMechId"/>
+                </call-service>
+                <set field="addressPurposeContext.partyId" from-field="tempMap.partyId"/>
+                <!-- create the shipping location -->
+                <set field="addressPurposeContext.contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                <call-service service-name="createPartyContactMechPurpose" in-map-name="addressPurposeContext"/>
+                <!-- also consider this address the general correspondence address -->
+                <set field="addressPurposeContext.contactMechPurposeTypeId" value="GENERAL_LOCATION"/>
+                <call-service service-name="createPartyContactMechPurpose" in-map-name="addressPurposeContext"/>
+            </else>
+        </if-compare>
+
+        <!-- home phone -->
+        <if-not-empty field="parameters.CUSTOMER_HOME_CONTACT">
+            <call-service service-name="createPartyTelecomNumber" in-map-name="homePhoneContext">
+                <result-to-field result-name="contactMechId" field="homePhonePurposeContext.contactMechId"/>
+            </call-service>
+            <set field="homePhonePurposeContext.partyId" from-field="tempMap.partyId"/>
+            <set field="homePhonePurposeContext.contactMechPurposeTypeId" value="PHONE_HOME"/>
+            <call-service service-name="createPartyContactMechPurpose" in-map-name="homePhonePurposeContext"/>
+        </if-not-empty>
+
+        <!-- work phone -->
+        <if-not-empty field="parameters.CUSTOMER_WORK_CONTACT">
+            <call-service service-name="createPartyTelecomNumber" in-map-name="workPhoneContext">
+                <result-to-field result-name="contactMechId" field="workPhonePurposeContext.contactMechId"/>
+            </call-service>
+            <set field="workPhonePurposeContext.partyId" from-field="tempMap.partyId"/>
+            <set field="workPhonePurposeContext.contactMechPurposeTypeId" value="PHONE_WORK"/>
+            <call-service service-name="createPartyContactMechPurpose" in-map-name="workPhonePurposeContext"/>
+        </if-not-empty>
+
+        <!-- fax phone -->
+        <if-not-empty field="parameters.CUSTOMER_FAX_CONTACT">
+            <call-service service-name="createPartyTelecomNumber" in-map-name="faxPhoneContext">
+                <result-to-field result-name="contactMechId" field="faxPhonePurposeContext.contactMechId"/>
+            </call-service>
+            <set field="faxPhonePurposeContext.partyId" from-field="tempMap.partyId"/>
+            <set field="faxPhonePurposeContext.contactMechPurposeTypeId" value="FAX_NUMBER"/>
+            <call-service service-name="createPartyContactMechPurpose" in-map-name="faxPhonePurposeContext"/>
+        </if-not-empty>
+
+        <!-- mobile phone -->
+        <if-not-empty field="parameters.CUSTOMER_MOBILE_CONTACT">
+            <call-service service-name="createPartyTelecomNumber" in-map-name="mobilePhoneContext">
+                <result-to-field result-name="contactMechId" field="mobilePhonePurposeContext.contactMechId"/>
+            </call-service>
+            <set field="mobilePhonePurposeContext.partyId" from-field="tempMap.partyId"/>
+            <set field="mobilePhonePurposeContext.contactMechPurposeTypeId" value="PHONE_MOBILE"/>
+            <call-service service-name="createPartyContactMechPurpose" in-map-name="mobilePhonePurposeContext"/>
+        </if-not-empty>
+
+        <!-- email address -->
+        <call-service service-name="createPartyEmailAddress" in-map-name="emailContext">
+            <result-to-field result-name="contactMechId" field="emailPurposeContext.contactMechId"/>
+        </call-service>
+        <set field="emailPurposeContext.partyId" from-field="tempMap.partyId"/>
+        <set field="emailPurposeContext.contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+        <call-service service-name="createPartyContactMechPurpose" in-map-name="emailPurposeContext"/>
+
+        <!-- set the partyId in the request -->
+        <field-to-request field="tempMap.partyId" request-name="partyId"/>
+
+    </simple-method>
+</simple-methods>

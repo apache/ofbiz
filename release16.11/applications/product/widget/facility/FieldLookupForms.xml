@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="LookupFacility" target="LookupFacility" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <!--<auto-fields-entity entity-name="Facility" default-field-type="hidden"/> -->
+        <field name="facilityId"><text-find/></field>
+        <field name="facilityName"><text-find/></field>
+        <field name="parentFacilityId"><text-find/></field>
+        <field name="facilityTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="FacilityType" key-field-name="facilityTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupFacility" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="LookupFacility">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="Facility"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="facilityId" title=" " widget-style="buttontext">
+            <hyperlink description="${facilityId}" target="javascript:set_values('${facilityId}', '${facilityName}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="facilityName"><display/></field>
+        <field name="facilityTypeId"><display/></field>
+    </form>
+    <form name="LookupFacilityLocation" target="LookupFacilityLocation" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="FacilityLocation" default-field-type="find"/>
+        <field name="facilityId" use-when="facilityId != null"><hidden/></field>
+        <field name="facilityId" use-when="facilityId == null">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName}">
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="locationTypeEnumId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Enumeration" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" value="FACLOC_TYPE"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListLookupFacilityLocation" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar"
+        paginate-target="LookupFacilityLocation">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="FacilityLocation"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="FacilityLocation" default-field-type="display"/>
+        <field name="locationSeqId" title=" " widget-style="buttontext">
+            <hyperlink description="${locationSeqId}" target="javascript:set_value('${locationSeqId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="facilityId"><hidden/></field>
+        <field name="locationTypeEnumId">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+    </form>
+
+    <form name="LookupShipment" type="single" target="LookupShipment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field position="1" name="shipmentId"><text-find/></field>
+        <field position="1" name="shipmentTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ShipmentType"/>
+            </drop-down>
+        </field>
+        <field position="2" name="statusId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="SHIPMENT_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="1" name="partyIdFrom" title="${uiLabelMap.PartyPartyFrom}"><text-find/></field>
+        <field position="1" name="partyIdTo" title="${uiLabelMap.PartyPartyTo}"><text-find/></field>
+        <field position="1" name="Datefrom" title="${uiLabelMap.CommonFromDate}"><date-time/></field>
+        <field position="2" name="DateThru" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListShipment" list-name="listIt" title="" type="list" paginate-target="LookupShipment"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="Shipment"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="shipmentId" widget-style="buttontext">
+            <hyperlink description="${shipmentId}" target="javascript:set_value('${shipmentId}')" also-hidden="false" target-type="plain"/>
+        </field>
+        <field name="shipmentTypeId"><display-entity entity-name="ShipmentType"/></field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="partyIdFrom" title="${uiLabelMap.PartyPartyFrom}"><display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${lastName}[${partyId}]"/></field>
+        <field name="partyIdTo" title="${uiLabelMap.PartyPartyTo}"><display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${lastName}[${partyId}]"/></field>
+    </form>
+    <form name="ListProductInventoryLocation" list-name="LocationList" title="" type="list" paginate-target="ListProductInventoryLocation"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" view-size="20">
+        <field name="inventoryItemId"><display/></field>
+        <field name="locationSeqId" title=" " widget-style="buttontext" >
+            <hyperlink description="${locationSeqId}" target="javascript:set_value('${locationSeqId}')" also-hidden="false" target-type="plain"/>
+        </field> 
+        <field name="locationTypeEnumId">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="quantityOnHandTotal" title="${uiLabelMap.ProductQoh}"><display/></field>
+        <field name="availableToPromiseTotal" title="${uiLabelMap.ProductAtp}"><display/></field>
+    </form>
+</forms>

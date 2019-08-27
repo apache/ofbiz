@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Manufacturing Services - MRP</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- MRP services -->
+    <service name="executeMrp" engine="java"
+            location="org.apache.ofbiz.manufacturing.mrp.MrpServices" invoke="executeMrp" auth="true"
+            transaction-timeout="7200" max-retry="0">
+        <description>Performs a run of Mrp</description>
+        <attribute name="facilityGroupId" type="String" mode="IN" optional="true"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="mrpName" type="String" mode="IN" optional="true"/>
+        <attribute name="defaultYearsOffset" type="Integer" mode="IN" optional="true"/>
+        <attribute name="msgResult" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="initMrpEvents" engine="java"
+            location="org.apache.ofbiz.manufacturing.mrp.MrpServices" invoke="initMrpEvents" auth="true">
+        <description>Initialize data for the MRP</description>
+        <attribute name="mrpId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="manufacturingFacilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="reInitialize" type="Boolean" mode="IN" optional="false"/>
+        <attribute name="defaultYearsOffset" type="Integer" mode="IN" optional="true"/>
+    </service>
+    <service name="findProductMrpQoh" engine="java"
+            location="org.apache.ofbiz.manufacturing.mrp.MrpServices" invoke="findProductMrpQoh" auth="true">
+        <description>Find the quantity on hand of products for the MRP</description>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantityOnHandTotal" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <service name="createMrpEvent" engine="java"
+            location="org.apache.ofbiz.manufacturing.mrp.InventoryEventPlannedServices" invoke="createMrpEvent" auth="false">
+        <description>create an MrpEvent</description>
+        <attribute name="mrpId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="mrpEventTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="eventName" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="setEstimatedDeliveryDates" engine="java"
+            location="org.apache.ofbiz.manufacturing.jobshopmgt.ProductionRunServices" invoke="setEstimatedDeliveryDates">
+        <description>Set estimated ship dates for order items based on outstanding production runs</description>
+    </service>
+
+    <service name="createMrpEventType" default-entity-name="MrpEventType" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a MrpEventType record</description>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateMrpEventType" default-entity-name="MrpEventType" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a MrpEventType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteMrpEventType" default-entity-name="MrpEventType" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a MrpEventType record</description>
+        <auto-attributes include="pk" mode="IN"/>
+    </service>
+</services>

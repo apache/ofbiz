@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Accounting Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+
+    <!-- Billing Account Services -->
+    <service name="createBillingAccount" default-entity-name="BillingAccount" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Billing Account</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateBillingAccount" default-entity-name="BillingAccount" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Billing Account</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="createBillingAccountRole" default-entity-name="BillingAccountRole" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Billing Account Role</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    <service name="updateBillingAccountRole" default-entity-name="BillingAccountRole" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Billing Account Role</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeBillingAccountRole" default-entity-name="BillingAccountRole" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Billing Account Role</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="createBillingAccountAndRole" engine="group" auth="true">
+        <group>
+            <invoke name="createBillingAccount" mode="sync" result-to-context="true"/>
+            <invoke name="createBillingAccountRole" mode="sync" parameters="optional"/>
+        </group>
+        <override name="billingAccountId" optional="true"/>
+    </service>
+    <service name="createBillingAccountTerm" default-entity-name="BillingAccountTerm" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Billing Account Term</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="termTypeId" optional="false"/>
+        <override name="billingAccountId" optional="false"/>
+    </service>
+    <service name="updateBillingAccountTerm" default-entity-name="BillingAccountTerm" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a Billing Account Term</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="termTypeId" optional="false"/>
+        <override name="billingAccountId" optional="false"/>
+    </service>
+    <service name="removeBillingAccountTerm" default-entity-name="BillingAccountTerm" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove a Billing Account Term</description>
+        <permission-service service-name="acctgBillingAcctCheck" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="calcBillingAccountBalance" engine="java"
+            location="org.apache.ofbiz.accounting.payment.BillingAccountWorker" invoke="calcBillingAccountBalance">
+        <description>Calculate the balance of a Billing Account</description>
+        <attribute name="billingAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="accountBalance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="netAccountBalance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="availableBalance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="availableToCapture" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="billingAccount" type="org.apache.ofbiz.entity.GenericValue" mode="OUT" optional="false"/>
+    </service>
+</services>
