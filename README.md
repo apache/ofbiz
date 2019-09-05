@@ -49,7 +49,7 @@ MS Windows:
 `init-gradle-wrapper`
 
 Unix-like OS:
-`./gradle/init-gradle-wrapper`
+`gradle/init-gradle-wrapper.sh`
 
 The script will download all the Gradle wrapper files required to build the system. 
 Alternatively, after you have Gradle installed:
