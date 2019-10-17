@@ -242,7 +242,7 @@ under the License.
                                                             </#if>
                                                         </#list>
                                                     </#if>
-                                                    <#if product.productTypeId == "SERVICE" && currentItemStatus.statusId == "ITEM_COMPLETED">
+                                                    <#if product?has_content && product.productTypeId?has_content && "SERVICE" == product.productTypeId && "ITEM_COMPLETED" == currentItemStatus.statusId>
                                                         <#assign shippedQuantity = orderItem.quantity?default(0)/>
                                                         <#assign totalReceived = orderItem.quantity?default(0)>
                                                     </#if>
